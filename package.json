@@ -1,0 +1,21 @@
+{
+  "name": "griptape.js",
+  "version": "0.1.0",
+  "description": "griptaje.js is the collection of the coolest library and tools for interacting with the Secret Network blockchain. Use it everywhere!",
+  "main": "index.js",
+  "repository": "https://github.com/stakeordie/griptape.js",
+  "author": "Stake or Die",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@babel/preset-env": "^7.13.8",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.20",
+    "babel-jest": "^26.6.3",
+    "jest": "^26.6.3"
+  }
+}
