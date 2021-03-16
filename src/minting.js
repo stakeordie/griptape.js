@@ -1,11 +1,8 @@
-import Inflation from "./domain/inflation"
+import axios from 'axios';
 
-const axios = require('axios');
+import Inflation from './domain/inflation'
 
-
-async function getInflation() {
+export async function getInflation() {
   const response = await axios.get('http://127.0.0.1:1317/minting/inflation');
   return new Inflation(response.data.height, response.data.result);
 }
-
-module.exports = getInflation;
