@@ -1,9 +1,8 @@
-import griptape from './index';
+const getInflation = require('./minting');
 
 jest.mock('axios');
 
 test('Check for minting inflation', async () => {
-  console.log(griptape.mint.getInflation);
-  const inflation = await griptape.mint.getInflation();
+  const inflation = await getInflation();
   expect(inflation.value).toBe('0.150000000000000001');
 });
