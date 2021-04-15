@@ -1,5 +1,5 @@
-import Keplr from './lib/keplr';
-import SecretJsClient from './lib/secretjs-client';
+import Keplr from './clients/keplr';
+import SecretJsClient from './clients/scrt-client';
 
 export {
     Keplr as Keplr,
