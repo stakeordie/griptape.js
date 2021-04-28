@@ -1,43 +1,46 @@
-const KEPLR_ADDRESS_REFRESH_RATE = 1000;
-
 // Keplr is the first implementation of an offline wallet compatible with
-// Stake or Die! javascript stack
+// Stake or Die! javascript stack.
 //
 // This class describes the wallet specification and this would be adjusted
-// when other wallets are integrated, i.e. Metamask
-// 
-// Wallet's functions are: 
-// - constructor(chainId, chainName, restUrl, rpcUrl, loadListener)
-// - async enable
+// when other wallets are integrated, i.e. Metamask.
+//
+// Wallet's functions are:
+// - constructor(chainId, chainName, restUrl, rpcUrl, isExperimental, experimentalChain)
+// - async enable()
 // - async checkAddressUpdates()
 // - async getSelectedKey()         <--- should this be renamed?
 // -       getSigner()
 // -       getSeed()
 // - async suggestExperimental()
-//
+
+import TestnetChain from '../libs/testnet';
+
+const KEPLR_ADDRESS_REFRESH_RATE = 1000;
+
 export default class Keplr {
 
-  constructor(chainId, chainName, restUrl, rpcUrl, loadListener) {
+  constructor(chainId, chainName, restUrl, rpcUrl, isExperimental, experimentalChain) {
     this.chainId = chainId;
     this.chainName = chainName;
     this.restUrl = restUrl;
     this.rpcUrl = rpcUrl;
-
     this.address = null;
 
-    if (process.isClient) {
-      window.onload = (async () => {
-        if (typeof loadListener === 'function') {
-          await loadListener();
-        }
-        await this.checkAddressUpdates();
-        if (this.address) {
-          this.checkInterval = setInterval(() => {
-            this.checkAddressUpdates();
-          }, KEPLR_ADDRESS_REFRESH_RATE);
-        }
-      });
-    }
+    window.onload = (async () => {
+      if (isExperimental) {
+        const defaultChainInfo = TestnetChain(chainId, chainName, rpcUrl, restUrl);
+        const chainInfo = experimentalChain || defaultChainInfo;
+        this.suggestExperimental(chainInfo);
+      }
+
+      await this.checkAddressUpdates();
+
+      if (this.address) {
+        this.checkInterval = setInterval(() => {
+          this.checkAddressUpdates();
+        }, KEPLR_ADDRESS_REFRESH_RATE);
+      }
+    });
   }
 
   // Prompts the user to enable the wallet
@@ -50,11 +53,6 @@ export default class Keplr {
         throw "Keplr rejected the connection";
       }
     });
-    if (!this.checkInterval) {
-      this.checkInterval = setInterval(() => {
-        this.checkAddressUpdates();
-      }, KEPLR_ADDRESS_REFRESH_RATE);
-    }
   }
 
   async checkAddressUpdates() {
@@ -135,5 +133,4 @@ export default class Keplr {
       throw err;
     }
   }
-
-}
+};
