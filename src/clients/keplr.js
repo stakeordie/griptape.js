@@ -61,11 +61,11 @@ export default class Keplr {
         const newAddress = (await this.getSigner().getAccounts())[0].address;
         if (this.address != newAddress && typeof this.onAddressChanged === 'function') {
           this.address = newAddress;
-          this.onAddressChanged(this.address);
         }
       } catch (err) {
         this.address = null;
       }
+      this.onAddressChanged(this.address);
     });
   }
 
