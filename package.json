@@ -1,6 +1,6 @@
 {
   "name": "@stakeordie/griptape.js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "griptate.js is the collection of the coolest library and tools for interacting with the Secret Network blockchain. Use it everywhere!",
   "main": "src/main.js",
   "repository": "https://github.com/stakeordie/griptape.js",
@@ -19,6 +19,8 @@
     "jest": "^26.6.3"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "@iov/crypto": "^2.5.0",
+    "axios": "^0.21.1",
+    "secretjs": "^0.11.0"
   }
 }
