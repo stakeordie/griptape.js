@@ -1,26 +1,19 @@
 {
   "name": "@stakeordie/griptape.js",
-  "version": "0.1.5",
-  "description": "griptate.js is the collection of the coolest library and tools for interacting with the Secret Network blockchain. Use it everywhere!",
-  "main": "src/main.js",
-  "repository": "https://github.com/stakeordie/griptape.js",
-  "author": "Stake or Die",
+  "version": "0.2.0",
+  "main": "dist/main.js",
+  "types": "types/main.d.ts",
+  "author": "Stake Or Die!",
   "license": "MIT",
-  "private": false,
   "scripts": {
-    "test": "jest"
+    "build": "tsc --skipLibCheck",
+    "dev": "tsc -w --skipLibCheck"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.8",
-    "@babel/preset-env": "^7.13.8",
-    "@babel/preset-typescript": "^7.13.0",
-    "@types/jest": "^26.0.20",
-    "babel-jest": "^26.6.3",
-    "jest": "^26.6.3"
+    "@keplr-wallet/types": "^0.9.0-alpha.4",
+    "typescript": "^4.3.2"
   },
   "dependencies": {
-    "@iov/crypto": "^2.5.0",
-    "axios": "^0.21.1",
     "secretjs": "^0.11.0"
   }
 }

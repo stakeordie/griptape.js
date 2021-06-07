@@ -6,7 +6,7 @@ insert_final_newline = true
 charset = utf-8
 indent_style = space
 
-[*.{json,vue,scss,css,yml,md,js}]
+[*.{json,vue,scss,css,yml,md,js,ts}]
 indent_size = 2
 
 [*.{conf}]
