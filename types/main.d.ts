@@ -1,14 +1,14 @@
-import { SigningCosmWasmClient } from 'secretjs';
 import { Wallet } from './wallet';
+import { ScrtClient } from './scrt';
 export * from './utils/scrt';
 export interface Griptape {
     wallet: Wallet;
-    scrtClient: SigningCosmWasmClient;
+    scrtClient: ScrtClient;
 }
 export interface Contract {
     createViewingKey(): Promise<string>;
     setAddress(address: string): void;
-    setScrtClient(scrtClient: SigningCosmWasmClient): void;
+    setScrtClient(scrtClient: ScrtClient): void;
 }
 export interface ContractConfig {
     address: string;
