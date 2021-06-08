@@ -1,9 +1,11 @@
 {
   "name": "@stakeordie/griptape.js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "dist/main.js",
   "types": "types/main.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "author": "Stake Or Die!",
   "license": "MIT",
   "scripts": {
