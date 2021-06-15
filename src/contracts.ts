@@ -4,7 +4,7 @@ import {
   ContractDefinition,
   ContractBaseDefinition
 } from './types'
-import { ScrtClient, generateEntropyString } from './scrt'
+import { ScrtClient, generateEntropyString } from './wsecretjs'
 
 async function createViewingKey(): Promise<string> {
   const entropy = generateEntropyString(27)

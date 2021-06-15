@@ -1,6 +1,6 @@
 import { Griptape, GriptapeConfig } from './types'
 import { useWallet } from './wallet'
-import { createScrtClient } from './scrt'
+import { createScrtClient } from './wsecretjs'
 
 export function grip(conf: GriptapeConfig): Promise<Griptape> {
   // TODO assert config properties

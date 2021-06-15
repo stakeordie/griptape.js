@@ -1,5 +1,5 @@
 import { Wallet } from './wallet'
-import { ScrtClient } from './scrt'
+import { ScrtClient } from './wsecretjs'
 
 export interface Queries {
   getBalance(address: string, key: string): Promise<void>
