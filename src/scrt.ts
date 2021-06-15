@@ -1,14 +1,43 @@
 import {
   SigningCosmWasmClient,
   CosmWasmClient,
-} from 'secretjs';
+  FeeTable,
+  Account,
+  ExecuteResult
+} from 'secretjs'
+import {
+  Coin,
+  StdFee
+} from 'secretjs/types/types.js'
+import { assert } from './utils/assertions'
+import { Wallet } from './wallet'
 
-import { Coin, StdFee } from 'secretjs/types/types.js';
+const decoder = new TextDecoder() // encoding defaults to utf-8
+const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+const charactersLength = characters.length
 
-import { Wallet } from './wallet';
-import { handleContractResponse } from './utils/scrt';
+export function generateEntropyString(length: number): string {
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength))
+  }
+  return result
+}
 
-const customFees = {
+export function bech32(str: string, abbrv: number): string {
+  const half = (abbrv / 2) || 8
+  return str.substring(0, half) + '...' + str.substring(str.length - half, str.length)
+}
+
+function handleContractResponse(response: ExecuteResult): object {
+  try {
+    return JSON.parse(decoder.decode(response.data))
+  } catch (e) {
+    throw e
+  }
+}
+
+const customFees: FeeTable = {
   upload: {
     amount: [{ amount: "2000000", denom: "uscrt" }],
     gas: "2000000",
@@ -29,17 +58,18 @@ const customFees = {
 
 export class ScrtClient {
 
-  readonly cosmWasmClient: CosmWasmClient;
+  readonly cosmWasmClient: CosmWasmClient
 
-  readonly signingCosmWasmClient: SigningCosmWasmClient;
+  readonly signingCosmWasmClient: SigningCosmWasmClient
 
-  constructor(cosmWasmClient: CosmWasmClient, signingCosmWasmClient: SigningCosmWasmClient) {
-    this.cosmWasmClient = cosmWasmClient;
-    this.signingCosmWasmClient = signingCosmWasmClient;
+  constructor(cosmWasmClient: CosmWasmClient,
+              signingCosmWasmClient: SigningCosmWasmClient) {
+    this.cosmWasmClient = cosmWasmClient
+    this.signingCosmWasmClient = signingCosmWasmClient
   }
 
   async queryContract(address: string, queryMsg: object): Promise<object> {
-    return await this.cosmWasmClient.queryContractSmart(address, queryMsg);
+    return await this.cosmWasmClient.queryContractSmart(address, queryMsg)
   }
 
   async executeContract(
@@ -50,41 +80,40 @@ export class ScrtClient {
     fee?: StdFee
   ): Promise<object> {
     try {
-      const response = await this.signingCosmWasmClient.execute(contractAddress, handleMsg, memo, transferAmount, fee);
-      return handleContractResponse(response);
+      const response = await this.signingCosmWasmClient.execute(
+        contractAddress, handleMsg, memo, transferAmount, fee)
+      return handleContractResponse(response)
     } catch(e: any) {
       // TODO improve error handling here
-      throw e;
+      throw e
     }
+  }
+
+  async getAccount(address: string): Promise<Account> {
+    const account = await this.signingCosmWasmClient.getAccount(address)
+    assert(account, 'Account was not found')
+    return account
   }
 }
 
 export function createScrtClient(restUrl: string, wallet: Wallet): Promise<ScrtClient> {
   return new Promise<ScrtClient>(async (resolve, reject) => {
-    const cosmWasmClient = new CosmWasmClient(restUrl);
-    const { keplr } = wallet;
+    const cosmWasmClient = new CosmWasmClient(restUrl)
+    const { keplr } = wallet
 
-    const chainId = await cosmWasmClient.getChainId();
+    const chainId = await cosmWasmClient.getChainId()
 
     // Set the chain id in the wallet
-    wallet.chainId = chainId;
+    wallet.chainId = chainId
 
-    try {
-      await keplr.enable(chainId);
-    } catch (e) {
-      reject(e);
-      return;
-    }
+    const address = await wallet.getAddress()
+    const signer = await window?.getOfflineSigner!(chainId)
+    const enigmaUtils = await wallet.keplr.getEnigmaUtils(chainId)
 
-    const address = await wallet.getAddress();
-    const signer = await window?.getOfflineSigner!(chainId);
-    const enigmaUtils = await wallet.keplr.getEnigmaUtils(chainId);
-
-    // @ts-ignore
-    const signingCosmWasmClient = new SigningCosmWasmClient(restUrl, address, signer, enigmaUtils, customFees);
-
-    const scrtClient = new ScrtClient(cosmWasmClient, signingCosmWasmClient);
-
-    resolve(scrtClient);
-  });
+    const signingCosmWasmClient = new SigningCosmWasmClient(
+      // @ts-ignore
+      restUrl, address, signer, enigmaUtils, customFees)
+    const scrtClient = new ScrtClient(cosmWasmClient, signingCosmWasmClient)
+    resolve(scrtClient)
+  })
 }

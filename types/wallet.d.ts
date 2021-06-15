@@ -8,3 +8,4 @@ export declare class Wallet {
     getAddress(): Promise<string>;
     onKeplrChange(callback: Function): void;
 }
+export declare function useWallet(): Promise<Wallet>;
