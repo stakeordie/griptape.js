@@ -1,5 +1,4 @@
 import { Keplr } from '@keplr-wallet/types';
-export declare function getWallet(): Promise<Wallet>;
 export declare class Wallet {
     keplr: Keplr;
     chainId?: string;

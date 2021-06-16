@@ -1,30 +1,6 @@
 import { Keplr, ChainInfo } from '@keplr-wallet/types'
 import { assert } from './utils/assertions'
 
-// TODO remove this method in favor of `useWallet`
-// Code from https://docs.keplr.app/api/
-export function getWallet(): Promise<Wallet> {
-  return new Promise((resolve, reject) => {
-    const documentStateChange = (event: Event) => {
-      if (
-        event.target &&
-        (event.target as Document).readyState === 'complete'
-      ) {
-        if (!window.keplr) {
-          reject()
-          return
-        }
-
-        resolve(new Wallet(window.keplr))
-
-        document.removeEventListener('readystatechange', documentStateChange)
-      }
-    }
-
-    document.addEventListener('readystatechange', documentStateChange)
-  })
-}
-
 export class Wallet {
 
   keplr: Keplr
