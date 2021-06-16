@@ -23,7 +23,7 @@ async function getBalance(address: string, key: string): Promise<void> {
     const { balance: { amount } } = response
     this.balance = amount
   } catch (e) {
-    this.balance = '0'
+    this.balance = ''
   }
 }
 
@@ -44,7 +44,7 @@ export function defineSnip20Contract(
 
   // Base state
   const state = {
-    balance: '0'
+    balance: ''
   }
 
   // Base messages
