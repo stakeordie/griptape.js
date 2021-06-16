@@ -5,6 +5,8 @@ export declare class Wallet {
     constructor(keplr: Keplr);
     enable(): Promise<void>;
     getAddress(): Promise<string>;
+    suggestToken(contractAddress: string): Promise<void>;
+    getSnip20ViewingKey(contractAddress: string): Promise<string>;
     onKeplrChange(callback: Function): void;
 }
 export declare function useWallet(): Promise<Wallet>;

@@ -103,8 +103,11 @@ export function createScrtClient(restUrl: string, wallet: Wallet): Promise<ScrtC
 
     const chainId = await cosmWasmClient.getChainId()
 
-    // Set the chain id in the wallet
+    // Set the chain id in the wallet.
     wallet.chainId = chainId
+
+    // Enabling the wallet ASAP is recommended.
+    await wallet.enable()
 
     const address = await wallet.getAddress()
     const signer = await window?.getOfflineSigner!(chainId)

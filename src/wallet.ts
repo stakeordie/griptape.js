@@ -25,6 +25,18 @@ export class Wallet {
     return address
   }
 
+  async suggestToken(contractAddress: string): Promise<void> {
+    assert(this.chainId, 'Chain id is not set')
+
+    await this.keplr.suggestToken(this.chainId, contractAddress)
+  }
+
+  async getSnip20ViewingKey(contractAddress: string): Promise<string> {
+    assert(this.chainId, 'Chain id is not set')
+
+    return await this.keplr.getSecret20ViewingKey(this.chainId, contractAddress)
+  }
+
   onKeplrChange(callback: Function) {
     window.addEventListener('keplr_keystorechange', async () => {
       await callback()
