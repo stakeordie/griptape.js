@@ -6,13 +6,12 @@ import {
 } from './types'
 import { ScrtClient, generateEntropyString } from './wsecretjs'
 
-async function createViewingKey(): Promise<string> {
+async function createViewingKey(): Promise<object> {
   const entropy = generateEntropyString(27)
   const handleMsg = { 'create_viewing_key': { entropy } }
   const response =
     await this.scrtClient.executeContract(this.contractAddress, handleMsg)
-  const { 'create_viewing_key': { key } } = response
-  return key
+  return response
 }
 
 async function getBalance(address: string, key: string): Promise<void> {
@@ -31,6 +30,11 @@ export function defineContract(
   contractAddress: string,
   contractBaseDef: ContractBaseDefinition
 ): ContractDefinition {
+  const messages = {
+    ...contractBaseDef.messages,
+    createViewingKey
+  }
+  contractBaseDef.messages = messages
   return {
     spec: 'base',
     contractAddress,
