@@ -4,7 +4,8 @@ import { Decimal } from 'decimal.js'
 export function coinConvert(
   number: number | string,
   decimals: number,
-  type?: 'human' | 'machine'): string {
+  type?: 'human' | 'machine',
+  fixed?: number): string {
 
   if (!number) return ''
 
@@ -16,21 +17,36 @@ export function coinConvert(
   if ((theNumber as string).indexOf('.') === -1) {
     // In case `number` is an integer
 
+    let result: Decimal
+
     if (type && type === 'machine') {
-      return new Decimal(number).toString()
+      result = new Decimal(number)
+    } else {
+      result = new Decimal(number)
+        .dividedBy(new Decimal(10).toPower(decimals))
     }
 
-    return new Decimal(number)
-      .dividedBy(new Decimal(10).toPower(decimals))
-      .toString()
+    if (typeof fixed !== 'undefined') {
+      return result.toFixed(fixed)
+    }
+
+    return result.toString()
 
   } else {
     // In case is not an integer, we just handle it as float
 
-    if (type && type === 'human') {
-      return new Decimal(number).toString()
+    let result: Decimal
+
+    if (type && type !== 'human') {
+      result = new Decimal(number)
+    } else {
+      result = new Decimal(10).toPower(decimals).times(number)
     }
 
-    return new Decimal(10).toPower(decimals).times(number).toString()
+    if (typeof fixed !== 'undefined') {
+      return result.toFixed(fixed)
+    }
+
+    return result.toString()
   }
 }
