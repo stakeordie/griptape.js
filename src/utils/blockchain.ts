@@ -20,7 +20,7 @@ export function coinConvert(
     let result: Decimal
 
     if (type && type === 'machine') {
-      result = new Decimal(number)
+      result = new Decimal(10).toPower(decimals).times(number)
     } else {
       result = new Decimal(number)
         .dividedBy(new Decimal(10).toPower(decimals))
@@ -37,7 +37,7 @@ export function coinConvert(
 
     let result: Decimal
 
-    if (type && type !== 'human') {
+    if (type && type === 'human') {
       result = new Decimal(number)
     } else {
       result = new Decimal(10).toPower(decimals).times(number)
