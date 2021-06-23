@@ -9,6 +9,6 @@ export declare class ScrtClient {
     constructor(cosmWasmClient: CosmWasmClient, signingCosmWasmClient: SigningCosmWasmClient);
     queryContract(address: string, queryMsg: object): Promise<object>;
     executeContract(contractAddress: string, handleMsg: object, memo?: string, transferAmount?: readonly Coin[], fee?: StdFee): Promise<object>;
-    getAccount(address: string): Promise<Account>;
+    getAccount(address: string): Promise<Account | undefined>;
 }
-export declare function createScrtClient(restUrl: string, wallet: Wallet): Promise<ScrtClient>;
+export declare function createScrtClient(restUrl: string, wallet: Wallet): Promise<ScrtClient | undefined>;
