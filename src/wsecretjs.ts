@@ -13,7 +13,8 @@ import { assert } from './utils/assertions'
 import { Wallet } from './wallet'
 
 const decoder = new TextDecoder() // encoding defaults to utf-8
-const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+const characters =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 const charactersLength = characters.length
 
 export function generateEntropyString(length: number): string {
@@ -27,7 +28,8 @@ export function generateEntropyString(length: number): string {
 export function bech32(str: string, abbrv: number): string {
   if (!str) return ''
   const half = (abbrv / 2) || 8
-  return str.substring(0, half) + '...' + str.substring(str.length - half, str.length)
+  return str.substring(0, half) + '...'
+       + str.substring(str.length - half, str.length)
 }
 
 function handleContractResponse(response: ExecuteResult): object {
