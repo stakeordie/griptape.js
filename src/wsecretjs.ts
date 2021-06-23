@@ -25,6 +25,7 @@ export function generateEntropyString(length: number): string {
 }
 
 export function bech32(str: string, abbrv: number): string {
+  if (!str) return ''
   const half = (abbrv / 2) || 8
   return str.substring(0, half) + '...' + str.substring(str.length - half, str.length)
 }
@@ -39,20 +40,20 @@ function handleContractResponse(response: ExecuteResult): object {
 
 const customFees: FeeTable = {
   upload: {
-    amount: [{ amount: "2000000", denom: "uscrt" }],
-    gas: "2000000",
+    amount: [{ amount: '2000000', denom: 'uscrt' }],
+    gas: '2000000',
   },
   init: {
-    amount: [{ amount: "500000", denom: "uscrt" }],
-    gas: "500000",
+    amount: [{ amount: '500000', denom: 'uscrt' }],
+    gas: '500000',
   },
   exec: {
-    amount: [{ amount: "750000", denom: "uscrt" }],
-    gas: "750000",
+    amount: [{ amount: '750000', denom: 'uscrt' }],
+    gas: '750000',
   },
   send: {
-    amount: [{ amount: "80000", denom: "uscrt" }],
-    gas: "80000",
+    amount: [{ amount: '80000', denom: 'uscrt' }],
+    gas: '80000',
   },
 }
 
@@ -89,25 +90,38 @@ export class ScrtClient {
     }
   }
 
-  async getAccount(address: string): Promise<Account> {
-    const account = await this.signingCosmWasmClient.getAccount(address)
-    assert(account, 'Account was not found')
-    return account
+  async getAccount(address: string): Promise<Account | undefined> {
+    return await this.signingCosmWasmClient.getAccount(address)
   }
 }
 
-export function createScrtClient(restUrl: string, wallet: Wallet): Promise<ScrtClient> {
-  return new Promise<ScrtClient>(async (resolve, reject) => {
+export function createScrtClient(restUrl: string, wallet: Wallet):
+  Promise<ScrtClient | undefined> {
+
+  return new Promise<ScrtClient | undefined>(async (resolve, reject) => {
     const cosmWasmClient = new CosmWasmClient(restUrl)
     const { keplr } = wallet
 
-    const chainId = await cosmWasmClient.getChainId()
+    let chainId
+    try {
+      chainId = await cosmWasmClient.getChainId()
+    } catch(e) {
+      resolve(undefined)
+      return
+    }
+
+    if (chainId) {
+      try {
+        // Enabling the wallet ASAP is recommended.
+        await keplr.enable(chainId)
+      } catch(e) {
+        resolve(undefined)
+        return
+      }
+    }
 
     // Set the chain id in the wallet.
     wallet.chainId = chainId
-
-    // Enabling the wallet ASAP is recommended.
-    await wallet.enable()
 
     const address = await wallet.getAddress()
     const signer = await window?.getOfflineSigner!(chainId)

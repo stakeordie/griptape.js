@@ -12,13 +12,13 @@ export class Wallet {
   }
 
   async enable(): Promise<void> {
-    assert(this.chainId, 'Chain id is not set')
+    if (!this.chainId) return
 
     this.keplr.enable(this.chainId)
   }
 
   async getAddress(): Promise<string> {
-    assert(this.chainId, 'Chain id is not set')
+    if (!this.chainId) return ''
 
     const signer = window?.getOfflineSigner!(this.chainId)
     const [{ address }] = await signer.getAccounts()
