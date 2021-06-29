@@ -59,16 +59,40 @@ const customFees: FeeTable = {
   },
 }
 
+export class Result {
+
+  private readonly data: any
+
+  constructor(data: any) {
+    this.data = data
+  }
+
+  get(): any {
+    return decoder.decode(this.data)
+  }
+
+  parse(): object {
+    try {
+      return JSON.parse(decoder.decode(this.data))
+    } catch (e) {
+      throw e
+    }
+  }
+}
+
 export class ScrtClient {
 
   readonly cosmWasmClient: CosmWasmClient
 
-  readonly signingCosmWasmClient: SigningCosmWasmClient
+  readonly signingCosmWasmClient?: SigningCosmWasmClient
 
   constructor(cosmWasmClient: CosmWasmClient,
-              signingCosmWasmClient: SigningCosmWasmClient) {
+              signingCosmWasmClient?: SigningCosmWasmClient) {
     this.cosmWasmClient = cosmWasmClient
-    this.signingCosmWasmClient = signingCosmWasmClient
+
+    if (signingCosmWasmClient) {
+      this.signingCosmWasmClient = signingCosmWasmClient
+    }
   }
 
   async queryContract(address: string, queryMsg: object): Promise<object> {
@@ -81,11 +105,11 @@ export class ScrtClient {
     memo?: string,
     transferAmount?: readonly Coin[],
     fee?: StdFee
-  ): Promise<object> {
+  ): Promise<Result | undefined> {
     try {
-      const response = await this.signingCosmWasmClient.execute(
+      const response = await this.signingCosmWasmClient?.execute(
         contractAddress, handleMsg, memo, transferAmount, fee)
-      return handleContractResponse(response)
+      return new Result(response?.data)
     } catch(e: any) {
       // TODO improve error handling here
       throw e
@@ -93,7 +117,7 @@ export class ScrtClient {
   }
 
   async getAccount(address: string): Promise<Account | undefined> {
-    return await this.signingCosmWasmClient.getAccount(address)
+    return await this.signingCosmWasmClient?.getAccount(address)
   }
 }
 
@@ -108,7 +132,7 @@ export function createScrtClient(restUrl: string, wallet: Wallet):
     try {
       chainId = await cosmWasmClient.getChainId()
     } catch(e) {
-      resolve(undefined)
+      resolve(new ScrtClient(cosmWasmClient))
       return
     }
 
@@ -117,7 +141,7 @@ export function createScrtClient(restUrl: string, wallet: Wallet):
         // Enabling the wallet ASAP is recommended.
         await keplr.enable(chainId)
       } catch(e) {
-        resolve(undefined)
+        resolve(new ScrtClient(cosmWasmClient))
         return
       }
     }
