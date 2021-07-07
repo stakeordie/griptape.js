@@ -12,20 +12,30 @@ You will need [Node.js](https://nodejs.org/en/) version 12+ and [Yarn](https://c
 After installing all dependencies, here is a description at a very high level the workflow you need to follow to start
 contributing:
 
-1. [Link](https://classic.yarnpkg.com/en/docs/cli/link/) your project with `yarn link`.
+1. Checkout to the dev branch:
 
 ```sh
 cd griptape.js
+git checkout dev
+```
+
+1. [Link](https://classic.yarnpkg.com/en/docs/cli/link/) your project with `yarn link`:
+
+```sh
+# ./griptape.js
+
 yarn link
 ```
 
-2. Run `yarn dev` to watch your changes while.
+2. Run `yarn dev` to watch your changes while:
 
 ```sh
+# ./griptape.js
+
 yarn dev
 ```
 
-3. Create a new project and link it `yarn link @stakeordie/griptape.js`.
+3. In other directory, create a new project and link it `yarn link @stakeordie/griptape.js`:
 
 ```sh
 yarn create @vitejs/app my-app
