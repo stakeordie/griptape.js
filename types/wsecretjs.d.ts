@@ -19,9 +19,9 @@ export declare class ScrtClient {
     executeContract(contractAddress: string, handleMsg: object, memo?: string, transferAmount?: readonly Coin[], fee?: StdFee): Promise<Result | undefined>;
     getAccount(address: string): Promise<Account | undefined>;
     getProposals(params: {
-        voter: string;
-        depositor: string;
-        status: string;
+        voter?: string;
+        depositor?: string;
+        status?: string;
     }): Promise<object>;
     createProposal(proposal: object): Promise<object>;
     getProposalVotes(id: string): Promise<object>;

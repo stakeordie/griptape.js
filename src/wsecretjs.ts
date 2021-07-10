@@ -131,7 +131,7 @@ export class ScrtClient {
     return await this.signingCosmWasmClient?.getAccount(address)
   }
 
-  getProposals(params: { voter: string, depositor: string, status: string }): Promise<object> {
+  getProposals(params: { voter?: string, depositor?: string, status?: string }): Promise<object> {
     const qs = toQueryString(params);
     return this.secretApi.get(`/gov/proposals?${qs}`);
   }
