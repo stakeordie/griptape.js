@@ -9,8 +9,9 @@ import {
   Coin,
   StdFee
 } from 'secretjs/types/types.js';
-import { Wallet } from './wallet';
+import { Wallet, getExperimentalConfig } from './wallet';
 import axios, { AxiosInstance } from 'axios';
+import { GriptapeConfig } from './types';
 
 const decoder = new TextDecoder(); // encoding defaults to utf-8
 const characters =
@@ -148,8 +149,9 @@ export class ScrtClient {
   }
 }
 
-export function createScrtClient(restUrl: string, wallet: Wallet):
+export function createScrtClient(conf: GriptapeConfig, wallet: Wallet):
   Promise<ScrtClient | undefined> {
+  const { restUrl, rpcUrl, isExperimental } = conf;
 
   return new Promise<ScrtClient | undefined>(async (resolve, reject) => {
     const cosmWasmClient = new CosmWasmClient(restUrl);
@@ -167,6 +169,15 @@ export function createScrtClient(restUrl: string, wallet: Wallet):
     if (chainId) {
       try {
         // Enabling the wallet ASAP is recommended.
+        if (isExperimental && rpcUrl) {
+          const experimentalConfig = getExperimentalConfig({
+            chainId,
+            chainName: chainId,
+            rest: restUrl,
+            rpc: rpcUrl
+          });
+          await keplr.experimentalSuggestChain(experimentalConfig);
+        }
         await keplr.enable(chainId);
       } catch (e) {
         resolve(new ScrtClient(cosmWasmClient, secretApi));

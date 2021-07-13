@@ -21,4 +21,6 @@ export interface Griptape {
 }
 export interface GriptapeConfig {
     restUrl: string;
+    rpcUrl?: string;
+    isExperimental: boolean;
 }

@@ -1,6 +1,58 @@
 import { Keplr, ChainInfo } from '@keplr-wallet/types';
 import { assert } from './utils/assertions';
 
+export const getExperimentalConfig = (props: {
+  chainId: string,
+  chainName: string,
+  rpc: string,
+  rest: string
+}) => {
+  const { chainId, chainName, rpc, rest } = props;
+  return {
+    chainId,
+    chainName,
+    rpc,
+    rest,
+    bip44: {
+      coinType: 529,
+    },
+    coinType: 529,
+    stakeCurrency: {
+      coinDenom: 'SCRT',
+      coinMinimalDenom: 'uscrt',
+      coinDecimals: 6,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'secret',
+      bech32PrefixAccPub: 'secretpub',
+      bech32PrefixValAddr: 'secretvaloper',
+      bech32PrefixValPub: 'secretvaloperpub',
+      bech32PrefixConsAddr: 'secretvalcons',
+      bech32PrefixConsPub: 'secretvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'SCRT',
+        coinMinimalDenom: 'uscrt',
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'SCRT',
+        coinMinimalDenom: 'uscrt',
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.1,
+      average: 0.25,
+      high: 0.4,
+    },
+    features: ['secretwasm'],
+  }
+};
+
 export class Wallet {
 
   keplr: Keplr;

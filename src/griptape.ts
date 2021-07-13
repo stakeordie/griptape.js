@@ -7,7 +7,7 @@ export function grip(conf: GriptapeConfig): Promise<Griptape> {
   return new Promise<Griptape>(async (resolve, reject) => {
     try {
       const wallet = await useWallet();
-      const scrtClient = await createScrtClient(conf.restUrl, wallet);
+      const scrtClient = await createScrtClient(conf, wallet);
       resolve({ wallet, scrtClient } as Griptape);
     } catch (e) {
       reject(e);
