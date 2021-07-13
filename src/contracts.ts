@@ -1,28 +1,28 @@
-import { assert } from './utils/assertions'
+import { assert } from './utils/assertions';
 import {
   Griptape,
   ContractDefinition,
   ContractBaseDefinition
-} from './types'
-import { ScrtClient, generateEntropyString } from './wsecretjs'
+} from './types';
+import { ScrtClient, generateEntropyString } from './wsecretjs';
 
 async function createViewingKey(): Promise<object> {
-  const entropy = generateEntropyString(27)
-  const handleMsg = { 'create_viewing_key': { entropy } }
+  const entropy = generateEntropyString(27);
+  const handleMsg = { 'create_viewing_key': { entropy } };
   const response =
-    await this.scrtClient.executeContract(this.contractAddress, handleMsg)
-  return response
+    await this.scrtClient.executeContract(this.contractAddress, handleMsg);
+  return response;
 }
 
 async function getBalance(address: string, key: string): Promise<void> {
-  const queryMsg = { balance: { address, key } }
+  const queryMsg = { balance: { address, key } };
   try {
     const response =
-      await this.scrtClient.queryContract(this.contractAddress, queryMsg)
-    const { balance: { amount } } = response
-    this.balance = amount
+      await this.scrtClient.queryContract(this.contractAddress, queryMsg);
+    const { balance: { amount } } = response;
+    this.balance = amount;
   } catch (e) {
-    this.balance = ''
+    this.balance = '';
   }
 }
 
@@ -33,13 +33,13 @@ export function defineContract(
   const messages = {
     ...contractBaseDef.messages,
     createViewingKey
-  }
-  contractBaseDef.messages = messages
+  };
+  contractBaseDef.messages = messages;
   return {
     spec: 'base',
     contractAddress,
     ...contractBaseDef
-  }
+  };
 }
 
 export function defineSnip20Contract(
@@ -49,17 +49,17 @@ export function defineSnip20Contract(
   // Base state
   const state = {
     balance: ''
-  }
+  };
 
   // Base messages
   const messages = {
     createViewingKey
-  }
+  };
 
   // Base queries
   const queries = {
     getBalance
-  }
+  };
 
   const contractDef: ContractDefinition = {
     spec: 'snip-20',
@@ -67,7 +67,7 @@ export function defineSnip20Contract(
     state,
     messages,
     queries
-  }
+  };
 
   if (contractBaseDef) {
 
@@ -75,23 +75,23 @@ export function defineSnip20Contract(
       state: newState,
       messages: newMessages,
       queries: newQueries
-    } = contractBaseDef
+    } = contractBaseDef;
 
     contractDef.state = {
       ...state,
       ...newState
-    }
+    };
 
     contractDef.messages = {
       ...messages,
       ...newMessages
-    }
+    };
 
     contractDef.queries = {
       ...queries,
       ...newQueries
-    }
+    };
   }
 
-  return contractDef
+  return contractDef;
 }
