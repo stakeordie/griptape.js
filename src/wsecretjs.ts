@@ -4,40 +4,39 @@ import {
   FeeTable,
   Account,
   ExecuteResult
-} from 'secretjs'
+} from 'secretjs';
 import {
   Coin,
   StdFee
-} from 'secretjs/types/types.js'
-import { assert } from './utils/assertions'
-import { Wallet } from './wallet'
+} from 'secretjs/types/types.js';
+import { Wallet } from './wallet';
 import axios, { AxiosInstance } from 'axios';
 
-const decoder = new TextDecoder() // encoding defaults to utf-8
+const decoder = new TextDecoder(); // encoding defaults to utf-8
 const characters =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-const charactersLength = characters.length
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const charactersLength = characters.length;
 
 export function generateEntropyString(length: number): string {
-  let result = ''
+  let result = '';
   for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-  return result
+  return result;
 }
 
 export function bech32(str: string, abbrv: number): string {
-  if (!str) return ''
-  const half = (abbrv / 2) || 8
+  if (!str) return '';
+  const half = (abbrv / 2) || 8;
   return str.substring(0, half) + '...'
-       + str.substring(str.length - half, str.length)
+    + str.substring(str.length - half, str.length);
 }
 
 function handleContractResponse(response: ExecuteResult): object {
   try {
-    return JSON.parse(decoder.decode(response.data))
+    return JSON.parse(decoder.decode(response.data));
   } catch (e) {
-    throw e
+    throw e;
   }
 }
 
@@ -64,50 +63,50 @@ const customFees: FeeTable = {
     amount: [{ amount: '80000', denom: 'uscrt' }],
     gas: '80000',
   },
-}
+};
 
 export class Result {
 
-  private readonly data: any
+  private readonly data: any;
 
   constructor(data: any) {
-    this.data = data
+    this.data = data;
   }
 
   get(): any {
-    return decoder.decode(this.data)
+    return decoder.decode(this.data);
   }
 
   parse(): object {
     try {
-      return JSON.parse(decoder.decode(this.data))
+      return JSON.parse(decoder.decode(this.data));
     } catch (e) {
-      throw e
+      throw e;
     }
   }
 }
 
 export class ScrtClient {
 
-  readonly cosmWasmClient: CosmWasmClient
+  readonly cosmWasmClient: CosmWasmClient;
 
-  readonly signingCosmWasmClient?: SigningCosmWasmClient
+  readonly signingCosmWasmClient?: SigningCosmWasmClient;
 
-  readonly secretApi: AxiosInstance
+  readonly secretApi: AxiosInstance;
 
   constructor(cosmWasmClient: CosmWasmClient,
-              secretApi: AxiosInstance,
-              signingCosmWasmClient?: SigningCosmWasmClient) {
-    this.cosmWasmClient = cosmWasmClient
-    this.secretApi = secretApi
+    secretApi: AxiosInstance,
+    signingCosmWasmClient?: SigningCosmWasmClient) {
+    this.cosmWasmClient = cosmWasmClient;
+    this.secretApi = secretApi;
 
     if (signingCosmWasmClient) {
-      this.signingCosmWasmClient = signingCosmWasmClient
+      this.signingCosmWasmClient = signingCosmWasmClient;
     }
   }
 
   async queryContract(address: string, queryMsg: object): Promise<object> {
-    return await this.cosmWasmClient.queryContractSmart(address, queryMsg)
+    return await this.cosmWasmClient.queryContractSmart(address, queryMsg);
   }
 
   async executeContract(
@@ -119,19 +118,19 @@ export class ScrtClient {
   ): Promise<Result | undefined> {
     try {
       const response = await this.signingCosmWasmClient?.execute(
-        contractAddress, handleMsg, memo, transferAmount, fee)
-      return new Result(response?.data)
-    } catch(e: any) {
+        contractAddress, handleMsg, memo, transferAmount, fee);
+      return new Result(response?.data);
+    } catch (e: any) {
       // TODO improve error handling here
-      throw e
+      throw e;
     }
   }
 
   async getAccount(address: string): Promise<Account | undefined> {
-    return await this.signingCosmWasmClient?.getAccount(address)
+    return await this.signingCosmWasmClient?.getAccount(address);
   }
 
-  getProposals(params: { voter?: string, depositor?: string, status?: string }): Promise<object> {
+  getProposals(params: { voter?: string, depositor?: string, status?: string; }): Promise<object> {
     const qs = toQueryString(params);
     return this.secretApi.get(`/gov/proposals?${qs}`);
   }
@@ -153,40 +152,40 @@ export function createScrtClient(restUrl: string, wallet: Wallet):
   Promise<ScrtClient | undefined> {
 
   return new Promise<ScrtClient | undefined>(async (resolve, reject) => {
-    const cosmWasmClient = new CosmWasmClient(restUrl)
+    const cosmWasmClient = new CosmWasmClient(restUrl);
     const secretApi = axios.create({ baseURL: restUrl });
-    const { keplr } = wallet
+    const { keplr } = wallet;
 
-    let chainId
+    let chainId;
     try {
-      chainId = await cosmWasmClient.getChainId()
-    } catch(e) {
-      resolve(new ScrtClient(cosmWasmClient, secretApi))
-      return
+      chainId = await cosmWasmClient.getChainId();
+    } catch (e) {
+      resolve(new ScrtClient(cosmWasmClient, secretApi));
+      return;
     }
 
     if (chainId) {
       try {
         // Enabling the wallet ASAP is recommended.
-        await keplr.enable(chainId)
-      } catch(e) {
-        resolve(new ScrtClient(cosmWasmClient, secretApi))
-        return
+        await keplr.enable(chainId);
+      } catch (e) {
+        resolve(new ScrtClient(cosmWasmClient, secretApi));
+        return;
       }
     }
 
     // Set the chain id in the wallet.
-    wallet.chainId = chainId
+    wallet.chainId = chainId;
 
-    const address = await wallet.getAddress()
-    const signer = await window?.getOfflineSigner!(chainId)
-    const enigmaUtils = await wallet.keplr.getEnigmaUtils(chainId)
+    const address = await wallet.getAddress();
+    const signer = await window?.getOfflineSigner!(chainId);
+    const enigmaUtils = await wallet.keplr.getEnigmaUtils(chainId);
 
     const signingCosmWasmClient = new SigningCosmWasmClient(
       // @ts-ignore
-      restUrl, address, signer, enigmaUtils, customFees)
+      restUrl, address, signer, enigmaUtils, customFees);
     const scrtClient =
-      new ScrtClient(cosmWasmClient, secretApi, signingCosmWasmClient)
-    resolve(scrtClient)
-  })
+      new ScrtClient(cosmWasmClient, secretApi, signingCosmWasmClient);
+    resolve(scrtClient);
+  });
 }

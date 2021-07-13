@@ -1,58 +1,58 @@
-import { Keplr, ChainInfo } from '@keplr-wallet/types'
-import { assert } from './utils/assertions'
+import { Keplr, ChainInfo } from '@keplr-wallet/types';
+import { assert } from './utils/assertions';
 
 export class Wallet {
 
-  keplr: Keplr
+  keplr: Keplr;
 
-  chainId?: string
+  chainId?: string;
 
   constructor(keplr: Keplr) {
-    this.keplr = keplr
+    this.keplr = keplr;
   }
 
   async enable(): Promise<void> {
-    if (!this.chainId) return
+    if (!this.chainId) return;
 
-    this.keplr.enable(this.chainId)
+    this.keplr.enable(this.chainId);
   }
 
   async getAddress(): Promise<string> {
-    if (!this.chainId) return ''
+    if (!this.chainId) return '';
 
-    const signer = window?.getOfflineSigner!(this.chainId)
-    const [{ address }] = await signer.getAccounts()
-    return address
+    const signer = window?.getOfflineSigner!(this.chainId);
+    const [{ address }] = await signer.getAccounts();
+    return address;
   }
 
   async suggestToken(contractAddress: string): Promise<void> {
-    assert(this.chainId, 'Chain id is not set')
+    assert(this.chainId, 'Chain id is not set');
 
-    await this.keplr.suggestToken(this.chainId, contractAddress)
+    await this.keplr.suggestToken(this.chainId, contractAddress);
   }
 
   async getSnip20ViewingKey(contractAddress: string): Promise<string> {
-    assert(this.chainId, 'Chain id is not set')
+    assert(this.chainId, 'Chain id is not set');
 
-    return await this.keplr.getSecret20ViewingKey(this.chainId, contractAddress)
+    return await this.keplr.getSecret20ViewingKey(this.chainId, contractAddress);
   }
 
   onKeplrChange(callback: Function) {
     window.addEventListener('keplr_keystorechange', async () => {
-      await callback()
-    })
+      await callback();
+    });
   }
 }
 
-let wallet: Wallet | null = null
+let wallet: Wallet | null = null;
 
 export function useWallet(): Promise<Wallet> {
   return new Promise<Wallet>((resolve, reject) => {
     if (wallet) {
-      resolve(wallet)
+      resolve(wallet);
 
       // We needed to return immediately
-      return
+      return;
     }
 
     const documentStateChange = (event: Event) => {
@@ -61,22 +61,22 @@ export function useWallet(): Promise<Wallet> {
         (event.target as Document).readyState === 'complete'
       ) {
         if (!window.keplr) {
-          reject()
+          reject();
 
           // Also here...
-          return
+          return;
         }
 
         if (wallet == null) {
-          wallet = new Wallet(window.keplr)
+          wallet = new Wallet(window.keplr);
         }
 
-        resolve(wallet)
+        resolve(wallet);
 
-        document.removeEventListener('readystatechange', documentStateChange)
+        document.removeEventListener('readystatechange', documentStateChange);
       }
-    }
+    };
 
-    document.addEventListener('readystatechange', documentStateChange)
-  })
+    document.addEventListener('readystatechange', documentStateChange);
+  });
 }
