@@ -50,3 +50,10 @@ export function coinConvert(
     return result.toString();
   }
 }
+
+export function bech32(str: string, abbrv: number): string {
+  if (!str) return '';
+  const half = (abbrv / 2) || 8;
+  return str.substring(0, half) + '...'
+    + str.substring(str.length - half, str.length);
+}

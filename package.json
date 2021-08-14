@@ -1,8 +1,8 @@
 {
   "name": "@stakeordie/griptape.js",
   "version": "0.2.13",
-  "main": "dist/main.js",
-  "types": "types/main.d.ts",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
   "files": [
     "dist",
     "types"
