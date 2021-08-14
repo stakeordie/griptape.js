@@ -1,3 +1,13 @@
-import { ContractDefinition, ContractBaseDefinition } from './types';
-export declare function defineContract(contractAddress: string, contractBaseDef: ContractBaseDefinition): ContractDefinition;
-export declare function defineSnip20Contract(contractAddress: string, contractBaseDef?: ContractBaseDefinition): ContractDefinition;
+import { Coin, StdFee } from 'secretjs/types/types.js';
+export interface Context {
+    address?: string;
+    key?: string;
+}
+export interface ContractExecuteRequest {
+    contractAddress: string;
+    handleMsg: Record<string, unknown>;
+    memo?: string;
+    transferAmount?: readonly Coin[];
+    fee?: StdFee;
+}
+export declare function createContract(contract: Record<string, unknown>): Record<string, any>;
