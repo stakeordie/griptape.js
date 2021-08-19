@@ -48,7 +48,6 @@ export interface Context {
 }
 
 export interface ContractExecuteRequest {
-  contractAddress: string;
   handleMsg: Record<string, unknown>;
   memo?: string;
   transferAmount?: readonly Coin[];
