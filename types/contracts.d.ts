@@ -4,7 +4,6 @@ export interface Context {
     key?: string;
 }
 export interface ContractExecuteRequest {
-    contractAddress: string;
     handleMsg: Record<string, unknown>;
     memo?: string;
     transferAmount?: readonly Coin[];

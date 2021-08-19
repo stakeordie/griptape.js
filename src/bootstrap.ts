@@ -172,3 +172,8 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
     };
   };
 }
+
+export function getChainId() {
+  if (!client) throw new Error('No client available');
+  return client.getChainId();
+}

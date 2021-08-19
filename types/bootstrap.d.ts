@@ -22,3 +22,4 @@ export declare function bootstrap(): Promise<void>;
 export declare function queryContract(address: string, queryMsg: Record<string, unknown>): Promise<Record<string, unknown>>;
 export declare function executeContract(contractAddress: string, handleMsg: Record<string, unknown>, memo?: string, transferAmount?: readonly Coin[], fee?: StdFee): Promise<ExecuteResult>;
 export declare function getKeplrAccountProvider(): AccountProviderGetter;
+export declare function getChainId(): Promise<string>;
