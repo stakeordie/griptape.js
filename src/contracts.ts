@@ -108,9 +108,20 @@ export function createContract(contract: Record<string, unknown>):
     }
   };
 
-  const { id, at, definition: { queries, messages } }: any = contract;
+  const { id, at, definition: { queries: q, messages: m } }: any = contract;
+
+  // Handling when no queries or messages are defined in the contract
+  // definition.
+  let queries = q || {};
+  let messages = m || {};
+
+  // Setting the type of queries and messages.
   Object.keys(queries).forEach(it => queries[it].type = QUERY_TYPE)
   Object.keys(messages).forEach(it => messages[it].type = MESSAGE_TYPE)
+
+  // Define the target object.
   const target = { id, at, ...queries, ...messages };
+
+  // Create a new proxy for that target.
   return new Proxy(target, handler);
 }
