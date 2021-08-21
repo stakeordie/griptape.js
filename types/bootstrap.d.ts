@@ -12,7 +12,9 @@ export interface AccountProvider {
 export declare type AccountProviderGetter = (chainId: string) => Promise<AccountProvider | undefined>;
 export declare class Griptape {
     address?: string;
+    isConnected: boolean;
     onConnect(callback: () => void): Griptape;
+    onConnectAndAlways(callback: () => void): Griptape;
     onInit(callback: () => void): Griptape;
 }
 export declare const griptape: Griptape;
@@ -23,3 +25,4 @@ export declare function queryContract(address: string, queryMsg: Record<string, 
 export declare function executeContract(contractAddress: string, handleMsg: Record<string, unknown>, memo?: string, transferAmount?: readonly Coin[], fee?: StdFee): Promise<ExecuteResult>;
 export declare function getKeplrAccountProvider(): AccountProviderGetter;
 export declare function getChainId(): Promise<string>;
+export declare function getHeight(): Promise<number>;

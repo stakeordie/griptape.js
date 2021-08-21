@@ -52,8 +52,19 @@ export class Griptape {
 
   address?: string
 
+  isConnected = false
+
   onConnect(callback: () => void): Griptape {
     window.addEventListener('connected', callback);
+    return this;
+  }
+
+  onConnectAndAlways(callback: () => void): Griptape {
+    if (!this.isConnected) {
+      return this.onConnect(callback);
+    } else {
+      callback();
+    }
     return this;
   }
 
@@ -86,6 +97,7 @@ export async function gripApp(
     runApp();
     await initSigningClient();
     emitEvent('connected');
+    griptape.isConnected = true;
     emitEvent('init');
   }
 }
@@ -176,4 +188,9 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
 export function getChainId() {
   if (!client) throw new Error('No client available');
   return client.getChainId();
+}
+
+export function getHeight() {
+  if (!client) throw new Error('No client available');
+  return client.getHeight();
 }
