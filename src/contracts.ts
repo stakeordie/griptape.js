@@ -1,6 +1,7 @@
 import {
   queryContract,
-  executeContract
+  executeContract,
+  getHeight
 } from './bootstrap';
 import { Coin, StdFee } from 'secretjs/types/types.js';
 import { griptape, viewingKeyManager } from './index.js';
@@ -68,7 +69,8 @@ export function createContract(contract: Record<string, unknown>):
           const { at: contractAddress } = contract;
           const address = griptape.address;
           const key = viewingKeyManager.get(contractAddress);
-          const ctx = { address, key } as Context;
+          const height = await getHeight();
+          const ctx = { address, key, height } as Context;
           const args = [ctx, ...argumentsList];
           const result = Reflect.apply(func, thisArg, args);
 
