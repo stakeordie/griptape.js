@@ -53,8 +53,10 @@ export class ViewingKeyManager {
   }
 
   public get(idOrAddress: string): string | undefined {
-    const account = this.getAccount();
-    if (!account) throw new Error('No account available');
+    let account = this.getAccount();
+    if (!account) {
+      account = this.addAccount();
+    }
     const key = account.keys.find(it => this.isEqual(it, idOrAddress));
     if (!key) return;
     return key.value;
