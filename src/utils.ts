@@ -1,5 +1,8 @@
 import { Decimal } from 'decimal.js';
 
+// The number set here is an arbitrary number.
+Decimal.set({ toExpPos: 50 });
+
 // Convert to/from human and machine.
 export function coinConvert(
   number: number | string,
