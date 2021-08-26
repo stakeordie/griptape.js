@@ -127,3 +127,57 @@ export function createContract(contract: Record<string, unknown>):
   // Create a new proxy for that target.
   return new Proxy(target, handler);
 }
+
+export function extendContract(base:Record<string,any>,extended:Record<string,any>):
+  Record<string, any> {
+    let result: Record<string, any> = {}
+
+    const {
+      messages: baseMessages = {},
+      queries : baseQueries  = {},
+    }:any = base;
+
+    const {
+      messages: defMessages = {},
+      queries : defQueries  = {},
+    }:any = extended;
+
+    //CHECK Messages common keys
+    const baseMessagesKeys = Object.keys(baseMessages);
+    const defMessagesKeys  = Object.keys(defMessages);
+    const messageKeys      = calculateCommonKeys(baseMessagesKeys,defMessagesKeys);
+    //CHECK Queries common keys
+    const baseQueriesKeys = Object.keys(baseQueries);
+    const defQueriesKeys  = Object.keys(defQueries);
+    const querieKeys      = calculateCommonKeys(baseQueriesKeys,defQueriesKeys);
+
+    //BIND `base` and `def` definitions 
+    result = {
+      messages:{
+        ...base.messages,
+        ...extended.messages,
+      },
+      queries:{
+        ...base.queries,
+        ...extended.queries,
+      }
+    }
+
+    //OVERRIDE common keys with def values
+    messageKeys.forEach((key)=>{
+      result.messages[key] = extended.messages[key]
+    });
+
+    querieKeys.forEach((key)=>{
+      result.queries[key] = extended.queries[key]
+    });    
+
+    return result;
+}
+
+function calculateCommonKeys(baseKeys:Array<string>,defKeys:Array<string>):Array<string>{
+  if( baseKeys.length === 0 || defKeys.length === 0 ) return [];
+
+  const result:Array<string> = baseKeys.filter((key)=> defKeys.find( (k) => k === key)); 
+  return result;
+}
