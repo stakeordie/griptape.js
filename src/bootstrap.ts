@@ -118,7 +118,7 @@ async function initSigningClient(): Promise<void> {
   const chainId = await client.getChainId();
   const provider = await getProvider(chainId);
 
-  if (!provider) throw new Error('Could not initialize provider');
+  if (!provider) return;
 
   const address = provider.getAddress();
   const signer = provider.getSigner();
@@ -171,7 +171,11 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
       throw new Error('Install keplr extension');
 
     // Enabling keplr is recommended
-    await keplr.enable(chainId);
+    try {
+      await keplr.enable(chainId);
+    } catch (e) {
+      return;
+    }
 
     const offlineSigner = window.getOfflineSigner(chainId);
     const [{ address }] = await offlineSigner.getAccounts();
