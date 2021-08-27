@@ -10,3 +10,4 @@ export interface ContractExecuteRequest {
     fee?: StdFee;
 }
 export declare function createContract(contract: Record<string, unknown>): Record<string, any>;
+export declare function extendContract(base: Record<string, any>, extended: Record<string, any>): Record<string, any>;
