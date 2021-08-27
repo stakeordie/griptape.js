@@ -9,6 +9,16 @@ import { griptape, viewingKeyManager } from './index.js';
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
 
+function getEntropyString(length: number): string {
+  const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let result           = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
 function getValue(object: any, key: string): any {
   let value;
   Object.keys(object).some(k => {
@@ -46,6 +56,8 @@ function warn(func: any, result: any, msg: string): void {
 export interface Context {
   address?: string;
   key?: string;
+  padding?: string;
+  height?: number;
 }
 
 export interface ContractExecuteRequest {
@@ -54,6 +66,8 @@ export interface ContractExecuteRequest {
   transferAmount?: readonly Coin[];
   fee?: StdFee;
 }
+
+export type ContractRequest = Record<string, unknown>;
 
 export function createContract(contract: Record<string, unknown>):
   Record<string, any> {
@@ -67,11 +81,18 @@ export function createContract(contract: Record<string, unknown>):
       return new Proxy(contract[prop], {
         apply: async (func: any, thisArg: any, argumentsList: any) => {
           const { at: contractAddress } = contract;
+
+          // Get all context variables.
           const address = griptape.address;
           const key = viewingKeyManager.get(contractAddress);
           const height = await getHeight();
-          const ctx = { address, key, height } as Context;
+          const padding = getEntropyString(12);
+
+          // Set the context.
+          const ctx = { address, key, height, padding } as Context;
           const args = [ctx, ...argumentsList];
+
+          // Call the method, injecting the context.
           const result = Reflect.apply(func, thisArg, args);
 
           const hasAddress = getValue(result, 'address');
