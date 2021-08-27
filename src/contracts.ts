@@ -46,6 +46,7 @@ function warn(func: any, result: any, msg: string): void {
 export interface Context {
   address?: string;
   key?: string;
+  padding?: string
 }
 
 export interface ContractExecuteRequest {
