@@ -162,16 +162,17 @@ export function extendContract(base: Record<string,any>,extended: Record<string,
       queries : defQueries  = { },
     } = extended;
 
-    //CHECK Messages common keys
+    // Check messages common keys.
     const baseMessagesKeys = Object.keys(baseMessages);
     const defMessagesKeys  = Object.keys(defMessages);
     const messageKeys      = calculateCommonKeys(baseMessagesKeys, defMessagesKeys);
-    //CHECK Queries common keys
+
+    // Check queries common keys.
     const baseQueriesKeys = Object.keys(baseQueries);
     const defQueriesKeys  = Object.keys(defQueries);
     const queriesKey      = calculateCommonKeys(baseQueriesKeys, defQueriesKeys);
 
-    //BIND `base` and `def` definitions 
+    // Bind `base` and `def` definitions.
     const result = {
       messages:{
         ...base.messages,
@@ -181,22 +182,22 @@ export function extendContract(base: Record<string,any>,extended: Record<string,
         ...base.queries,
         ...extended.queries,
       }
-    }
+    };
 
-    //OVERRIDE common keys with def values
+    // Override common keys with def valuesS.
     messageKeys.forEach( key => {
       result.messages[key] = extended.messages[key]
     });
-    
+
     queriesKey.forEach( key => {
       result.queries[key] = extended.queries[key]
-    });    
-    
-    //Warnings
-    if( messageKeys.length > 0 ) {
+    });
+
+    // Warnings.
+    if(messageKeys.length > 0) {
       console.warn(`You overrided the following values from Messages object: ${messageKeys.toString()}`)
     }
-    if( queriesKey.length > 0 ) {
+    if(queriesKey.length > 0) {
       console.warn(`You overrided the following values from Queries object: ${queriesKey.toString()}`)
     }
 
@@ -204,10 +205,7 @@ export function extendContract(base: Record<string,any>,extended: Record<string,
 }
 
 function calculateCommonKeys( baseKeys: Array<string>, defKeys: Array<string> ) : 
-Array<string> {
- 
-  if( baseKeys.length === 0 || defKeys.length === 0 ) return [];
-
-  const result:Array<string> = baseKeys.filter((key)=> defKeys.find( (k) => k === key)); 
-  return result;
+  Array<string> {
+  if (baseKeys.length === 0 || defKeys.length === 0) return [];
+  return baseKeys.filter((key) => defKeys.find((k) => k === key));
 }
