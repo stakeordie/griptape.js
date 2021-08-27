@@ -185,12 +185,12 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
   };
 }
 
-export function getChainId() {
+export function getChainId(): Promise<string> {
   if (!client) throw new Error('No client available');
   return client.getChainId();
 }
 
-export function getHeight() {
+export function getHeight(): Promise<number> {
   if (!client) throw new Error('No client available');
   return client.getHeight();
 }
