@@ -10,6 +10,7 @@ import {
   FeeTable
 } from 'secretjs';
 import { ViewingKeyManager } from './viewing-keys';
+import { emitEvent } from './events';
 
 const customFees: FeeTable = {
   upload: {
@@ -49,41 +50,11 @@ let signingClient: SigningCosmWasmClient | undefined;
 let getProvider: AccountProviderGetter | undefined;
 
 export class Griptape {
-
   address?: string
-
-  isConnected = false
-
-  onConnect(callback: () => void): Griptape {
-    window.addEventListener('connected', callback);
-    return this;
-  }
-
-  onConnectAndAlways(callback: () => void): Griptape {
-    if (!this.isConnected) {
-      return this.onConnect(callback);
-    } else {
-      callback();
-    }
-    return this;
-  }
-
-  onInit(callback: () => void): Griptape {
-    window.addEventListener('init', callback);
-    return this;
-  }
 }
 
 export const griptape = new Griptape();
 export const viewingKeyManager = new ViewingKeyManager();
-
-function emitEvent(
-  name: string,
-  options: Record<string, unknown> = { bubbles: true, cancelable: true }
-) {
-    const event = new Event(name, options);
-    document.dispatchEvent(event);
-}
 
 export async function gripApp(
   restUrl: string,
@@ -96,8 +67,6 @@ export async function gripApp(
     await initClient();
     runApp();
     await initSigningClient();
-    emitEvent('connected');
-    griptape.isConnected = true;
     emitEvent('init');
   }
 }
@@ -118,7 +87,7 @@ async function initSigningClient(): Promise<void> {
   const chainId = await client.getChainId();
   const provider = await getProvider(chainId);
 
-  if (!provider) throw new Error('Could not initialize provider');
+  if (!provider) return;
 
   const address = provider.getAddress();
   const signer = provider.getSigner();
@@ -137,7 +106,6 @@ export async function bootstrap(): Promise<void> {
   if (!config) throw new Error('No configuration was set');
   initClient();
   await initSigningClient();
-  emitEvent('connected');
 }
 
 // TODO Move this to `contracts.ts`
@@ -163,6 +131,9 @@ export async function executeContract(
     contractAddress, handleMsg, memo, transferAmount, fee);
 }
 
+// So this is a very rough implementation of an Account provider.
+// This is not the way it suppose to be, but for now will do the trick.
+// This will require a refactor at some point.
 export function getKeplrAccountProvider(): AccountProviderGetter {
   return async (chainId: string) => {
     const keplr = await getKeplr();
@@ -171,11 +142,23 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
       throw new Error('Install keplr extension');
 
     // Enabling keplr is recommended
-    await keplr.enable(chainId);
+    try {
+      await keplr.enable(chainId);
+    } catch (e) {
+      return;
+    }
 
     const offlineSigner = window.getOfflineSigner(chainId);
     const [{ address }] = await offlineSigner.getAccounts();
     const enigmaUtils = await keplr.getEnigmaUtils(chainId);
+
+    // At this point we have an account available...
+    emitEvent('account-available');
+
+    // And also we want to be able to react to an account change.
+    window.addEventListener("keplr_keystorechange", () => {
+      emitEvent('account-change');
+    });
 
     return {
       getAddress: () => address,
