@@ -148,3 +148,66 @@ export function createContract(contract: Record<string, unknown>):
   // Create a new proxy for that target.
   return new Proxy(target, handler);
 }
+
+export function extendContract(base: Record<string,any>,extended: Record<string,any>):
+  Record<string, any> {
+
+    const {
+      messages: baseMessages = { },
+      queries : baseQueries  = { },
+    } = base;
+
+    const {
+      messages: defMessages = { },
+      queries : defQueries  = { },
+    } = extended;
+
+    //CHECK Messages common keys
+    const baseMessagesKeys = Object.keys(baseMessages);
+    const defMessagesKeys  = Object.keys(defMessages);
+    const messageKeys      = calculateCommonKeys(baseMessagesKeys, defMessagesKeys);
+    //CHECK Queries common keys
+    const baseQueriesKeys = Object.keys(baseQueries);
+    const defQueriesKeys  = Object.keys(defQueries);
+    const queriesKey      = calculateCommonKeys(baseQueriesKeys, defQueriesKeys);
+
+    //BIND `base` and `def` definitions 
+    const result = {
+      messages:{
+        ...base.messages,
+        ...extended.messages,
+      },
+      queries:{
+        ...base.queries,
+        ...extended.queries,
+      }
+    }
+
+    //OVERRIDE common keys with def values
+    messageKeys.forEach( key => {
+      result.messages[key] = extended.messages[key]
+    });
+    
+    queriesKey.forEach( key => {
+      result.queries[key] = extended.queries[key]
+    });    
+    
+    //Warnings
+    if( messageKeys.length > 0 ) {
+      console.warn(`You overrided the following values from Messages object: ${messageKeys.toString()}`)
+    }
+    if( queriesKey.length > 0 ) {
+      console.warn(`You overrided the following values from Queries object: ${queriesKey.toString()}`)
+    }
+
+    return result;
+}
+
+function calculateCommonKeys( baseKeys: Array<string>, defKeys: Array<string> ) : 
+Array<string> {
+ 
+  if( baseKeys.length === 0 || defKeys.length === 0 ) return [];
+
+  const result:Array<string> = baseKeys.filter((key)=> defKeys.find( (k) => k === key)); 
+  return result;
+}

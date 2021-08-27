@@ -12,10 +12,6 @@ export interface AccountProvider {
 export declare type AccountProviderGetter = (chainId: string) => Promise<AccountProvider | undefined>;
 export declare class Griptape {
     address?: string;
-    isConnected: boolean;
-    onConnect(callback: () => void): Griptape;
-    onConnectAndAlways(callback: () => void): Griptape;
-    onInit(callback: () => void): Griptape;
 }
 export declare const griptape: Griptape;
 export declare const viewingKeyManager: ViewingKeyManager;

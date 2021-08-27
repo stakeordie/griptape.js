@@ -13,3 +13,4 @@ export interface ContractExecuteRequest {
 }
 export declare type ContractRequest = Record<string, unknown>;
 export declare function createContract(contract: Record<string, unknown>): Record<string, any>;
+export declare function extendContract(base: Record<string, any>, extended: Record<string, any>): Record<string, any>;

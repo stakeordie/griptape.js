@@ -1,3 +1,5 @@
+import { emitEvent } from './events';
+
 export interface Key {
   id: string;
   contractAddress: string;
@@ -34,16 +36,17 @@ export class ViewingKeyManager {
     if (!account) {
       account = this.addAccount();
     }
-    const key = account.keys.find(it => this.isKeyAdded(it, form));
+    if (!account) throw new Error('No account available');
+    const key = account?.keys.find(it => this.isKeyAdded(it, form));
     if (key) return key.value;
     const newKey = this.createKey(form);
     account.keys.push(newKey);
     localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    emitEvent('viewing-key-created');
     return newKey.value;
   }
 
   public createKey(form: KeyForm): Key {
-    if (!this.address) throw new Error('Address not available');
     const { id, contractAddress, key: value } = form;
     return {
       id,
@@ -57,13 +60,13 @@ export class ViewingKeyManager {
     if (!account) {
       account = this.addAccount();
     }
-    const key = account.keys.find(it => this.isEqual(it, idOrAddress));
+    const key = account?.keys.find(it => this.isEqual(it, idOrAddress));
     if (!key) return;
     return key.value;
   }
 
-  private addAccount(): Account {
-    if (!this.address) throw new Error('Address not available');
+  private addAccount(): Account | undefined {
+    if (!this.address) return;
 
     const { address } = this;
     const account = { address, keys: [] };
