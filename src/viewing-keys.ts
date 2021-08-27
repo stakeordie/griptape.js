@@ -1,3 +1,5 @@
+import { emitEvent } from './events';
+
 export interface Key {
   id: string;
   contractAddress: string;
@@ -40,6 +42,7 @@ export class ViewingKeyManager {
     const newKey = this.createKey(form);
     account.keys.push(newKey);
     localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    emitEvent('viewing-key-created');
     return newKey.value;
   }
 
