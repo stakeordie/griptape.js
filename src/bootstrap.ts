@@ -10,6 +10,7 @@ import {
   FeeTable
 } from 'secretjs';
 import { ViewingKeyManager } from './viewing-keys';
+import { emitEvent } from './events';
 
 const customFees: FeeTable = {
   upload: {
@@ -46,43 +47,13 @@ export type AccountProviderGetter = (chainId: string)
 let config: Config | undefined;
 let client: CosmWasmClient | undefined;
 let signingClient: SigningCosmWasmClient | undefined;
-let getProvider: AccountProviderGetter | undefined;
+let provider: AccountProvider | undefined;
 
-export class Griptape {
-
-  address?: string
-
-  isConnected = false
-
-  onConnect(callback: () => void): Griptape {
-    window.addEventListener('connected', callback);
-    return this;
-  }
-
-  onConnectAndAlways(callback: () => void): Griptape {
-    if (!this.isConnected) {
-      return this.onConnect(callback);
-    } else {
-      callback();
-    }
-    return this;
-  }
-
-  onInit(callback: () => void): Griptape {
-    window.addEventListener('init', callback);
-    return this;
-  }
-}
-
-export const griptape = new Griptape();
 export const viewingKeyManager = new ViewingKeyManager();
 
-function emitEvent(
-  name: string,
-  options: Record<string, unknown> = { bubbles: true, cancelable: true }
-) {
-    const event = new Event(name, options);
-    document.dispatchEvent(event);
+export function getAddress() {
+  if (!provider) throw new Error('No provider available');
+  return provider.getAddress();
 }
 
 export async function gripApp(
@@ -91,42 +62,54 @@ export async function gripApp(
   runApp: () => void): Promise<void> {
 
   if (!config) {
-    getProvider = accountProviderGetter;
+    // Set the configuration.
     config = { restUrl };
+
+    // `CosmWasmClient` should be created first.
     await initClient();
+
+    // Run the app.
     runApp();
+
+    // Current chain ID.
+    const chainId = await getChainId();
+
+    // Set the provider.
+    provider = await accountProviderGetter(chainId);
+
+    // At this point we have an account available...
+    emitEvent('account-available');
+
+    // `SigningCosmWasmClient` should be created later.
     await initSigningClient();
-    emitEvent('connected');
-    griptape.isConnected = true;
-    emitEvent('init');
   }
 }
 
-function initClient(): void {
+async function initClient(): Promise<void> {
   if (client) return;
   if (!config) throw new Error('No configuration was set');
+
+  // Create `CosmWasmClient`.
   client = new CosmWasmClient(config.restUrl);
+
+  // Get the chain ID for this node.
+  const chainId = await client.getChainId();
+
 }
 
 async function initSigningClient(): Promise<void> {
   if (signingClient) return;
   if (!config) throw new Error('No configuration was set');
   if (!client) throw new Error('No client available');
-  if (!getProvider) throw new Error('No provider available');
+  if (!provider) throw new Error('No provider available');
 
   const { restUrl } = config;
-  const chainId = await client.getChainId();
-  const provider = await getProvider(chainId);
 
-  if (!provider) throw new Error('Could not initialize provider');
+  if (!provider) return;
 
   const address = provider.getAddress();
   const signer = provider.getSigner();
   const seed = provider.getSeed();
-
-  // Hacking the system
-  griptape.address = address;
-  viewingKeyManager.address = address;
 
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
@@ -135,9 +118,8 @@ async function initSigningClient(): Promise<void> {
 
 export async function bootstrap(): Promise<void> {
   if (!config) throw new Error('No configuration was set');
-  initClient();
+  await initClient();
   await initSigningClient();
-  emitEvent('connected');
 }
 
 // TODO Move this to `contracts.ts`
@@ -163,6 +145,9 @@ export async function executeContract(
     contractAddress, handleMsg, memo, transferAmount, fee);
 }
 
+// So this is a very rough implementation of an Account provider.
+// This is not the way it suppose to be, but for now will do the trick.
+// This will require a refactor at some point.
 export function getKeplrAccountProvider(): AccountProviderGetter {
   return async (chainId: string) => {
     const keplr = await getKeplr();
@@ -170,12 +155,21 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
     if (!keplr || !window.getOfflineSigner)
       throw new Error('Install keplr extension');
 
-    // Enabling keplr is recommended
-    await keplr.enable(chainId);
+    try {
+      // Enabling keplr is recommended. But is not what I like...
+      await keplr.enable(chainId);
+    } catch (e) {
+      return;
+    }
 
     const offlineSigner = window.getOfflineSigner(chainId);
     const [{ address }] = await offlineSigner.getAccounts();
     const enigmaUtils = await keplr.getEnigmaUtils(chainId);
+
+    // And also we want to be able to react to an account change.
+    window.addEventListener("keplr_keystorechange", () => {
+      emitEvent('account-change');
+    });
 
     return {
       getAddress: () => address,
@@ -185,12 +179,12 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
   };
 }
 
-export function getChainId() {
+export function getChainId(): Promise<string> {
   if (!client) throw new Error('No client available');
   return client.getChainId();
 }
 
-export function getHeight() {
+export function getHeight(): Promise<number> {
   if (!client) throw new Error('No client available');
   return client.getHeight();
 }

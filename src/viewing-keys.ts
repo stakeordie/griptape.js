@@ -1,3 +1,6 @@
+import { emitEvent } from './events';
+import { getAddress } from './bootstrap';
+
 export interface Key {
   id: string;
   contractAddress: string;
@@ -18,8 +21,6 @@ export interface KeyForm {
 export class ViewingKeyManager {
   private readonly accounts: Array<Account> = []
 
-  address: string | undefined
-
   constructor() {
     const item = localStorage.getItem('griptape.js');
     if (item) {
@@ -27,23 +28,63 @@ export class ViewingKeyManager {
     }
   }
 
-  public add(form: KeyForm): string {
-    if (!this.address) throw new Error('Address not available');
+  public add(contract: Record<string, string>, key: string): string {
+    // TODO We might want to remove the use of a form.
+    const form: KeyForm = {
+      id: contract.id,
+      contractAddress: contract.at,
+      key: key
+    };
 
     let account = this.getAccount();
     if (!account) {
       account = this.addAccount();
     }
-    const key = account.keys.find(it => this.isKeyAdded(it, form));
-    if (key) return key.value;
+    if (!account) throw new Error('No account available');
+
+    const theKey = account?.keys.find(it => this.isKeyAdded(it, form));
+    if (theKey) return theKey.value;
+
     const newKey = this.createKey(form);
     account.keys.push(newKey);
     localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    emitEvent('viewing-key-created');
     return newKey.value;
   }
 
-  public createKey(form: KeyForm): Key {
-    if (!this.address) throw new Error('Address not available');
+  public set(contract: Record<string, string>, key: string): void {
+    const form: KeyForm = {
+      id: contract.id,
+      contractAddress: contract.at,
+      key: key
+    };
+    let account = this.getAccount();
+    if (!account) {
+      account = this.addAccount();
+    }
+    const theKey = account?.keys.find(it => this.isKeyAdded(it, form));
+    if (!theKey) return;
+
+    // Update the viewing key.
+    theKey.value = key;
+
+    console.log('Update the viewing key');
+
+    // Update local storage.
+    localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+  }
+
+  public get(idOrAddress: string): string | undefined {
+    let account = this.getAccount();
+    if (!account) {
+      account = this.addAccount();
+    }
+    const key = account?.keys.find(it => this.isEqual(it, idOrAddress));
+    if (!key) return;
+    return key.value;
+  }
+
+  private createKey(form: KeyForm): Key {
     const { id, contractAddress, key: value } = form;
     return {
       id,
@@ -52,28 +93,16 @@ export class ViewingKeyManager {
     } as Key;
   }
 
-  public get(idOrAddress: string): string | undefined {
-    let account = this.getAccount();
-    if (!account) {
-      account = this.addAccount();
-    }
-    const key = account.keys.find(it => this.isEqual(it, idOrAddress));
-    if (!key) return;
-    return key.value;
-  }
-
-  private addAccount(): Account {
-    if (!this.address) throw new Error('Address not available');
-
-    const { address } = this;
+  private addAccount(): Account | undefined {
+    const address = getAddress();
     const account = { address, keys: [] };
     this.accounts.push(account);
     return account;
   }
 
   private getAccount(): Account | undefined {
-    if (!this.address) return;
-    return this.accounts.find(it => it.address === this.address);
+    const address = getAddress();
+    return this.accounts.find(it => it.address === address);
   }
 
   private isEqual(a: Key, idOrAddress: string): boolean {
@@ -82,7 +111,6 @@ export class ViewingKeyManager {
   }
 
   private isKeyAdded(a: Key, b: KeyForm): boolean {
-    if (!this.address) throw new Error('Address not available');
     return a.contractAddress === b.contractAddress || a.id === b.id;
   }
 }

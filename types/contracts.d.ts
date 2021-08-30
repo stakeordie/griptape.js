@@ -2,6 +2,8 @@ import { Coin, StdFee } from 'secretjs/types/types.js';
 export interface Context {
     address?: string;
     key?: string;
+    padding?: string;
+    height?: number;
 }
 export interface ContractExecuteRequest {
     handleMsg: Record<string, unknown>;
@@ -9,4 +11,6 @@ export interface ContractExecuteRequest {
     transferAmount?: readonly Coin[];
     fee?: StdFee;
 }
+export declare type ContractRequest = Record<string, unknown>;
 export declare function createContract(contract: Record<string, unknown>): Record<string, any>;
+export declare function extendContract(base: Record<string, any>, extended: Record<string, any>): Record<string, any>;

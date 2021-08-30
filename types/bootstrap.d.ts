@@ -10,15 +10,8 @@ export interface AccountProvider {
     getSeed: () => any;
 }
 export declare type AccountProviderGetter = (chainId: string) => Promise<AccountProvider | undefined>;
-export declare class Griptape {
-    address?: string;
-    isConnected: boolean;
-    onConnect(callback: () => void): Griptape;
-    onConnectAndAlways(callback: () => void): Griptape;
-    onInit(callback: () => void): Griptape;
-}
-export declare const griptape: Griptape;
 export declare const viewingKeyManager: ViewingKeyManager;
+export declare function getAddress(): string;
 export declare function gripApp(restUrl: string, accountProviderGetter: AccountProviderGetter, runApp: () => void): Promise<void>;
 export declare function bootstrap(): Promise<void>;
 export declare function queryContract(address: string, queryMsg: Record<string, unknown>): Promise<Record<string, unknown>>;
