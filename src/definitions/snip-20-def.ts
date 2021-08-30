@@ -10,9 +10,10 @@ export const snip20Def = {
       return { token_info: { } };
     },
 
-    getTransferHistory({ address, key }: Context,
-                       page_size: number,
-                       page?: number): ContractRequest {
+    getTransferHistory(
+      { address, key }: Context,
+      page_size: number,
+      page?: number): ContractRequest {
       return { transfer_history: { address, key, page_size, page } };
     },
 

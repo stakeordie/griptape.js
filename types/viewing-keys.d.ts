@@ -14,11 +14,11 @@ export interface KeyForm {
 }
 export declare class ViewingKeyManager {
     private readonly accounts;
-    address: string | undefined;
     constructor();
-    add(form: KeyForm): string;
-    createKey(form: KeyForm): Key;
+    add(contract: Record<string, string>, key: string): string;
+    set(contract: Record<string, string>, key: string): void;
     get(idOrAddress: string): string | undefined;
+    private createKey;
     private addAccount;
     private getAccount;
     private isEqual;

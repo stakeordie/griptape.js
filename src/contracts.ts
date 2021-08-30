@@ -1,10 +1,11 @@
 import {
   queryContract,
   executeContract,
-  getHeight
+  getHeight,
+  getAddress
 } from './bootstrap';
 import { Coin, StdFee } from 'secretjs/types/types.js';
-import { griptape, viewingKeyManager } from './index.js';
+import { viewingKeyManager } from './index.js';
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
@@ -83,8 +84,8 @@ export function createContract(contract: Record<string, unknown>):
           const { at: contractAddress } = contract;
 
           // Get all context variables.
-          const address = griptape.address;
-          const key = viewingKeyManager.get(contractAddress);
+          const address = await getAddress();
+          const key = await viewingKeyManager.get(contractAddress);
           const height = await getHeight();
           const padding = getEntropyString(12);
 
