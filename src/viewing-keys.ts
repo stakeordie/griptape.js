@@ -95,6 +95,7 @@ export class ViewingKeyManager {
 
   private addAccount(): Account | undefined {
     const address = getAddress();
+    if (!address) return;
     const account = { address, keys: [] };
     this.accounts.push(account);
     return account;
