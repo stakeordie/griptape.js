@@ -4,5 +4,6 @@ export * from './definitions';
 export * from './utils';
 export * from './wallet';
 
+export * from './events';
 export * from './events/accounts';
 export * from './events/viewing-keys';
