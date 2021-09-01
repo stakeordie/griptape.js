@@ -84,7 +84,7 @@ export function createContract(contract: Record<string, unknown>):
           const { at: contractAddress } = contract;
 
           // Get all context variables.
-          const address = await getAddress();
+          const address = getAddress();
           const key = await viewingKeyManager.get(contractAddress);
           const height = await getHeight();
           const padding = getEntropyString(12);
@@ -195,10 +195,10 @@ export function extendContract(base: Record<string,any>,extended: Record<string,
     });
 
     // Warnings.
-    if(messageKeys.length > 0) {
+    if (messageKeys.length > 0) {
       console.warn(`You overrided the following values from Messages object: ${messageKeys.toString()}`)
     }
-    if(queriesKey.length > 0) {
+    if (queriesKey.length > 0) {
       console.warn(`You overrided the following values from Queries object: ${queriesKey.toString()}`)
     }
 
