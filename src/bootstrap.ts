@@ -51,9 +51,8 @@ let provider: AccountProvider | undefined;
 
 export const viewingKeyManager = new ViewingKeyManager();
 
-export function getAddress() {
-  if (!provider) throw new Error('No provider available');
-  return provider.getAddress();
+export function getAddress(): string | undefined {
+  return provider?.getAddress();
 }
 
 export async function gripApp(
@@ -88,13 +87,7 @@ export async function gripApp(
 async function initClient(): Promise<void> {
   if (client) return;
   if (!config) throw new Error('No configuration was set');
-
-  // Create `CosmWasmClient`.
   client = new CosmWasmClient(config.restUrl);
-
-  // Get the chain ID for this node.
-  const chainId = await client.getChainId();
-
 }
 
 async function initSigningClient(): Promise<void> {
@@ -139,7 +132,6 @@ export async function executeContract(
   transferAmount?: readonly Coin[],
   fee?: StdFee
 ): Promise<ExecuteResult> {
-  if (!signingClient) await initSigningClient();
   if (!signingClient) throw new Error('No signing client available');
   return signingClient.execute(
     contractAddress, handleMsg, memo, transferAmount, fee);
@@ -167,7 +159,7 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
     const enigmaUtils = await keplr.getEnigmaUtils(chainId);
 
     // And also we want to be able to react to an account change.
-    window.addEventListener("keplr_keystorechange", () => {
+    window.addEventListener('keplr_keystorechange', () => {
       emitEvent('account-change');
     });
 
