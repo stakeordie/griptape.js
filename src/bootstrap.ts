@@ -48,11 +48,17 @@ let config: Config | undefined;
 let client: CosmWasmClient | undefined;
 let signingClient: SigningCosmWasmClient | undefined;
 let provider: AccountProvider | undefined;
+let getProvider: AccountProviderGetter | undefined;
+let accountAvailable = false;
 
 export const viewingKeyManager = new ViewingKeyManager();
 
 export function getAddress(): string | undefined {
   return provider?.getAddress();
+}
+
+export function isAccountAvailable() {
+  return accountAvailable;
 }
 
 export async function gripApp(
@@ -74,10 +80,13 @@ export async function gripApp(
     const chainId = await getChainId();
 
     // Set the provider.
-    provider = await accountProviderGetter(chainId);
+    getProvider = accountProviderGetter;
+    provider = await getProvider(chainId);
 
     // At this point we have an account available...
     emitEvent('account-available');
+
+    accountAvailable = true;
 
     // `SigningCosmWasmClient` should be created later.
     await initSigningClient();
@@ -110,8 +119,12 @@ async function initSigningClient(): Promise<void> {
 }
 
 export async function bootstrap(): Promise<void> {
-  if (!config) throw new Error('No configuration was set');
+  if (!getProvider) throw new Error('No provider available');
   await initClient();
+  const chainId = await getChainId();
+  provider = await getProvider(chainId);
+  emitEvent('account-available');
+  accountAvailable = true;
   await initSigningClient();
 }
 
