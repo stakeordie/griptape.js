@@ -177,7 +177,7 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
 
     const offlineSigner = window.getOfflineSigner(chainId);
     const [{ address }] = await offlineSigner.getAccounts();
-    const enigmaUtils = await keplr.getEnigmaUtils(chainId);
+    const enigmaUtils = keplr.getEnigmaUtils(chainId);
 
     // And also we want to be able to react to an account change.
     window.addEventListener('keplr_keystorechange', () => {
