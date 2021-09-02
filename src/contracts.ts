@@ -180,7 +180,7 @@ export function extendContract(
     },
   };
 
-  // Override common keys with def valuesS.
+  // Override common keys with def values.
   messageKeys.forEach((key) => {
     result.messages[key] = extended.messages[key];
   });
