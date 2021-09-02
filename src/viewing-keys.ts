@@ -19,7 +19,7 @@ export interface KeyForm {
 }
 
 export class ViewingKeyManager {
-  private readonly accounts: Array<Account> = []
+  private readonly accounts: Array<Account> = [];
 
   constructor() {
     const item = localStorage.getItem('griptape.js');
@@ -33,7 +33,7 @@ export class ViewingKeyManager {
     const form: KeyForm = {
       id: contract.id,
       contractAddress: contract.at,
-      key: key
+      key: key,
     };
 
     let account = this.getAccount();
@@ -42,7 +42,7 @@ export class ViewingKeyManager {
     }
     if (!account) throw new Error('No account available');
 
-    const theKey = account?.keys.find(it => this.isKeyAdded(it, form));
+    const theKey = account?.keys.find((it) => this.isKeyAdded(it, form));
     if (theKey) return theKey.value;
 
     const newKey = this.createKey(form);
@@ -56,13 +56,13 @@ export class ViewingKeyManager {
     const form: KeyForm = {
       id: contract.id,
       contractAddress: contract.at,
-      key: key
+      key: key,
     };
     let account = this.getAccount();
     if (!account) {
       account = this.addAccount();
     }
-    const theKey = account?.keys.find(it => this.isKeyAdded(it, form));
+    const theKey = account?.keys.find((it) => this.isKeyAdded(it, form));
     if (!theKey) return;
 
     // Update the viewing key.
@@ -79,7 +79,7 @@ export class ViewingKeyManager {
     if (!account) {
       account = this.addAccount();
     }
-    const key = account?.keys.find(it => this.isEqual(it, idOrAddress));
+    const key = account?.keys.find((it) => this.isEqual(it, idOrAddress));
     if (!key) return;
     return key.value;
   }
@@ -89,7 +89,7 @@ export class ViewingKeyManager {
     return {
       id,
       contractAddress,
-      value
+      value,
     } as Key;
   }
 
@@ -103,12 +103,11 @@ export class ViewingKeyManager {
 
   private getAccount(): Account | undefined {
     const address = getAddress();
-    return this.accounts.find(it => it.address === address);
+    return this.accounts.find((it) => it.address === address);
   }
 
   private isEqual(a: Key, idOrAddress: string): boolean {
-    return a.contractAddress === idOrAddress
-        || a.id === idOrAddress
+    return a.contractAddress === idOrAddress || a.id === idOrAddress;
   }
 
   private isKeyAdded(a: Key, b: KeyForm): boolean {

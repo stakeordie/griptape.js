@@ -1,11 +1,11 @@
-import { Keplr } from "@keplr-wallet/types";
+import { Keplr } from '@keplr-wallet/types';
 
 export async function getKeplr(): Promise<Keplr | undefined> {
   if (window.keplr) {
     return window.keplr;
   }
 
-  if (document.readyState === "complete") {
+  if (document.readyState === 'complete') {
     return window.keplr;
   }
 
@@ -13,13 +13,13 @@ export async function getKeplr(): Promise<Keplr | undefined> {
     const documentStateChange = (event: Event) => {
       if (
         event.target &&
-        (event.target as Document).readyState === "complete"
+        (event.target as Document).readyState === 'complete'
       ) {
         resolve(window.keplr);
-        document.removeEventListener("readystatechange", documentStateChange);
+        document.removeEventListener('readystatechange', documentStateChange);
       }
     };
 
-    document.addEventListener("readystatechange", documentStateChange);
+    document.addEventListener('readystatechange', documentStateChange);
   });
 }
