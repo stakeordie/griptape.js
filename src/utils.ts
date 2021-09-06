@@ -8,8 +8,8 @@ export function coinConvert(
   number: number | string,
   decimals: number,
   type?: 'human' | 'machine',
-  fixed?: number): string {
-
+  fixed?: number
+): string {
   if (!number) return '';
 
   let theNumber = number;
@@ -25,8 +25,7 @@ export function coinConvert(
     if (type && type === 'machine') {
       result = new Decimal(10).toPower(decimals).times(number);
     } else {
-      result = new Decimal(number)
-        .dividedBy(new Decimal(10).toPower(decimals));
+      result = new Decimal(number).dividedBy(new Decimal(10).toPower(decimals));
     }
 
     if (typeof fixed !== 'undefined') {
@@ -34,7 +33,6 @@ export function coinConvert(
     }
 
     return result.toString();
-
   } else {
     // In case is not an integer, we just handle it as float
 
@@ -56,7 +54,10 @@ export function coinConvert(
 
 export function bech32(str: string, abbrv: number): string {
   if (!str) return '';
-  const half = (abbrv / 2) || 8;
-  return str.substring(0, half) + '...'
-    + str.substring(str.length - half, str.length);
+  const half = abbrv / 2 || 8;
+  return (
+    str.substring(0, half) +
+    '...' +
+    str.substring(str.length - half, str.length)
+  );
 }

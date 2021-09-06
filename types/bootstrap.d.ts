@@ -10,11 +10,9 @@ export interface AccountProvider {
     getSeed: () => any;
 }
 export declare type AccountProviderGetter = (chainId: string) => Promise<AccountProvider | undefined>;
-export declare class Griptape {
-    address?: string;
-}
-export declare const griptape: Griptape;
 export declare const viewingKeyManager: ViewingKeyManager;
+export declare function getAddress(): string | undefined;
+export declare function isAccountAvailable(): boolean;
 export declare function gripApp(restUrl: string, accountProviderGetter: AccountProviderGetter, runApp: () => void): Promise<void>;
 export declare function bootstrap(): Promise<void>;
 export declare function queryContract(address: string, queryMsg: Record<string, unknown>): Promise<Record<string, unknown>>;
