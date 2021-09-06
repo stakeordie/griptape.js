@@ -12,18 +12,7 @@ export interface ContractExecuteRequest {
     fee?: StdFee;
 }
 export declare type ContractRequest = Record<string, unknown>;
-export declare function createContract<Type>(contract: Record<string, unknown>): Type;
-/**
- * Binds two Definition objects into one. Similar to inherence in Object Oriented Programing.
- *
- * If they have similar either Queries or Messages `extended` will override `base` properties
- *
- * @param base Base Definition object (can be overrided with extendend Definition)
- * @param extended Child Definition object all it's Queries and Messages may override the base defition
- * @returns Returns a Definition object that you can pass in to a `createContract` function
- *
- * For more info checkout our documentation here https://docs.vue.griptapejs.com/
- */
+export declare function createContract(contract: Record<string, unknown>): Record<string, any>;
 export declare function extendContract(base: Record<string, any>, extended: Record<string, any>): Record<string, any>;
 export interface BaseContract {
 }
@@ -87,7 +76,6 @@ export interface Snip20 extends BaseContract {
     /**
      * Deposits a native coin into the contract, which will mint an equivalent amount of tokens to be created.
      * The amount MUST be sent in the sent_funds field of the transaction itself, as coins must really be sent to the contract's native address.
-     *
      */
     deposit(): ContractRequest;
     /**
@@ -95,6 +83,6 @@ export interface Snip20 extends BaseContract {
      *
      * @param amount The amount of tokens to redeem to
      * @param denom Denom of tokens to mint. Only used if the contract supports multiple denoms
-     */
+    */
     redeem(amount: string, denom?: string): ContractRequest;
 }
