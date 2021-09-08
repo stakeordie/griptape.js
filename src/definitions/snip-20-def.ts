@@ -1,6 +1,25 @@
-import { Context, ContractRequest } from '../contracts';
+import {
+  Context,
+  ContractRequest,
+  ContractDefinition,
+  BaseContract,
+} from '../contracts';
 
-export const snip20Def = {
+export interface Snip20Contract extends BaseContract {
+  getBalance(): ContractRequest;
+  getTokenInfo(): ContractRequest;
+  getTransferHistory(page_size: number, page?: number): ContractRequest;
+  getExchangeRate(): ContractRequest;
+  transfer(recipient: string, amount: string): ContractRequest;
+  send(recipient: string, amount: string, msg?: string): ContractRequest;
+  registerReceived(code_hash: string): ContractRequest;
+  createViewingKey(entropy: string): ContractRequest;
+  setViewingKey(key: string): ContractRequest;
+  deposit(): ContractRequest;
+  redeem(amount: string, denom?: string): ContractRequest;
+}
+
+export const snip20Def: ContractDefinition = {
   queries: {
     getBalance({ address, key }: Context): ContractRequest {
       return { balance: { address, key } };
