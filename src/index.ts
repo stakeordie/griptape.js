@@ -10,3 +10,5 @@ export * from './wallet';
 
 export * from './events/accounts';
 export * from './events/viewing-keys';
+
+export * from './modules';

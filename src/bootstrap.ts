@@ -51,6 +51,10 @@ let accountAvailable = false;
 
 export const viewingKeyManager = new ViewingKeyManager();
 
+export function getConfig(): Config | undefined {
+  return config;
+}
+
 export function getAddress(): string | undefined {
   return provider?.getAddress();
 }
