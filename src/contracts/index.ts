@@ -3,9 +3,18 @@ import {
   executeContract,
   getHeight,
   getAddress,
-} from './bootstrap';
-import { Coin, StdFee } from 'secretjs/types/types.js';
-import { viewingKeyManager } from './index.js';
+} from '../bootstrap';
+import { viewingKeyManager } from '../bootstrap';
+import {
+  Context,
+  ContractExecuteRequest,
+  BaseContract,
+  BaseContractProps,
+  ContractRequest,
+  ContractDefinition,
+  ContractSpecification,
+} from './types';
+import { handleError } from './errors';
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
@@ -66,33 +75,6 @@ function calculateCommonKeys(
   return result;
 }
 
-export interface Context {
-  address?: string;
-  key?: string;
-  padding?: string;
-  height?: number;
-}
-
-export interface ContractExecuteRequest {
-  handleMsg: Record<string, unknown>;
-  memo?: string;
-  transferAmount?: readonly Coin[];
-  fee?: StdFee;
-}
-
-export interface BaseContract {}
-
-export type ContractRequest = Record<string, unknown>;
-export type ContractDefinition = {
-  queries: any;
-  messages: any;
-};
-export type ContractSpecification = {
-  id: string;
-  at: string;
-  definition: ContractDefinition;
-};
-
 const contractRegistry: any[] = [];
 
 export function createContract<Type>(contract: ContractSpecification): Type {
@@ -108,7 +90,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
 
           // Get all context variables.
           const address = getAddress();
-          const key = await viewingKeyManager.get(contractAddress);
+          const key = viewingKeyManager.get(contractAddress);
           const height = await getHeight();
           const padding = getEntropyString(12);
 
@@ -136,13 +118,25 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           } else if (func.type === MESSAGE_TYPE) {
             const { handleMsg, memo, transferAmount, fee } =
               result as ContractExecuteRequest;
-            return executeContract(
-              contractAddress,
-              handleMsg,
-              memo,
-              transferAmount,
-              fee
-            );
+            try {
+              return await executeContract(
+                contractAddress,
+                handleMsg,
+                memo,
+                transferAmount,
+                fee
+              );
+            } catch (e: any) {
+              const doHandleError = handleError(
+                contract as BaseContractProps,
+                e
+              );
+              if (doHandleError) {
+                doHandleError();
+              } else {
+                throw e;
+              }
+            }
           }
 
           return Reflect.apply(func, thisArg, argumentsList);

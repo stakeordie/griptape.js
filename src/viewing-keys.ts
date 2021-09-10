@@ -68,8 +68,6 @@ export class ViewingKeyManager {
     // Update the viewing key.
     theKey.value = key;
 
-    console.log('Update the viewing key');
-
     // Update local storage.
     localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
   }

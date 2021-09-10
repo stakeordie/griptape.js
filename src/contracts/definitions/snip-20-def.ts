@@ -3,21 +3,8 @@ import {
   ContractRequest,
   ContractDefinition,
   BaseContract,
-} from '../contracts';
-
-export interface Snip20Contract extends BaseContract {
-  getBalance(): ContractRequest;
-  getTokenInfo(): ContractRequest;
-  getTransferHistory(page_size: number, page?: number): ContractRequest;
-  getExchangeRate(): ContractRequest;
-  transfer(recipient: string, amount: string): ContractRequest;
-  send(recipient: string, amount: string, msg?: string): ContractRequest;
-  registerReceived(code_hash: string): ContractRequest;
-  createViewingKey(entropy: string): ContractRequest;
-  setViewingKey(key: string): ContractRequest;
-  deposit(): ContractRequest;
-  redeem(amount: string, denom?: string): ContractRequest;
-}
+  Snip20Contract,
+} from '../types';
 
 export const snip20Def: ContractDefinition = {
   queries: {

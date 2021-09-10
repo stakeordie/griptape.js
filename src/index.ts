@@ -1,6 +1,10 @@
 export * from './bootstrap';
+
 export * from './contracts';
-export * from './definitions';
+export * from './contracts/errors';
+export * from './contracts/definitions';
+export * from './contracts/types';
+
 export * from './utils';
 export * from './wallet';
 
