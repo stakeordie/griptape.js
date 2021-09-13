@@ -41,6 +41,7 @@ export class ViewingKeyManager {
       account = this.addAccount();
     }
     if (!account) throw new Error('No account available');
+    if (!key) throw new Error('Empty or undefined key cannot be added');
 
     const theKey = account?.keys.find((it) => this.isKeyAdded(it, form));
     if (theKey) return theKey.value;
