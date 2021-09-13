@@ -14,7 +14,7 @@ import {
   ContractDefinition,
   ContractSpecification,
 } from './types';
-import { handleError } from './errors';
+import { getErrorHandler } from './errors';
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
@@ -127,12 +127,9 @@ export function createContract<Type>(contract: ContractSpecification): Type {
                 fee
               );
             } catch (e: any) {
-              const doHandleError = handleError(
-                contract as BaseContractProps,
-                e
-              );
-              if (doHandleError) {
-                doHandleError();
+              const errorHandler = getErrorHandler(contract.id, e);
+              if (errorHandler) {
+                errorHandler.handler();
               } else {
                 throw e;
               }

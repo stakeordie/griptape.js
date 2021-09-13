@@ -6,3 +6,7 @@ export function toQueryString(params: any): string {
     )
     .join('&');
 }
+
+export function handleResponse(res: any) {
+  return res.data;
+}

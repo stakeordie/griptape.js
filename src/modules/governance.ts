@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { toQueryString } from './utils';
 import { ProposalParamChangeRequest } from './types';
+import { getConfig } from '../bootstrap';
 
 export class GovernanceModule {
   private client: AxiosInstance;
@@ -9,8 +10,9 @@ export class GovernanceModule {
     this.client = axios.create({ baseURL });
   }
 
-  submitProposal(proposal: object): Promise<object> {
-    return this.client.post(`/gov/proposals`, proposal);
+  async submitProposal(proposal: object): Promise<object> {
+    const res = await this.client.post(`/gov/proposals`, proposal);
+    return res.data;
   }
 
   async queryProposals(
@@ -25,15 +27,32 @@ export class GovernanceModule {
     return res.data;
   }
 
-  changeProposalParameter(body: ProposalParamChangeRequest): Promise<object> {
-    return this.client.post(`/gov/proposals/param_change`, body);
+  async changeProposalParameter(
+    body: ProposalParamChangeRequest
+  ): Promise<object> {
+    const res = await this.client.post(`/gov/proposals/param_change`, body);
+    return res.data;
   }
 
-  getProposalVotes(id: string): Promise<object> {
-    return this.client.get(`/gov/proposals/${id}/votes`);
+  async getProposalVotes(id: string): Promise<object> {
+    const res = await this.client.get(`/gov/proposals/${id}/votes`);
+    return res.data;
   }
 
-  voteProposal(id: string, vote: object): Promise<object> {
-    return this.client.post(`/gov/proposals/${id}/votes`, vote);
+  async voteProposal(id: string, vote: object): Promise<object> {
+    const res = await this.client.post(`/gov/proposals/${id}/votes`, vote);
+    return res.data;
   }
+}
+
+// Add governance module.
+let governanceModule: GovernanceModule;
+
+export function useGovernance() {
+  const config = getConfig();
+  if (!config) throw new Error('No client available');
+  if (!governanceModule) {
+    governanceModule = new GovernanceModule(config.restUrl);
+  }
+  return governanceModule;
 }

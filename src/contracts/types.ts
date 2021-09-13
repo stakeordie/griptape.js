@@ -46,7 +46,13 @@ export interface ContractSpecification extends BaseContractProps {
   definition: ContractDefinition;
 }
 
-export enum ContractError {
-  OutOfGas,
-  KeplrRejected,
+export class ErrorHandler {
+  test: (e: any) => boolean;
+
+  handler: () => void;
+
+  constructor(test: (e: any) => boolean, handler: () => void) {
+    this.test = test;
+    this.handler = handler;
+  }
 }
