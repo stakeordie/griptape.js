@@ -1,13 +1,10 @@
 import { getKeplr } from './wallet';
-import {
-  Coin,
-  StdFee
-} from 'secretjs/types/types.js';
+import { Coin, StdFee } from 'secretjs/types/types.js';
 import {
   CosmWasmClient,
   SigningCosmWasmClient,
   ExecuteResult,
-  FeeTable
+  FeeTable,
 } from 'secretjs';
 import { ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
@@ -36,13 +33,14 @@ export interface Config {
 }
 
 export interface AccountProvider {
-  getAddress: () => string
-  getSigner: () => any
-  getSeed: () => any
+  getAddress: () => string;
+  getSigner: () => any;
+  getSeed: () => any;
 }
 
-export type AccountProviderGetter = (chainId: string)
-                                     => Promise<AccountProvider | undefined>
+export type AccountProviderGetter = (
+  chainId: string
+) => Promise<AccountProvider | undefined>;
 
 let config: Config | undefined;
 let client: CosmWasmClient | undefined;
@@ -52,6 +50,10 @@ let getProvider: AccountProviderGetter | undefined;
 let accountAvailable = false;
 
 export const viewingKeyManager = new ViewingKeyManager();
+
+export function getConfig(): Config | undefined {
+  return config;
+}
 
 export function getAddress(): string | undefined {
   return provider?.getAddress();
@@ -64,8 +66,8 @@ export function isAccountAvailable() {
 export async function gripApp(
   restUrl: string,
   accountProviderGetter: AccountProviderGetter,
-  runApp: () => void): Promise<void> {
-
+  runApp: () => void
+): Promise<void> {
   if (!config) {
     // Set the configuration.
     config = { restUrl };
@@ -115,7 +117,12 @@ async function initSigningClient(): Promise<void> {
 
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
-    restUrl, address, signer, seed, customFees);
+    restUrl,
+    address,
+    signer,
+    seed,
+    customFees
+  );
 }
 
 export async function bootstrap(): Promise<void> {
@@ -147,7 +154,12 @@ export async function executeContract(
 ): Promise<ExecuteResult> {
   if (!signingClient) throw new Error('No signing client available');
   return signingClient.execute(
-    contractAddress, handleMsg, memo, transferAmount, fee);
+    contractAddress,
+    handleMsg,
+    memo,
+    transferAmount,
+    fee
+  );
 }
 
 // So this is a very rough implementation of an Account provider.
@@ -169,7 +181,7 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
 
     const offlineSigner = window.getOfflineSigner(chainId);
     const [{ address }] = await offlineSigner.getAccounts();
-    const enigmaUtils = await keplr.getEnigmaUtils(chainId);
+    const enigmaUtils = keplr.getEnigmaUtils(chainId);
 
     // And also we want to be able to react to an account change.
     window.addEventListener('keplr_keystorechange', () => {
@@ -179,7 +191,7 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
     return {
       getAddress: () => address,
       getSigner: () => offlineSigner,
-      getSeed: () => enigmaUtils
+      getSeed: () => enigmaUtils,
     };
   };
 }
