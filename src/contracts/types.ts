@@ -12,6 +12,7 @@ export interface Context {
   key?: string;
   padding?: string;
   height?: number;
+  entropy?: string;
 }
 
 export interface ContractExecuteRequest {

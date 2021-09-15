@@ -93,9 +93,9 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           const key = viewingKeyManager.get(contractAddress);
           const height = await getHeight();
           const padding = getEntropyString(12);
-
+          const entropy = getEntropyString(12);
           // Set the context.
-          const ctx = { address, key, height, padding } as Context;
+          const ctx = { address, key, height, padding, entropy } as Context;
           const args = [ctx, ...argumentsList];
 
           // Call the method, injecting the context.
