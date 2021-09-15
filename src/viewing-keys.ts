@@ -29,6 +29,7 @@ export class ViewingKeyManager {
   }
 
   public add(contract: Record<string, string>, key: string): string {
+    if (!key) throw new Error('Empty or undefined key cannot be added');
     // TODO We might want to remove the use of a form.
     const form: KeyForm = {
       id: contract.id,
