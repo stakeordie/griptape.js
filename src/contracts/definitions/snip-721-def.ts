@@ -12,28 +12,31 @@ export const snip721Def: ContractDefinition = {
       return { contract_info: {} };
     },
 
-    getNumTokens(viewer: Context): ContractRequest {
-      return { num_tokens: {} };
+    getNumTokens({ address, key: viewing_key }: Context): ContractRequest {
+      const viewer = { address, viewing_key };
+      return { num_tokens: { viewer } };
     },
 
     getOwnerOf(
-      viewer: Context,
+      { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
-      return { owner_of: { token_id, include_expired } };
+      const viewer = { address, viewing_key };
+      return { owner_of: { token_id, viewer, include_expired } };
     },
 
-    getNftInfo(viewer: Context, token_id: string): ContractRequest {
+    getNftInfo(_: Context, token_id: string): ContractRequest {
       return { nft_info: { token_id } };
     },
 
     getAllNftInfo(
-      viewer: Context,
+      { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
-      return { all_nft_info: { token_id, include_expired } };
+      const viewer = { address, viewing_key };
+      return { all_nft_info: { token_id, viewer, include_expired } };
     },
     getPrivateMetadata(
       { address, key: viewing_key }: Context,
@@ -48,13 +51,15 @@ export const snip721Def: ContractDefinition = {
       };
     },
     getNftDossier(
-      _: Context,
+      { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
+      const viewer = { viewing_key, address };
       return {
         nft_dossier: {
           token_id,
+          viewer,
           include_expired,
         },
       };
