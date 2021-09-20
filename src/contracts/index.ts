@@ -101,18 +101,6 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           // Call the method, injecting the context.
           const result = Reflect.apply(func, thisArg, args);
 
-          const hasAddress = getValue(result, 'address');
-          if (hasOwnDeepProperty(result, 'address') && !hasAddress) {
-            warn(func, result, 'No address available');
-            return;
-          }
-
-          const hasKey = getValue(result, 'key');
-          if (hasOwnDeepProperty(result, 'key') && !hasKey) {
-            warn(func, result, 'No key available');
-            return;
-          }
-
           if (func.type === QUERY_TYPE) {
             return queryContract(contractAddress, result);
           } else if (func.type === MESSAGE_TYPE) {
