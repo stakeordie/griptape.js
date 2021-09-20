@@ -38,6 +38,7 @@ export const snip721Def: ContractDefinition = {
       const viewer = { address, viewing_key };
       return { all_nft_info: { token_id, viewer, include_expired } };
     },
+
     getPrivateMetadata(
       { address, key: viewing_key }: Context,
       token_id: string
@@ -50,6 +51,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getNftDossier(
       { address, key: viewing_key }: Context,
       token_id: string,
@@ -64,6 +66,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getTokenApprovals(
       { key: viewing_key }: Context,
       token_id: string,
@@ -77,6 +80,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getApprovedForAll(
       { address: owner }: Context,
       include_expired?: boolean
@@ -88,6 +92,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getInventoryApprovals(
       { address, key: viewing_key }: Context,
       include_expired?: boolean
@@ -100,6 +105,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getTokens(
       { address: viewer }: Context,
       owner: string,
@@ -115,6 +121,7 @@ export const snip721Def: ContractDefinition = {
         },
       };
     },
+
     getTransactionHistory(
       { address, key: viewing_key }: Context,
       page?: number,
@@ -141,6 +148,7 @@ export const snip721Def: ContractDefinition = {
       const handleMsg = {
         transfer_nft: { recipient, token_id, memo, padding },
       };
+
       return { handleMsg };
     },
 
@@ -189,6 +197,7 @@ export const snip721Def: ContractDefinition = {
       };
       return { handleMsg };
     },
+
     setWhiteListedApproval(
       { padding }: Context,
       address: string,
@@ -211,6 +220,7 @@ export const snip721Def: ContractDefinition = {
       };
       return { handleMsg };
     },
+
     registerReceive(
       { padding }: Context,
       code_hash: string,
@@ -232,6 +242,7 @@ export const snip721Def: ContractDefinition = {
       };
       return { handleMsg };
     },
+
     setViewingKey({ padding }: Context, key: string) {
       const handleMsg = {
         set_viewing_key: { key, padding },
