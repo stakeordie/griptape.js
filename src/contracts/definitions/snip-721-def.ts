@@ -1,41 +1,45 @@
-import { Context, ContractRequest, ContractDefinition } from '../types';
+import {
+  Context,
+  ContractRequest,
+  ContractDefinition,
+  AccessLevel,
+  Expiration,
+} from '../types';
 
-export const snip721def: ContractDefinition = {
+export const snip721Def: ContractDefinition = {
   queries: {
     getContractInfo(): ContractRequest {
       return { contract_info: {} };
     },
 
-    getNumTokens({ address, key: viewing_key }: Context): ContractRequest {
-      return { viewer: { address, viewing_key } };
+    getNumTokens(viewer: Context): ContractRequest {
+      return { num_tokens: {} };
     },
 
     getOwnerOf(
-      { address, key: viewing_key }: Context,
+      viewer: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
-      const viewer = { address, viewing_key };
-      return { owner_of: { token_id, viewer, include_expired } };
+      return { owner_of: { token_id, include_expired } };
     },
 
-    getNftInfo(_: Context, token_id: string): ContractRequest {
+    getNftInfo(viewer: Context, token_id: string): ContractRequest {
       return { nft_info: { token_id } };
     },
 
     getAllNftInfo(
-      { address, key: viewing_key }: Context,
+      viewer: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
-      const viewer = { address, viewing_key };
-      return { all_nft_info: { token_id, viewer, include_expired } };
+      return { all_nft_info: { token_id, include_expired } };
     },
     getPrivateMetadata(
       { address, key: viewing_key }: Context,
       token_id: string
     ): ContractRequest {
-      const viewer = { address, viewing_key };
+      const viewer = { viewing_key, address };
       return {
         private_metadata: {
           token_id,
@@ -44,15 +48,13 @@ export const snip721def: ContractDefinition = {
       };
     },
     getNftDossier(
-      { address, key: viewing_key }: Context,
+      _: Context,
       token_id: string,
       include_expired?: boolean
     ): ContractRequest {
-      const viewer = { address, viewing_key };
       return {
         nft_dossier: {
           token_id,
-          viewer,
           include_expired,
         },
       };
@@ -71,13 +73,12 @@ export const snip721def: ContractDefinition = {
       };
     },
     getApprovedForAll(
-      { address: owner, key: viewing_key }: Context,
+      { address: owner }: Context,
       include_expired?: boolean
     ): ContractRequest {
       return {
         approved_for_all: {
           owner,
-          viewing_key,
           include_expired,
         },
       };
@@ -95,19 +96,15 @@ export const snip721def: ContractDefinition = {
       };
     },
     getTokens(
-      { address: viewer, key: viewing_key }: Context,
-      owner?: string,
+      { address: viewer }: Context,
+      owner: string,
       start_after?: string,
       limit?: number
     ): ContractRequest {
-      if (!owner) {
-        owner = viewer;
-      }
       return {
         tokens: {
-          owner,
           viewer,
-          viewing_key,
+          owner,
           start_after,
           limit,
         },
@@ -190,11 +187,11 @@ export const snip721def: ContractDefinition = {
     setWhiteListedApproval(
       { padding }: Context,
       address: string,
-      token_id: string,
-      view_owner: AccessLevel,
-      view_private_metadata: AccessLevel,
-      transfer: AccessLevel,
-      expires: Expiration
+      token_id?: string,
+      view_owner?: AccessLevel,
+      view_private_metadata?: AccessLevel,
+      transfer?: AccessLevel,
+      expires?: Expiration
     ) {
       const handleMsg = {
         set_whitelisted_approval: {
@@ -212,7 +209,7 @@ export const snip721def: ContractDefinition = {
     registerReceive(
       { padding }: Context,
       code_hash: string,
-      also_implements_batch_receive_nft: boolean
+      also_implements_batch_receive_nft?: boolean
     ) {
       const handleMsg = {
         register_receive_nft: {
@@ -223,6 +220,7 @@ export const snip721def: ContractDefinition = {
       };
       return { handleMsg };
     },
+
     createViewingKey({ padding, entropy }: Context) {
       const handleMsg = {
         create_viewing_key: { entropy, padding },
@@ -237,14 +235,3 @@ export const snip721def: ContractDefinition = {
     },
   },
 };
-
-export type Expiration =
-  | {
-      at_height: number;
-    }
-  | {
-      at_time: number;
-    }
-  | 'nerver';
-
-export type AccessLevel = 'approve_token' | 'all' | 'revoke_token' | 'none';
