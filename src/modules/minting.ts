@@ -38,7 +38,7 @@ export interface MintRequestResponse extends MintBaseResponse {
 
 export class MintingModule extends BlockchainModule {
   /**
-   * @returns ParametersResponse object with 'height' contains current block, 'result' contains all data
+   * @returns MintParametersResponse object with 'height' contains current block, 'result' contains all data
    */
   async getParameters(): Promise<MintParametersResponse> {
     const res = await this.client.get('/minting/parameters');
