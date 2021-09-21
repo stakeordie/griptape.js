@@ -1,13 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { getConfig } from '../bootstrap';
+import BlockchainModule from './base';
 
-export class SupplyModule {
-  private client: AxiosInstance;
-
-  constructor(baseURL: string) {
-    this.client = axios.create({ baseURL });
-  }
-
+export class SupplyModule extends BlockchainModule {
   async getTotal(): Promise<object> {
     const res = await this.client.get('/supply/total');
     return res.data;

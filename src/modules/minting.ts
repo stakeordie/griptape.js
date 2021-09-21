@@ -1,13 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { getConfig } from '../bootstrap';
+import BlockchainModule from './base';
 
-export class MintingModule {
-  private client: AxiosInstance;
-
-  constructor(baseURL: string) {
-    this.client = axios.create({ baseURL });
-  }
-
+export class MintingModule extends BlockchainModule {
   async getParameters(): Promise<object> {
     const res = await this.client.get('/minting/parameters');
     return res.data;

@@ -2,14 +2,9 @@ import axios, { AxiosInstance } from 'axios';
 import { toQueryString } from './utils';
 import { ProposalParamChangeRequest } from './types';
 import { getConfig } from '../bootstrap';
+import BlockchainModule from './base';
 
-export class GovernanceModule {
-  private client: AxiosInstance;
-
-  constructor(baseURL: string) {
-    this.client = axios.create({ baseURL });
-  }
-
+export class GovernanceModule extends BlockchainModule {
   async submitProposal(proposal: object): Promise<object> {
     const res = await this.client.post(`/gov/proposals`, proposal);
     return res.data;
