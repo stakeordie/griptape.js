@@ -1,6 +1,6 @@
 export function getValue(object: any, key: string): any {
   let value;
-  Object.keys(object).some((k) => {
+  Object.keys(object).some(k => {
     if (k === key) {
       value = object[k];
       return true;
@@ -44,8 +44,8 @@ export function calculateCommonKeys(
 ): Array<string> {
   if (baseKeys.length === 0 || defKeys.length === 0) return [];
 
-  const result: Array<string> = baseKeys.filter((key) =>
-    defKeys.find((k) => k === key)
+  const result: Array<string> = baseKeys.filter(key =>
+    defKeys.find(k => k === key)
   );
   return result;
 }

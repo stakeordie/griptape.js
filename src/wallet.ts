@@ -9,7 +9,7 @@ export async function getKeplr(): Promise<Keplr | undefined> {
     return window.keplr;
   }
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const documentStateChange = (event: Event) => {
       if (
         event.target &&

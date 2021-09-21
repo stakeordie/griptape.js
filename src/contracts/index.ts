@@ -116,8 +116,8 @@ export function createContract<Type>(contract: ContractSpecification): Type {
   let messages = m || {};
 
   // Setting the type of queries and messages.
-  Object.keys(queries).forEach((it) => (queries[it].type = QUERY_TYPE));
-  Object.keys(messages).forEach((it) => (messages[it].type = MESSAGE_TYPE));
+  Object.keys(queries).forEach(it => (queries[it].type = QUERY_TYPE));
+  Object.keys(messages).forEach(it => (messages[it].type = MESSAGE_TYPE));
 
   // Define the target object.
   const target = { id, at, ...queries, ...messages };
@@ -126,7 +126,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
   const result = new Proxy(target, handler);
 
   // Add to contract registry.
-  const idx = contractRegistry.findIndex((it) => it.id === contract.id);
+  const idx = contractRegistry.findIndex(it => it.id === contract.id);
   if (idx === -1) {
     contractRegistry.push(result);
   }
@@ -164,11 +164,11 @@ export function extendContract(
   };
 
   // Override common keys with def values.
-  messageKeys.forEach((key) => {
+  messageKeys.forEach(key => {
     result.messages[key] = extended.messages[key];
   });
 
-  queriesKey.forEach((key) => {
+  queriesKey.forEach(key => {
     result.queries[key] = extended.queries[key];
   });
 
@@ -191,7 +191,7 @@ export function extendContract(
 
 export function refContract<Type>(idOrAddress: string): Type {
   const contract = contractRegistry.find(
-    (it) => it.id === idOrAddress || it.at === idOrAddress
+    it => it.id === idOrAddress || it.at === idOrAddress
   );
   if (!contract)
     throw new Error(`No contract found with id or address ${idOrAddress}`);

@@ -2,13 +2,13 @@ import { BaseContractProps, ErrorHandler } from './types';
 
 export class OutOfGasErrorHandler extends ErrorHandler {
   constructor(handler: () => void) {
-    super((e) => e.toString().match(/insufficient fee/g), handler);
+    super(e => e.toString().match(/insufficient fee/g), handler);
   }
 }
 
 export class DefaultErrorHandler extends ErrorHandler {
   constructor(handler: () => void) {
-    super((e) => true, handler);
+    super(e => true, handler);
   }
 }
 
@@ -25,7 +25,7 @@ export function onContractError(
   }
   const handlers = errorHandlers[contractId];
   const hasHandler = handlers.find(
-    (it) => it.constructor.name === handler.constructor.name
+    it => it.constructor.name === handler.constructor.name
   );
   if (!hasHandler) {
     errorHandlers[contractId].push(handler);
@@ -33,5 +33,5 @@ export function onContractError(
 }
 
 export function getErrorHandler(id: string, e: any): ErrorHandler | undefined {
-  return errorHandlers[id]?.find((it) => it.test(e));
+  return errorHandlers[id]?.find(it => it.test(e));
 }
