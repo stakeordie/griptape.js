@@ -1,3 +1,4 @@
+import { ExecuteResult } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -13,14 +14,41 @@ import {
   ContractRequest,
   ContractDefinition,
   ContractSpecification,
+  ContractTxResponse,
 } from './types';
 import { getErrorHandler } from './errors';
 import { getEntropyString, calculateCommonKeys } from './utils';
+
+const decoder = new TextDecoder('utf-8');
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
 
 const contractRegistry: any[] = [];
+
+export class ContractTxResponseHandler implements ContractTxResponse {
+  private readonly response: ExecuteResult;
+
+  private constructor(response: ExecuteResult) {
+    this.response = response;
+  }
+
+  parse(): any {
+    return JSON.parse(decoder.decode(this.response.data));
+  }
+
+  parseFull(): any {
+    return this.response;
+  }
+
+  isEmpty(): boolean {
+    return typeof this.response === 'undefined';
+  }
+
+  static of(response: ExecuteResult): ContractTxResponse {
+    return new ContractTxResponseHandler(response);
+  }
+}
 
 export function createContract<Type>(contract: ContractSpecification): Type {
   const handler = {
@@ -52,13 +80,14 @@ export function createContract<Type>(contract: ContractSpecification): Type {
             const { handleMsg, memo, transferAmount, fee } =
               result as ContractExecuteRequest;
             try {
-              return await executeContract(
+              const response = await executeContract(
                 contractAddress,
                 handleMsg,
                 memo,
                 transferAmount,
                 fee
               );
+              return ContractTxResponseHandler.of(response);
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
