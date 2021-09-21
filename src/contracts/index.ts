@@ -15,32 +15,10 @@ import {
   ContractSpecification,
 } from './types';
 import { getErrorHandler } from './errors';
+import { getEntropyString, calculateCommonKeys } from './utils';
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
-
-function getEntropyString(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function calculateCommonKeys(
-  baseKeys: Array<string>,
-  defKeys: Array<string>
-): Array<string> {
-  if (baseKeys.length === 0 || defKeys.length === 0) return [];
-
-  const result: Array<string> = baseKeys.filter((key) =>
-    defKeys.find((k) => k === key)
-  );
-  return result;
-}
 
 const contractRegistry: any[] = [];
 

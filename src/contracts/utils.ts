@@ -26,3 +26,26 @@ export function hasOwnDeepProperty(obj: any, prop: string): boolean {
   }
   return false;
 }
+
+export function getEntropyString(length: number): string {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+export function calculateCommonKeys(
+  baseKeys: Array<string>,
+  defKeys: Array<string>
+): Array<string> {
+  if (baseKeys.length === 0 || defKeys.length === 0) return [];
+
+  const result: Array<string> = baseKeys.filter((key) =>
+    defKeys.find((k) => k === key)
+  );
+  return result;
+}
