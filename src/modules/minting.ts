@@ -4,7 +4,7 @@ import BlockchainModule from './base';
 /**
  * @member {string} height indicates the current block in the chain
  */
-export interface MintResponse {
+export interface MintBaseResponse {
   /** indicates the current block in the chain */
   height: string;
 }
@@ -13,12 +13,12 @@ export interface MintResponse {
  * @member {string} height indicates the current block in the chain
  * @member { ParametersResult } result is an object with mintable parameters
  */
-export interface ParametersResponse extends MintResponse {
+export interface MintParametersResponse extends MintBaseResponse {
   /**is an object with mintable parameters */
-  result: ParametersResult;
+  result: MintParametersResult;
 }
 
-export interface ParametersResult {
+export interface MintParametersResult {
   mint_denom: string;
   inflation_rate_change: string;
   inflation_max: string;
@@ -31,7 +31,7 @@ export interface ParametersResult {
  * @member {string} height indicates the current block in the chain
  * @member {string} result is a string representation of the result
  */
-export interface RequestResponse extends MintResponse {
+export interface MintRequestResponse extends MintBaseResponse {
   /** is a string representation of the result  */
   result: string;
 }
@@ -40,23 +40,23 @@ export class MintingModule extends BlockchainModule {
   /**
    * @returns ParametersResponse object with 'height' contains current block, 'result' contains all data
    */
-  async getParameters(): Promise<ParametersResponse> {
+  async getParameters(): Promise<MintParametersResponse> {
     const res = await this.client.get('/minting/parameters');
     return res.data;
   }
 
   /**
-   * @returns RequestResponse object with [height] contains current block, 'result' contains inflation as string
+   * @returns MintRequestResponse object with 'height' contains current block, 'result' contains inflation as string
    */
-  async getInflation(): Promise<RequestResponse> {
+  async getInflation(): Promise<MintRequestResponse> {
     const res = await this.client.get('/minting/inflation');
     return res.data;
   }
 
   /**
-   * @returns RequestResponse object with 'height' contains current block, 'result' contains anual provisions as string
+   * @returns MintRequestResponse object with 'height' contains current block, 'result' contains anual provisions as string
    */
-  async getAnualProvisions(): Promise<RequestResponse> {
+  async getAnualProvisions(): Promise<MintRequestResponse> {
     const res = await this.client.get('/minting/annual-provisions');
     return res.data;
   }
