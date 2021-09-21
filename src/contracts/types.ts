@@ -1,6 +1,12 @@
 import { Coin, StdFee } from 'secretjs/types/types.js';
 
-export type ContractRequest = Record<string, unknown>;
+export interface ContractTxResponse {
+  parse(): object;
+  parseFull(): object;
+  isEmpty(): boolean;
+}
+
+export type ContractRequest = Record<string, unknown> | ContractTxResponse;
 
 export type ContractDefinition = {
   queries: any;

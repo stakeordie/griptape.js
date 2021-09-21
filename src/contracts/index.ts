@@ -1,3 +1,4 @@
+import { ExecuteResult } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -13,36 +14,41 @@ import {
   ContractRequest,
   ContractDefinition,
   ContractSpecification,
+  ContractTxResponse,
 } from './types';
 import { getErrorHandler } from './errors';
+import { getEntropyString, calculateCommonKeys } from './utils';
+
+const decoder = new TextDecoder('utf-8');
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
 
-function getEntropyString(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function calculateCommonKeys(
-  baseKeys: Array<string>,
-  defKeys: Array<string>
-): Array<string> {
-  if (baseKeys.length === 0 || defKeys.length === 0) return [];
-
-  const result: Array<string> = baseKeys.filter((key) =>
-    defKeys.find((k) => k === key)
-  );
-  return result;
-}
-
 const contractRegistry: any[] = [];
+
+export class ContractTxResponseHandler implements ContractTxResponse {
+  private readonly response: ExecuteResult;
+
+  private constructor(response: ExecuteResult) {
+    this.response = response;
+  }
+
+  parse(): any {
+    return JSON.parse(decoder.decode(this.response.data));
+  }
+
+  parseFull(): any {
+    return this.response;
+  }
+
+  isEmpty(): boolean {
+    return typeof this.response === 'undefined';
+  }
+
+  static of(response: ExecuteResult): ContractTxResponse {
+    return new ContractTxResponseHandler(response);
+  }
+}
 
 export function createContract<Type>(contract: ContractSpecification): Type {
   const handler = {
@@ -74,13 +80,14 @@ export function createContract<Type>(contract: ContractSpecification): Type {
             const { handleMsg, memo, transferAmount, fee } =
               result as ContractExecuteRequest;
             try {
-              return await executeContract(
+              const response = await executeContract(
                 contractAddress,
                 handleMsg,
                 memo,
                 transferAmount,
                 fee
               );
+              return ContractTxResponseHandler.of(response);
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
