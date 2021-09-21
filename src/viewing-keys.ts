@@ -1,5 +1,6 @@
 import { emitEvent } from './events';
 import { getAddress } from './bootstrap';
+import { BaseContract } from './contracts/types';
 
 export interface Key {
   id: string;
@@ -28,7 +29,7 @@ export class ViewingKeyManager {
     }
   }
 
-  public add(contract: Record<string, string>, key: string): string {
+  public add(contract: BaseContract, key: string): string {
     if (!key) throw new Error('Empty or undefined key cannot be added');
     // TODO We might want to remove the use of a form.
     const form: KeyForm = {
@@ -53,7 +54,7 @@ export class ViewingKeyManager {
     return newKey.value;
   }
 
-  public set(contract: Record<string, string>, key: string): void {
+  public set(contract: BaseContract, key: string): void {
     const form: KeyForm = {
       id: contract.id,
       contractAddress: contract.at,
