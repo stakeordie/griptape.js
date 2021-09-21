@@ -30,39 +30,6 @@ function getEntropyString(length: number): string {
   return result;
 }
 
-function getValue(object: any, key: string): any {
-  let value;
-  Object.keys(object).some((k) => {
-    if (k === key) {
-      value = object[k];
-      return true;
-    }
-    if (object[k] && typeof object[k] === 'object') {
-      value = getValue(object[k], key);
-      return value !== undefined;
-    }
-  });
-  return value;
-}
-
-function hasOwnDeepProperty(obj: any, prop: string): boolean {
-  if (typeof obj === 'object' && obj !== null) {
-    if (obj.hasOwnProperty(prop)) {
-      return true;
-    }
-    for (const p in obj) {
-      if (obj.hasOwnProperty(p) && hasOwnDeepProperty(obj[p], prop)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function warn(func: any, result: any, msg: string): void {
-  console.warn(`Cannot call ${func.type} -> ${JSON.stringify(result)}: ${msg}`);
-}
-
 function calculateCommonKeys(
   baseKeys: Array<string>,
   defKeys: Array<string>
