@@ -4,6 +4,7 @@ import {
   executeContract,
   getHeight,
   getAddress,
+  instantiate,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -15,6 +16,7 @@ import {
   ContractDefinition,
   ContractSpecification,
   ContractTxResponse,
+  ContractInstantiationRequest,
 } from './types';
 import { getErrorHandler } from './errors';
 import { getEntropyString, calculateCommonKeys } from './utils';
@@ -196,4 +198,28 @@ export function refContract<Type>(idOrAddress: string): Type {
   if (!contract)
     throw new Error(`No contract found with id or address ${idOrAddress}`);
   return contract;
+}
+
+/**
+ * Instantiate a contract by providing a {@link ContractInstantiationRequest}.
+ * The instantiated contract is then available in the Contract Registry,
+ * therefore, you can get the returned reference of get one using
+ * {@link refContract}.
+ *
+ * @template T
+ * @param {ContractInstantiationRequest} req - The request to instantiate
+ * a contract.
+ * @return {Promise<T>} a contract instance.
+ */
+export async function instantiateContract<T>(
+  req: ContractInstantiationRequest
+): Promise<T> {
+  const { id, definition, codeId, label, initMsg } = req;
+  const { contractAddress: at } = await instantiate(codeId, initMsg, label);
+  const spec: ContractSpecification = {
+    id,
+    at,
+    definition,
+  };
+  return createContract<T>(spec);
 }

@@ -9,8 +9,8 @@ export interface ContractTxResponse {
 export type ContractRequest = Record<string, unknown> | ContractTxResponse;
 
 export type ContractDefinition = {
-  queries: any;
-  messages: any;
+  queries?: any;
+  messages?: any;
 };
 
 export interface Context {
@@ -78,6 +78,14 @@ export interface Snip20Contract extends BaseContract {
 
 export interface ContractSpecification extends BaseContractProps {
   definition: ContractDefinition;
+}
+
+export interface ContractInstantiationRequest {
+  id: string;
+  codeId: number;
+  definition: ContractDefinition;
+  label: string;
+  initMsg: object;
 }
 
 export class ErrorHandler {
