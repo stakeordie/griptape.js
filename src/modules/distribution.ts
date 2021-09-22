@@ -1,6 +1,11 @@
 import BlockchainModule from './base';
 import { getConfig } from '../bootstrap';
 
+//Base Initial Response For Almost Queries
+export interface BaseDistributionResponse {
+  height: string;
+}
+
 //TotalRewards: Response
 export interface TotalRewardsResponse {
   rewards: Reward[];
@@ -233,28 +238,40 @@ export interface PubKey {
   value: string;
 }
 
-//GetCommunnityPoolParameters : Response
-export interface GetCommunnityPoolParametersResponse {
+//GetCommunnityPoolParameters : Result
+export interface GetCommunnityPoolParametersResult {
   denom: string;
   amount: string;
 }
 
-//GetFeeDistributionParameters: Response
-export interface GetFeeDistributionParametersResponse {
-  base_proposer_reward: string;
-  bonus_proposer_reward: string;
-  community_tax: string;
+//GetCommunnityPoolParameters : Response
+export interface GetCommunnityPoolParametersResponse
+  extends BaseDistributionResponse {
+  result: GetCommunnityPoolParametersResult[];
 }
 
-//Error Interface
-export interface Error {
+//GetFeeDistributionParameters: Result
+export interface GetFeeDistributionParametersResult {
+  community_tax: string;
+  base_proposer_reward: string;
+  bonus_proposer_reward: string;
+  withdraw_addr_enabled: boolean;
+  secret_foundation_tax: string;
+  secret_foundation_address: string;
+}
+//GetFeeDistributionParameters: Response
+export interface GetFeeDistributionParametersResponse
+  extends BaseDistributionResponse {
+  result: GetFeeDistributionParametersResult[];
+}
+
+//ErrorDistribution Interface
+export interface ErrorDistribution {
   error: string;
 }
 
 export class DistributionModule extends BlockchainModule {
-  async getTotalRewards(
-    delegatorAddr: string
-  ): Promise<TotalRewardsResponse | Error> {
+  async getTotalRewards(delegatorAddr: string): Promise<TotalRewardsResponse> {
     const res = await this.client.get(
       `/distribution/delegators/${delegatorAddr}/rewards`
     );
@@ -264,7 +281,7 @@ export class DistributionModule extends BlockchainModule {
   async withDrawAllRewards(
     delegatorAddr: string,
     body: WithDrawAllRewardsRequest
-  ): Promise<WithDrawAllRewardsResponse | Error> {
+  ): Promise<WithDrawAllRewardsResponse | ErrorDistribution> {
     const res = await this.client.post(
       `/distribution/delegators/${delegatorAddr}/rewards`,
       body
@@ -275,7 +292,7 @@ export class DistributionModule extends BlockchainModule {
   async queryDelegationReward(
     delegatorAddr: string,
     validatorAddr: string
-  ): Promise<QueryDelegationRewardResponse | Error> {
+  ): Promise<QueryDelegationRewardResponse | ErrorDistribution> {
     const res = await this.client.get(
       `/distribution/delegators/${delegatorAddr}/rewards/${validatorAddr}`
     );
@@ -286,7 +303,7 @@ export class DistributionModule extends BlockchainModule {
     delegatorAddr: string,
     validatorAddr: string,
     body: WithdrawDelegationRewardRequest
-  ): Promise<WithdrawDelegationRewardResponse> {
+  ): Promise<WithdrawDelegationRewardResponse | ErrorDistribution> {
     const res = await this.client.post(
       `/distribution/delegators/${delegatorAddr}/rewards/${validatorAddr}`,
       body
@@ -296,7 +313,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getRewardsWithdrawalAddress(
     delegatorAddr: string
-  ): Promise<GetRewardsWithdrawalAddressResponse | Error> {
+  ): Promise<GetRewardsWithdrawalAddressResponse | ErrorDistribution> {
     const res = await this.client.get(
       `/distribution/delegators/${delegatorAddr}/withdraw_address`
     );
@@ -306,7 +323,7 @@ export class DistributionModule extends BlockchainModule {
   async replaceRewardsWithdrawalAddress(
     delegatorAddr: string,
     body: ReplaceRewardsWithdrawalAddressRequest
-  ): Promise<ReplaceRewardsWithdrawalAddressResponse | Error> {
+  ): Promise<ReplaceRewardsWithdrawalAddressResponse | ErrorDistribution> {
     const res = await this.client.post(
       `/distribution/delegators/${delegatorAddr}/withdraw_address`,
       body
@@ -316,7 +333,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getValidatorDistributionInfo(
     validatorAddr: string
-  ): Promise<getValidatorDistributionInfoResponse | Error> {
+  ): Promise<getValidatorDistributionInfoResponse | ErrorDistribution> {
     const res = await this.client.get(
       `/distribution/validators/${validatorAddr}`
     );
@@ -325,7 +342,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getFeeDistributionOustandingRewards(
     validatorAddr: string
-  ): Promise<GetFeeDistributionOustandingRewardsResponse | Error> {
+  ): Promise<GetFeeDistributionOustandingRewardsResponse | ErrorDistribution> {
     const res = await this.client.get(
       `distribution/validators/${validatorAddr}/outstanding_rewards`
     );
@@ -334,7 +351,7 @@ export class DistributionModule extends BlockchainModule {
 
   async queryCommissionSelfDelegationRewards(
     validatorAddr: string
-  ): Promise<QueryCommissionSelfDelegationRewardsResponse | Error> {
+  ): Promise<QueryCommissionSelfDelegationRewardsResponse | ErrorDistribution> {
     const res = await this.client.get(
       `/distribution/validators/${validatorAddr}/rewards`
     );
@@ -344,7 +361,7 @@ export class DistributionModule extends BlockchainModule {
   async withdrawValidatorsRewards(
     validatorAddr: string,
     body: WithdrawValidatorsRewardsRequest
-  ): Promise<WithdrawValidatorsRewardsResponse | Error> {
+  ): Promise<WithdrawValidatorsRewardsResponse | ErrorDistribution> {
     const res = await this.client.post(
       `/distribution/validators/${validatorAddr}/rewards`,
       body
@@ -352,16 +369,12 @@ export class DistributionModule extends BlockchainModule {
     return res.data;
   }
 
-  async getCommunnityPoolParameters(): Promise<
-    GetCommunnityPoolParametersResponse | Error
-  > {
+  async getCommunnityPoolParameters(): Promise<GetCommunnityPoolParametersResponse> {
     const res = await this.client.get(`/distribution/community_pool`);
     return res.data;
   }
 
-  async getFeeDistributionParameters(): Promise<
-    GetFeeDistributionParametersResponse | Error
-  > {
+  async getFeeDistributionParameters(): Promise<GetFeeDistributionParametersResponse> {
     const res = await this.client.get(`/distribution/parameters`);
     return res.data;
   }
