@@ -205,3 +205,8 @@ export function getHeight(): Promise<number> {
   if (!client) throw new Error('No client available');
   return client.getHeight();
 }
+
+export function instantiate(codeId: number, initMsg: object, label: string) {
+  if (!signingClient) throw new Error('No signing client available');
+  return signingClient.instantiate(codeId, initMsg, label);
+}
