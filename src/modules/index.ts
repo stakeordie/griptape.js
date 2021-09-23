@@ -5,3 +5,4 @@ export * from './slashing';
 export * from './bank';
 export * from './auth';
 export * from './base';
+export * from './distribution';
