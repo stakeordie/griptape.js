@@ -6,7 +6,7 @@ import {
   ExecuteResult,
   FeeTable,
 } from 'secretjs';
-import { ViewingKeyManager } from './viewing-keys';
+import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
 
 const customFees: FeeTable = {
@@ -50,6 +50,9 @@ let getProvider: AccountProviderGetter | undefined;
 let accountAvailable = false;
 
 export const viewingKeyManager = new ViewingKeyManager();
+export const keplrViewingKeyManager = new KeplrViewingKeyManager(
+  viewingKeyManager
+);
 
 export function getConfig(): Config | undefined {
   return config;

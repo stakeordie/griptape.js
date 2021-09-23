@@ -1,6 +1,7 @@
 import { emitEvent } from './events';
-import { getAddress } from './bootstrap';
+import { getAddress, getChainId } from './bootstrap';
 import { BaseContract } from './contracts/types';
+import { getKeplr } from './wallet';
 
 export interface Key {
   id: string;
@@ -112,5 +113,45 @@ export class ViewingKeyManager {
 
   private isKeyAdded(a: Key, b: KeyForm): boolean {
     return a.contractAddress === b.contractAddress || a.id === b.id;
+  }
+}
+
+/**
+ * Keplr-compliant viewing key manager. This class enables to add and get
+ * viewing keys from Keplr in order to use it with other Griptape.js API's.
+ */
+export class KeplrViewingKeyManager {
+  private readonly viewingKeyManager: ViewingKeyManager;
+
+  /**
+   * Creates a new {@link KeplrViewingKeyManager}
+   * @param viewingKeyManager A viewing key manager instance.
+   */
+  constructor(viewingKeyManager: ViewingKeyManager) {
+    this.viewingKeyManager = viewingKeyManager;
+  }
+
+  /**
+   * Adds a new viewing key by using the `suggestToken` API from Keplr.
+   * @param contract A contract to create a viewing key for.
+   * @returns a viewing key.
+   */
+  public async add(contract: BaseContract): Promise<string> {
+    const keplr = await getKeplr();
+    if (!keplr) throw new Error('Keplr is not installed');
+    const chainId = await getChainId();
+    await keplr.suggestToken(chainId, contract.at);
+    const key = await keplr.getSecret20ViewingKey(chainId, contract.at);
+    this.viewingKeyManager.add(contract, key);
+    return key;
+  }
+
+  /**
+   * Get a viewing key. This does not call Keplr in order to get it.
+   * @param idOrAddress Id or address of the contract.
+   * @returns a viewing key.
+   */
+  public get(idOrAddress: string): string | undefined {
+    return this.viewingKeyManager.get(idOrAddress);
   }
 }
