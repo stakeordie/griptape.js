@@ -1,13 +1,15 @@
 import BlockchainModule from './base';
 import { getConfig } from '../bootstrap';
 
-//Base Initial Response For Almost Queries
+//Base Initial Response
 export interface BaseDistributionResponse {
   height: string;
 }
 
-//TotalRewards: Response
-export interface TotalRewardsResponse {
+//#region getTotalRewards
+
+//TotalRewards: Request
+export interface TotalRewardsRequest {
   rewards: Reward[];
   total: Total[];
 }
@@ -16,11 +18,18 @@ export interface Reward {
   validator_address: string;
   reward: Total[];
 }
-
 export interface Total {
   denom: string;
   amount: string;
 }
+//TotalRewards: Response
+export interface TotalRewardsResponse extends BaseDistributionResponse {
+  result: TotalRewardsRequest;
+}
+
+//#endregion
+
+// #region WithDrawAllRewardsRequest
 
 //WithdraWithDrawAllRewards : Request
 export interface WithDrawAllRewardsRequest {
@@ -71,12 +80,24 @@ export interface PubKey {
   type: string;
   value: string;
 }
+//#endregion
 
-//QueryDelegation: Response
-export interface QueryDelegationRewardResponse {
+// #region QueryDelegationReward
+
+//QueryDelegationReward: Result
+export interface QueryDelegationRewardResult {
   denom: string;
   amount: string;
 }
+
+//QueryDelegationReward: Response
+export interface QueryDelegationRewardResponse
+  extends BaseDistributionResponse {
+  result: QueryDelegationRewardResult[];
+}
+//#endregion
+
+//#region WithdrawDelegationReward
 
 //WithdrawDelegationReward: Request
 export interface WithdrawDelegationRewardRequest {
@@ -119,10 +140,18 @@ export interface PubKey {
   value: string;
 }
 
+//#endregion
+
+//#region GetRewardsWithdrawalAddress
+
 //GetRewardsWithdrawalAddress: Response
 export interface GetRewardsWithdrawalAddressResponse {
-  res: string;
+  height: string;
+  result: string;
 }
+//#endregion
+
+//#region ReplaceRewardsWithdrawalAddress
 
 //ReplaceRewardsWithdrawalAddress : Request
 export interface ReplaceRewardsWithdrawalAddressRequest {
@@ -170,30 +199,59 @@ export interface PubKey {
   type: string;
   value: string;
 }
+//#endregion
 
-//GetValidatorDistributionInfo: Response
-export interface getValidatorDistributionInfoResponse {
+//#region GetValidatorDistributionInfo
+
+export interface GetValidatorDistributionInfoResult {
   operator_address: string;
   self_bond_rewards: SelfBondReward[];
   val_commission: SelfBondReward[];
 }
-
 export interface SelfBondReward {
   denom: string;
   amount: string;
 }
 
+//GetValidatorDistributionInfo: Response
+export interface GetValidatorDistributionInfoResponse
+  extends BaseDistributionResponse {
+  result: GetValidatorDistributionInfoResult;
+}
+
+//#endregion
+
+//#region GetFeeDistributionOustandingRewards
+
 //GetFeeDistributionOustandingRewards : Response
-export interface GetFeeDistributionOustandingRewardsResponse {
+export interface GetFeeDistributionOustandingRewardsResult {
+  denom: string;
+  amount: string;
+}
+export interface GetFeeDistributionOustandingRewardsResponse
+  extends BaseDistributionResponse {
+  result: GetFeeDistributionOustandingRewardsResult[];
+}
+
+//#endregion
+
+//#region QueryCommissionSelfDelegationRewards
+
+////QueryCommissionSelfDelegation: Result
+export interface QueryCommissionSelfDelegationRewardsResult {
   denom: string;
   amount: string;
 }
 
 //QueryCommissionSelfDelegation: Response
-export interface QueryCommissionSelfDelegationRewardsResponse {
-  denom: string;
-  amount: string;
+export interface QueryCommissionSelfDelegationRewardsResponse
+  extends BaseDistributionResponse {
+  result: QueryCommissionSelfDelegationRewardsResult[];
 }
+
+//#endregion
+
+//#region WithdrawValidatorsRewardsRequest
 
 //withdrawValidatorsRewards: Request
 export interface WithdrawValidatorsRewardsRequest {
@@ -238,6 +296,10 @@ export interface PubKey {
   value: string;
 }
 
+//#endregion
+
+//#region GetCommunnityPoolParameters
+
 //GetCommunnityPoolParameters : Result
 export interface GetCommunnityPoolParametersResult {
   denom: string;
@@ -250,6 +312,10 @@ export interface GetCommunnityPoolParametersResponse
   result: GetCommunnityPoolParametersResult[];
 }
 
+//#endregion
+
+//#region GetFeeDistributionParameters
+
 //GetFeeDistributionParameters: Result
 export interface GetFeeDistributionParametersResult {
   community_tax: string;
@@ -259,11 +325,14 @@ export interface GetFeeDistributionParametersResult {
   secret_foundation_tax: string;
   secret_foundation_address: string;
 }
+
 //GetFeeDistributionParameters: Response
 export interface GetFeeDistributionParametersResponse
   extends BaseDistributionResponse {
-  result: GetFeeDistributionParametersResult[];
+  result: GetFeeDistributionParametersResult;
 }
+
+//#endregion
 
 //ErrorDistribution Interface
 export interface ErrorDistribution {
@@ -292,7 +361,7 @@ export class DistributionModule extends BlockchainModule {
   async queryDelegationReward(
     delegatorAddr: string,
     validatorAddr: string
-  ): Promise<QueryDelegationRewardResponse | ErrorDistribution> {
+  ): Promise<QueryDelegationRewardResponse> {
     const res = await this.client.get(
       `/distribution/delegators/${delegatorAddr}/rewards/${validatorAddr}`
     );
@@ -313,7 +382,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getRewardsWithdrawalAddress(
     delegatorAddr: string
-  ): Promise<GetRewardsWithdrawalAddressResponse | ErrorDistribution> {
+  ): Promise<GetRewardsWithdrawalAddressResponse> {
     const res = await this.client.get(
       `/distribution/delegators/${delegatorAddr}/withdraw_address`
     );
@@ -333,7 +402,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getValidatorDistributionInfo(
     validatorAddr: string
-  ): Promise<getValidatorDistributionInfoResponse | ErrorDistribution> {
+  ): Promise<GetValidatorDistributionInfoResponse> {
     const res = await this.client.get(
       `/distribution/validators/${validatorAddr}`
     );
@@ -342,7 +411,7 @@ export class DistributionModule extends BlockchainModule {
 
   async getFeeDistributionOustandingRewards(
     validatorAddr: string
-  ): Promise<GetFeeDistributionOustandingRewardsResponse | ErrorDistribution> {
+  ): Promise<GetFeeDistributionOustandingRewardsResponse> {
     const res = await this.client.get(
       `distribution/validators/${validatorAddr}/outstanding_rewards`
     );
@@ -351,7 +420,7 @@ export class DistributionModule extends BlockchainModule {
 
   async queryCommissionSelfDelegationRewards(
     validatorAddr: string
-  ): Promise<QueryCommissionSelfDelegationRewardsResponse | ErrorDistribution> {
+  ): Promise<QueryCommissionSelfDelegationRewardsResponse> {
     const res = await this.client.get(
       `/distribution/validators/${validatorAddr}/rewards`
     );
@@ -361,7 +430,7 @@ export class DistributionModule extends BlockchainModule {
   async withdrawValidatorsRewards(
     validatorAddr: string,
     body: WithdrawValidatorsRewardsRequest
-  ): Promise<WithdrawValidatorsRewardsResponse | ErrorDistribution> {
+  ): Promise<WithdrawValidatorsRewardsResponse> {
     const res = await this.client.post(
       `/distribution/validators/${validatorAddr}/rewards`,
       body
