@@ -1,6 +1,6 @@
 import {
   Context,
-  ContractRequest,
+  ContractQueryRequest,
   ContractDefinition,
   AccessLevel,
   Expiration,
@@ -8,11 +8,11 @@ import {
 
 export const snip721Def: ContractDefinition = {
   queries: {
-    getContractInfo(): ContractRequest {
+    getContractInfo(): ContractQueryRequest {
       return { contract_info: {} };
     },
 
-    getNumTokens({ address, key: viewing_key }: Context): ContractRequest {
+    getNumTokens({ address, key: viewing_key }: Context): ContractQueryRequest {
       const viewer = { address, viewing_key };
       return { num_tokens: { viewer } };
     },
@@ -21,12 +21,12 @@ export const snip721Def: ContractDefinition = {
       { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       const viewer = { address, viewing_key };
       return { owner_of: { token_id, viewer, include_expired } };
     },
 
-    getNftInfo(_: Context, token_id: string): ContractRequest {
+    getNftInfo(_: Context, token_id: string): ContractQueryRequest {
       return { nft_info: { token_id } };
     },
 
@@ -34,7 +34,7 @@ export const snip721Def: ContractDefinition = {
       { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       const viewer = { address, viewing_key };
       return { all_nft_info: { token_id, viewer, include_expired } };
     },
@@ -42,7 +42,7 @@ export const snip721Def: ContractDefinition = {
     getPrivateMetadata(
       { address, key: viewing_key }: Context,
       token_id: string
-    ): ContractRequest {
+    ): ContractQueryRequest {
       const viewer = { viewing_key, address };
       return {
         private_metadata: {
@@ -56,7 +56,7 @@ export const snip721Def: ContractDefinition = {
       { address, key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       const viewer = { viewing_key, address };
       return {
         nft_dossier: {
@@ -71,7 +71,7 @@ export const snip721Def: ContractDefinition = {
       { key: viewing_key }: Context,
       token_id: string,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return {
         token_approvals: {
           token_id,
@@ -84,7 +84,7 @@ export const snip721Def: ContractDefinition = {
     getApprovedForAll(
       { address: owner }: Context,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return {
         approved_for_all: {
           owner,
@@ -96,7 +96,7 @@ export const snip721Def: ContractDefinition = {
     getInventoryApprovals(
       { address, key: viewing_key }: Context,
       include_expired?: boolean
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return {
         inventory_approvals: {
           address,
@@ -111,7 +111,7 @@ export const snip721Def: ContractDefinition = {
       owner: string,
       start_after?: string,
       limit?: number
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return {
         tokens: {
           viewer,
@@ -126,7 +126,7 @@ export const snip721Def: ContractDefinition = {
       { address, key: viewing_key }: Context,
       page?: number,
       page_size?: number
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return {
         transaction_history: {
           address,

@@ -9,13 +9,13 @@ import {
 import { viewingKeyManager } from '../bootstrap';
 import {
   Context,
-  ContractExecuteRequest,
+  ContractMessageRequest,
   BaseContract,
   BaseContractProps,
-  ContractRequest,
+  ContractQueryRequest,
   ContractDefinition,
   ContractSpecification,
-  ContractTxResponse,
+  ContractMessageResponse,
   ContractInstantiationRequest,
 } from './types';
 import { getErrorHandler } from './errors';
@@ -28,7 +28,7 @@ const MESSAGE_TYPE = 'message';
 
 const contractRegistry: any[] = [];
 
-export class ContractTxResponseHandler implements ContractTxResponse {
+export class ContractTxResponseHandler implements ContractMessageResponse {
   private readonly response: ExecuteResult;
 
   private constructor(response: ExecuteResult) {
@@ -47,7 +47,7 @@ export class ContractTxResponseHandler implements ContractTxResponse {
     return typeof this.response === 'undefined';
   }
 
-  static of(response: ExecuteResult): ContractTxResponse {
+  static of(response: ExecuteResult): ContractMessageResponse {
     return new ContractTxResponseHandler(response);
   }
 }
@@ -80,7 +80,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
             return queryContract(contractAddress, result);
           } else if (func.type === MESSAGE_TYPE) {
             const { handleMsg, memo, transferAmount, fee } =
-              result as ContractExecuteRequest;
+              result as ContractMessageRequest;
             try {
               const response = await executeContract(
                 contractAddress,
@@ -167,11 +167,11 @@ export function extendContract(
 
   // Override common keys with def values.
   messageKeys.forEach(key => {
-    result.messages[key] = extended.messages[key];
+    result.messages[key] = defMessages[key];
   });
 
   queriesKey.forEach(key => {
-    result.queries[key] = extended.queries[key];
+    result.queries[key] = defQueries[key];
   });
 
   // Warnings.

@@ -1,19 +1,18 @@
 import {
-  Context,
-  ContractRequest,
-  ContractDefinition,
   BaseContract,
+  Context,
+  ContractDefinition,
+  ContractQueryRequest,
   Snip20Contract,
 } from '../types';
 
 export const snip20Def: ContractDefinition = {
   queries: {
-    //Base
-    getBalance({ address, key }: Context): ContractRequest {
+    getBalance({ address, key }: Context): ContractQueryRequest {
       return { balance: { address, key } };
     },
 
-    getTokenInfo(): ContractRequest {
+    getTokenInfo(): ContractQueryRequest {
       return { token_info: {} };
     },
 
@@ -21,28 +20,29 @@ export const snip20Def: ContractDefinition = {
       { address, key }: Context,
       page_size: number,
       page?: number
-    ): ContractRequest {
+    ): ContractQueryRequest {
       return { transfer_history: { address, key, page_size, page } };
     },
 
-    //Mintable
-    getMinters(): ContractRequest {
+    getMinters(): ContractQueryRequest {
       return { minters: {} };
     },
 
-    //Alowance
-    getAllowance(owner: string, spender: string, key: string): ContractRequest {
+    getAllowance(
+      _: Context,
+      owner: string,
+      spender: string,
+      key: string
+    ): ContractQueryRequest {
       return { allowance: { owner, spender, key } };
     },
 
-    //Native
-    getExchangeRate(): ContractRequest {
+    getExchangeRate(): ContractQueryRequest {
       return { exchange_rate: {} };
     },
   },
 
   messages: {
-    //Base
     transfer({ padding }: Context, recipient: string, amount: string) {
       const handleMsg = {
         transfer: { recipient, amount, padding },
@@ -69,7 +69,7 @@ export const snip20Def: ContractDefinition = {
       return { handleMsg };
     },
 
-    createViewingKey({ padding }: Context, entropy: string) {
+    createViewingKey({ padding, entropy }: Context) {
       const handleMsg = {
         create_viewing_key: { entropy, padding },
       };
@@ -83,7 +83,6 @@ export const snip20Def: ContractDefinition = {
       return { handleMsg };
     },
 
-    //Alowances
     increaseAllowances(
       { padding }: Context,
       spender: string,
@@ -133,7 +132,6 @@ export const snip20Def: ContractDefinition = {
       return { handleMsg };
     },
 
-    //Mintable
     mint({ padding }: Context, recipient: string, amount: string) {
       const handleMsg = {
         mint: { recipient, amount, padding },
@@ -162,7 +160,6 @@ export const snip20Def: ContractDefinition = {
       return { handleMsg };
     },
 
-    //Native
     deposit({ padding }: Context) {
       const handleMsg = {
         deposit: { padding },
