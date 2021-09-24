@@ -1,20 +1,19 @@
 import { getConfig } from '../bootstrap';
 import BlockchainModule from './base';
-import { Fee, Signature } from './types';
-
-/**
- * @member {string} height indicates the current block in the chain
- */
-export interface SlashingBaseResponse {
-  /** indicates the current block in the chain */
-  height: string;
-}
+import {
+  Fee,
+  ModuleBaseResponse,
+  ModuleBodyRequest,
+  ModuleErrorResponse,
+  ModulePostResponse,
+  Signature,
+} from './types';
 
 /**
  * @member {string} height indicates the current block in the chain
  * @member { ParametersResult } result is an array of SlashingResult
  */
-export interface SlashingSigningInfoResponse extends SlashingBaseResponse {
+export interface SlashingSigningInfoResponse extends ModuleBaseResponse {
   /**is an array of SlashingResult objects */
   result: SlashingSigninInfoResult[];
 }
@@ -23,7 +22,7 @@ export interface SlashingSigningInfoResponse extends SlashingBaseResponse {
  * @member {string} height indicates the current block in the chain
  * @member {string} result is a SlashingParametersResult object
  */
-export interface SlashingParametersResponse extends SlashingBaseResponse {
+export interface SlashingParametersResponse extends ModuleBaseResponse {
   /** is a string representation of the result  */
   result: SlashingParametersResult;
 }
@@ -48,27 +47,14 @@ export interface SlashingParametersResult {
 }
 
 export interface UnJailValidatorRequest {
-  base_req: SlashingBaseReq;
-}
-
-export interface SlashingBaseReq {
-  from: string;
-  chain_id: string;
-  msg: string[];
-  fee: Fee;
-  memo: string;
-  signatures: Signature[];
-}
-
-export interface UnJailedValidatorResponse {
-  msg: string[];
-  fee: Fee;
-  memo: string;
-  signatures: Signature[];
-}
-
-export interface SlashingError {
-  error: string;
+  base_req: {
+    from: string;
+    chain_id: string;
+    msg: string[];
+    fee: Fee;
+    memo: string;
+    signatures: Signature[];
+  };
 }
 
 export class SlashingModule extends BlockchainModule {
@@ -100,12 +86,12 @@ export class SlashingModule extends BlockchainModule {
   /**
    * UnJail a jailed validator
    *
-   * @returns returns a UnJailedValidatorResponse or SlashingError object
+   * @returns returns a ModulePostResponse or ModuleErrorResponse object
    */
   async unJailValidator(
     validatorAddr: string,
-    base_req: UnJailValidatorRequest
-  ): Promise<UnJailedValidatorResponse | SlashingError> {
+    base_req: ModuleBodyRequest
+  ): Promise<ModulePostResponse | ModuleErrorResponse> {
     const res = await this.client.post(
       `/slashing/validators/${validatorAddr}/unjail`,
       base_req

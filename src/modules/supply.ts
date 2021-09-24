@@ -1,31 +1,15 @@
 import { getConfig } from '../bootstrap';
 import BlockchainModule from './base';
+import {
+  Amount,
+  ModuleBaseResponse,
+  ModuleErrorResponse,
+  ModuleSimpleResponse,
+} from './types';
 
-interface SupplyBaseResponse {
-  /** Current block in the chain */
-  height: string;
-}
-
-export interface SupplyResult {
-  /** The name of the coin */
-  denom: string;
-  /** Total supply in string format */
-  amount: string;
-}
-
-export interface TotalSupplyResponse extends SupplyBaseResponse {
+export interface TotalSupplyResponse extends ModuleBaseResponse {
   /** Array of totals supplies  */
-  result: SupplyResult[];
-}
-
-export interface TotalSupplyDenomResponse extends SupplyBaseResponse {
-  /** Amount of total supply for specific denom */
-  result: string;
-}
-
-export interface SupplyError {
-  /** RPC error managed for the server.*/
-  error: string;
+  result: Amount[];
 }
 
 export class SupplyModule extends BlockchainModule {
@@ -41,11 +25,11 @@ export class SupplyModule extends BlockchainModule {
 
   /**
    * Get total supply for an specific denom
-   * @returns TotalSupplyDenomResponse or SupplyError
+   * @returns ModuleSimpleResponse or ModuleErrorResponse
    * */
   async getTotalForDenom(
     denom: string
-  ): Promise<TotalSupplyDenomResponse | SupplyError> {
+  ): Promise<ModuleSimpleResponse | ModuleErrorResponse> {
     const res = await this.client.get(`/supply/total/${denom}`);
     return res.data;
   }

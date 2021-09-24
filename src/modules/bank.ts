@@ -1,21 +1,18 @@
 import { getConfig } from '../bootstrap';
 import BlockchainModule from './base';
-import { BaseReq, Deposit, Fee } from './types';
-
-//will be change for common type
-export interface BankError {
-  error: string;
-}
-
-//Will be change for common type
-export interface BankBaseResponse {
-  height: string;
-}
+import {
+  ModuleBaseResponse,
+  BaseReq,
+  Deposit,
+  Fee,
+  ModuleErrorResponse,
+  Signature,
+} from './types';
 
 /**
  * @member {Deposit []} result result of a query balance
  */
-export interface BankBalanceResponse extends BankBaseResponse {
+export interface BankBalanceResponse extends ModuleBaseResponse {
   result: Deposit[];
 }
 
@@ -40,7 +37,7 @@ export interface BankTransferResponse {
 export interface BankTransferResponseValue {
   msg: BankMsg[];
   fee: Fee;
-  signatures: null;
+  signatures: Signature;
   memo: string;
 }
 
@@ -60,7 +57,9 @@ export class BankModule extends BlockchainModule {
    * Get the account balances
    * @returns a BankBalanceResponse object or Error
    * */
-  async getBalance(address: string): Promise<BankBalanceResponse | BankError> {
+  async getBalance(
+    address: string
+  ): Promise<BankBalanceResponse | ModuleErrorResponse> {
     const res = await this.client.get(`/bank/balances/${address}`);
     return res.data;
   }
@@ -72,7 +71,7 @@ export class BankModule extends BlockchainModule {
   async transfer(
     address: string,
     body_request: BankTransferReq
-  ): Promise<BankTransferResponse | BankError> {
+  ): Promise<BankTransferResponse | ModuleErrorResponse> {
     const res = await this.client.post(
       `/bank/accounts/${address}/transfers`,
       body_request
