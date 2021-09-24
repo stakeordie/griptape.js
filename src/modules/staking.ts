@@ -453,163 +453,147 @@ export interface StakingError {
 }
 
 export class StakingModule extends BlockchainModule {
+  /**
+   * Get all delegations from a delegator
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @returns getAllDelegationsByDelegatorResponse
+   * */
   async getAllDelegationsByDelegator(
     delegatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     */
   ): Promise<GetAllDelegationsByDelegatorResponse> {
     const res = await this.client.get(
       `/staking/delegators/${delegatorAddr}/delegations`
     );
     return res.data;
-    /**
-     * Get all delegations from a delegator
-     * @returns getAllDelegationsByDelegatorResponse
-     * */
   }
 
+  /**
+   * Query the current delegation between a delegator and a validator
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @param {string} validatorAddr - Bech32 OperatorAddress of validator
+   * @returns QueryCurrentDelegationBetweenDelegatorValidatorResponse
+   * */
   async queryCurrentDelegationBetweenDelegatorValidator(
     delegatorAddr: string,
     validatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     * @param {string} validatorAddr - Bech32 OperatorAddress of validator
-     */
   ): Promise<QueryCurrentDelegationBetweenDelegatorValidatorResponse> {
     const res = await this.client.get(
       `/staking/delegators/${delegatorAddr}/delegations/${validatorAddr}`
     );
     return res.data;
-    /**
-     * Query the current delegation between a delegator and a validator
-     * @returns QueryCurrentDelegationBetweenDelegatorValidatorResponse
-     * */
   }
 
+  /**
+   * Get all unbonding delegations from a delegator
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @returns GetAllUnbondingDelegationsByDelegatorResponse
+   */
   async getAllUnbondingDelegationsByDelegator(
     delegatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     */
   ): Promise<GetAllUnbondingDelegationsByDelegatorResponse> {
     const res = await this.client.get(
       `/staking/delegators/${delegatorAddr}/unbonding_delegations`
     );
     return res.data;
-    /**
-     * Get all unbonding delegations from a delegator
-     * @returns GetAllUnbondingDelegationsByDelegatorResponse
-     * */
   }
 
+  /**
+   * Query all unbonding delegations between a delegator and a validator
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @param {string} validatorAddr - Bech32 OperatorAddress of validator
+   * @returns QueryAllUbondingDelegationsBetweenDelegatorAndValidatorResponse
+   */
   async queryAllUbondingDelegationsBetweenDelegatorAndValidator(
     delegatorAddr: string,
     validatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     * @param {string} validatorAddr - Bech32 OperatorAddress of validator
-     */
   ): Promise<QueryAllUbondingDelegationsBetweenDelegatorAndValidatorResponse> {
     const res = await this.client(
       `/staking/delegators/${delegatorAddr}/unbonding_delegations/${validatorAddr}`
     );
     return res.data;
-    /**
-     * Query all unbonding delegations between a delegator and a validator
-     * @returns QueryAllUbondingDelegationsBetweenDelegatorAndValidatorResponse
-     * */
   }
 
+  /**
+   * Query all validators that a delegator is bonded to
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @returns QueryAllValidatorsThatDelegatorIsBondedToResponse
+   */
   async queryAllValidatorsThatDelegatorIsBondedTo(
     delegatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     */
   ): Promise<QueryAllValidatorsThatDelegatorIsBondedToResponse> {
     const res = await this.client.get(
       `/staking/delegators/${delegatorAddr}/validators`
     );
     return res.data;
-    /**
-     * Query all validators that a delegator is bonded to
-     * @returns QueryAllValidatorsThatDelegatorIsBondedToResponse
-     * */
   }
 
+  /**
+   * Query a validator that a delegator is bonded to
+   * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
+   * @param {string} validatorAddr - Bech32 OperatorAddress of validator
+   * @returns QueryValidatorThatDelegatorIsBondedToResponse
+   */
   async queryValidatorThatDelegatorIsBondedTo(
     delegatorAddr: string,
     validatorAddr: string
-    /**
-     * @param {string} delegatorAddr - Bech32 AccAddress of Delegator
-     * @param {string} validatorAddr - Bech32 OperatorAddress of validator
-     */
   ): Promise<QueryValidatorThatDelegatorIsBondedToResponse> {
     const res = await this.client(
       `/staking/delegators/${delegatorAddr}/validators/${validatorAddr}`
     );
     return res.data;
-    /**
-     * Query a validator that a delegator is bonded to
-     * @returns QueryValidatorThatDelegatorIsBondedToResponse
-     * */
   }
 
+  /**
+   * Get all validator candidates. By default it returns only the bonded validators.
+   * @returns StakingValidatorsResponse
+   * */
   async stakingValidators(): Promise<StakingValidatorsResponse> {
     const res = await this.client(`/staking/validators`);
     return res.data;
-    /**
-     * Get all validator candidates. By default it returns only the bonded validators.
-     * @returns StakingValidatorsResponse
-     * */
   }
 
+  /**
+   * Query the information from a single validator
+   * @param {string} validatorAddr - Bech32 OperatorAddress of validator
+   * @returns QueryValidatorInfoResponse
+   */
   async queryValidatorInfo(
     validatorAddr: string
-    /**
-     * @param {string} validatorAddr - Bech32 OperatorAddress of validator
-     */
   ): Promise<QueryValidatorInfoResponse> {
     const res = await this.client(`/staking/validators/${validatorAddr}`);
     return res.data;
-    /**
-     * Query the information from a single validator
-     * @returns QueryValidatorInfoResponse
-     * */
   }
 
+  /**
+   * Get all delegations from a validator
+   * @param {string} validatorAddr - Bech32 OperatorAddress of validator
+   * @returns GettAllDelegationsByValidatorResponse
+   */
   async gettAllDelegationsByValidator(
     validatorAddr: string
-    /**
-     * @param {string} validatorAddr - Bech32 OperatorAddress of validator
-     */
   ): Promise<GettAllDelegationsByValidatorResponse> {
     const res = await this.client(
       `/staking/validators/${validatorAddr}/delegations`
     );
     return res.data;
-    /**
-     * Get all delegations from a validator
-     * @returns GettAllDelegationsByValidatorResponse
-     * */
   }
 
+  /**
+   * Get the current state of the staking pool
+   * @returns GetCurrentStateOfStakingPoolResponse
+   * */
   async getCurrentStateOfStakingPool(): Promise<GetCurrentStateOfStakingPoolResponse> {
     const res = await this.client(`/staking/pool`);
     return res.data;
-    /**
-     * Get the current state of the staking pool
-     * @returns GetCurrentStateOfStakingPoolResponse
-     * */
   }
 
+  /**
+   * Get the current staking parameter values
+   * @returns GetCurrentStakingParameterValuesResponse
+   * */
   async getCurrentStakingParameterValues(): Promise<GetCurrentStakingParameterValuesResponse> {
     const res = await this.client(`/staking/parameters`);
     return res.data;
-    /**
-     * Get the current staking parameter values
-     * @returns GetCurrentStakingParameterValuesResponse
-     * */
   }
 
   async submitDelegation(
@@ -621,10 +605,6 @@ export class StakingModule extends BlockchainModule {
       body_request
     );
     return res.data;
-    /**
-     * Submit delegation
-     * @returns SubmitDelegationResponse
-     * */
   }
 
   async submitUnbondingDelegation(
