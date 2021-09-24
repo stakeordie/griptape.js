@@ -1,3 +1,4 @@
+import { Amount } from '../../modules/types';
 import {
   BaseContract,
   Context,
@@ -176,30 +177,124 @@ export const snip20Def: ContractDefinition = {
   },
 };
 
-export interface CreateViewingKeyResponse {}
-
+export interface MessageResponse {
+  status: string;
+}
 export interface Snip20Contract extends BaseContract {
   getBalance(): Promise<{ balance: { amount: string } }>;
-  getTokenInfo(): any;
-  getTransferHistory(page_size: number, page?: number): any;
-  getMinters(): any;
-  getAllowance(owner: string, spender: string, key: string): any;
-  getExchangeRate(): any;
-  transfer(recipient: string, amount: string): any;
-  send(recipient: string, amount: string, msg?: string): any;
-  registerReceived(code_hash: string): any;
+  getTokenInfo(): Promise<{
+    name: string;
+    symbol: string;
+    decimals: number;
+    total_supply: string;
+  }>;
+  getTransferHistory(
+    page_size: number,
+    page?: number
+  ): Promise<{
+    transfer_history: {
+      txs: [
+        {
+          id: string;
+          from: string;
+          sender: string;
+          receiver: string;
+        }
+      ];
+      coins: {
+        amount: string;
+        denom: string;
+      };
+    };
+  }>;
+  getMinters(): Promise<{ minters: { minters: string[] } }>;
+  getAllowance(
+    owner: string,
+    spender: string,
+    key: string
+  ): Promise<{
+    allowance: {
+      spender: string;
+      owner: string;
+      allowance: string;
+      expiration: number;
+    };
+  }>;
+  getExchangeRate(): Promise<{
+    exchange_rate: { rate: string; denom: string };
+  }>;
+  transfer(
+    recipient: string,
+    amount: string
+  ): Promise<ContractMessageResponse<{ transfer: MessageResponse }>>;
+  send(
+    recipient: string,
+    amount: string,
+    msg?: string
+  ): Promise<ContractMessageResponse<{ send: MessageResponse }>>;
+  registerReceived(
+    code_hash: string
+  ): Promise<ContractMessageResponse<{ register_receive: MessageResponse }>>;
   createViewingKey(): Promise<
     ContractMessageResponse<{ create_viewing_key: { key: string } }>
   >;
-  setViewingKey(key: string): any;
-  increaseAllowances(spender: string, amount: string, expiration?: number): any;
-  decreaseAllowance(spender: string, amount: string, expiration?: number): any;
-  transferFrom(owner: string, recipient: string, amount: string): any;
-  sendFrom(owner: string, recipient: string, amount: string, msg?: string): any;
-  mint(recipient: string, amount: string): any;
-  setMinters(minters: string[]): any;
-  burn(amount: string): any;
-  burnFrom(owner: string, amount: string): any;
-  deposit(): any;
-  redeem(amount: string, denom?: string): any;
+  setViewingKey(
+    key: string
+  ): Promise<ContractMessageResponse<{ set_viewing_key: MessageResponse }>>;
+  increaseAllowances(
+    spender: string,
+    amount: string,
+    expiration?: number
+  ): Promise<
+    ContractMessageResponse<{
+      increase_allowance: {
+        spender: string;
+        owner: string;
+        allowance: string;
+      };
+    }>
+  >;
+  decreaseAllowance(
+    spender: string,
+    amount: string,
+    expiration?: number
+  ): Promise<
+    ContractMessageResponse<{
+      decrease_allowance: {
+        spender: string;
+        owner: string;
+        allowance: string;
+      };
+    }>
+  >;
+  transferFrom(
+    owner: string,
+    recipient: string,
+    amount: string
+  ): Promise<ContractMessageResponse<{ transfer_from: MessageResponse }>>;
+  sendFrom(
+    owner: string,
+    recipient: string,
+    amount: string,
+    msg?: string
+  ): Promise<ContractMessageResponse<{ send_from: { status: string } }>>;
+  mint(
+    recipient: string,
+    amount: string
+  ): Promise<ContractMessageResponse<{ mint: { status: string } }>>;
+  setMinters(
+    minters: string[]
+  ): Promise<ContractMessageResponse<{ set_minters: { status: string } }>>;
+  burn(
+    amount: string
+  ): Promise<ContractMessageResponse<{ burn: { status: string } }>>;
+  burnFrom(
+    owner: string,
+    amount: string
+  ): Promise<ContractMessageResponse<{ burn_from: { status: string } }>>;
+  deposit(): Promise<ContractMessageResponse<{ deposit: { status: string } }>>;
+  redeem(
+    amount: string,
+    denom?: string
+  ): Promise<ContractMessageResponse<{ redeem: { status: string } }>>;
 }
