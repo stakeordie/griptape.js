@@ -3,7 +3,7 @@ import {
   Context,
   ContractDefinition,
   ContractQueryRequest,
-  Snip20Contract,
+  ContractMessageResponse,
 } from '../types';
 
 export const snip20Def: ContractDefinition = {
@@ -175,3 +175,31 @@ export const snip20Def: ContractDefinition = {
     },
   },
 };
+
+export interface CreateViewingKeyResponse {}
+
+export interface Snip20Contract extends BaseContract {
+  getBalance(): Promise<{ balance: { amount: string } }>;
+  getTokenInfo(): any;
+  getTransferHistory(page_size: number, page?: number): any;
+  getMinters(): any;
+  getAllowance(owner: string, spender: string, key: string): any;
+  getExchangeRate(): any;
+  transfer(recipient: string, amount: string): any;
+  send(recipient: string, amount: string, msg?: string): any;
+  registerReceived(code_hash: string): any;
+  createViewingKey(): Promise<
+    ContractMessageResponse<{ create_viewing_key: { key: string } }>
+  >;
+  setViewingKey(key: string): any;
+  increaseAllowances(spender: string, amount: string, expiration?: number): any;
+  decreaseAllowance(spender: string, amount: string, expiration?: number): any;
+  transferFrom(owner: string, recipient: string, amount: string): any;
+  sendFrom(owner: string, recipient: string, amount: string, msg?: string): any;
+  mint(recipient: string, amount: string): any;
+  setMinters(minters: string[]): any;
+  burn(amount: string): any;
+  burnFrom(owner: string, amount: string): any;
+  deposit(): any;
+  redeem(amount: string, denom?: string): any;
+}

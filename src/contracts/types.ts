@@ -1,3 +1,4 @@
+import { ExecuteResult } from 'secretjs';
 import { Coin, StdFee } from 'secretjs/types/types.js';
 
 export interface Context {
@@ -8,9 +9,9 @@ export interface Context {
   entropy?: string;
 }
 
-export interface ContractMessageResponse {
-  parse(): object;
-  parseFull(): object;
+export interface ContractMessageResponse<T> {
+  parse(): T;
+  getRaw(): ExecuteResult;
   isEmpty(): boolean;
 }
 
@@ -40,30 +41,6 @@ export interface BaseContractProps {
 }
 
 export interface BaseContract extends BaseContractProps {}
-
-export interface Snip20Contract extends BaseContract {
-  getBalance(): any;
-  getTokenInfo(): any;
-  getTransferHistory(page_size: number, page?: number): any;
-  getMinters(): any;
-  getAllowance(owner: string, spender: string, key: string): any;
-  getExchangeRate(): any;
-  transfer(recipient: string, amount: string): any;
-  send(recipient: string, amount: string, msg?: string): any;
-  registerReceived(code_hash: string): any;
-  createViewingKey(): Promise<ContractMessageResponse>;
-  setViewingKey(key: string): any;
-  increaseAllowances(spender: string, amount: string, expiration?: number): any;
-  decreaseAllowance(spender: string, amount: string, expiration?: number): any;
-  transferFrom(owner: string, recipient: string, amount: string): any;
-  sendFrom(owner: string, recipient: string, amount: string, msg?: string): any;
-  mint(recipient: string, amount: string): any;
-  setMinters(minters: string[]): any;
-  burn(amount: string): any;
-  burnFrom(owner: string, amount: string): any;
-  deposit(): any;
-  redeem(amount: string, denom?: string): any;
-}
 
 export interface ContractSpecification extends BaseContractProps {
   definition: ContractDefinition;

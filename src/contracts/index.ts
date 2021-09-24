@@ -10,9 +10,6 @@ import { viewingKeyManager } from '../bootstrap';
 import {
   Context,
   ContractMessageRequest,
-  BaseContract,
-  BaseContractProps,
-  ContractQueryRequest,
   ContractDefinition,
   ContractSpecification,
   ContractMessageResponse,
@@ -28,7 +25,9 @@ const MESSAGE_TYPE = 'message';
 
 const contractRegistry: any[] = [];
 
-export class ContractTxResponseHandler implements ContractMessageResponse {
+export class ContractTxResponseHandler<T>
+  implements ContractMessageResponse<T>
+{
   private readonly response: ExecuteResult;
 
   private constructor(response: ExecuteResult) {
@@ -39,7 +38,7 @@ export class ContractTxResponseHandler implements ContractMessageResponse {
     return JSON.parse(decoder.decode(this.response.data));
   }
 
-  parseFull(): any {
+  getRaw(): ExecuteResult {
     return this.response;
   }
 
@@ -47,8 +46,8 @@ export class ContractTxResponseHandler implements ContractMessageResponse {
     return typeof this.response === 'undefined';
   }
 
-  static of(response: ExecuteResult): ContractMessageResponse {
-    return new ContractTxResponseHandler(response);
+  static of<T>(response: ExecuteResult): ContractMessageResponse<T> {
+    return new ContractTxResponseHandler<T>(response);
   }
 }
 
@@ -139,7 +138,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
 export function extendContract(
   base: ContractDefinition,
   extended: ContractDefinition
-): Record<string, any> {
+): ContractDefinition {
   const { messages: baseMessages = {}, queries: baseQueries = {} } = base;
   const { messages: defMessages = {}, queries: defQueries = {} } = extended;
 
