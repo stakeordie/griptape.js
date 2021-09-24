@@ -61,3 +61,28 @@ export interface PubKey {
   type: string;
   value: string;
 }
+
+//Common module types
+
+export interface ModuleBaseResponse {
+  /** Current block in the chain */
+  height: string;
+}
+
+export interface ModuleSimpleResponse extends ModuleBaseResponse {
+  result: string;
+}
+
+export interface ModuleErrorResponse {
+  error: string;
+}
+
+export interface ModulePostResponse {
+  msg: string[];
+  fee: Fee;
+  memo: string;
+  signatures: Signature[];
+}
+export interface ModuleBodyRequest {
+  base_req: BaseReq;
+}

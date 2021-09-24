@@ -1,16 +1,11 @@
 import { getConfig } from '../bootstrap';
 import BlockchainModule from './base';
-import { Amount } from './types';
-
-interface AuthBaseResponse {
-  /** Current block in the chain */
-  height: string;
-}
+import { Amount, ModuleBaseResponse } from './types';
 
 /**
  * @member {AuthResult} result object with result of query
  */
-export interface AuthAccountInfoResponse extends AuthBaseResponse {
+export interface AuthAccountInfoResponse extends ModuleBaseResponse {
   result: AuthResult;
 }
 
