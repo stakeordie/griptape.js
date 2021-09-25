@@ -1,24 +1,38 @@
+import { ExecuteResult } from 'secretjs';
 import { Coin, StdFee } from 'secretjs/types/types.js';
-
-export type ContractRequest = Record<string, unknown>;
-
-export type ContractDefinition = {
-  queries: any;
-  messages: any;
-};
 
 export interface Context {
   address?: string;
   key?: string;
   padding?: string;
   height?: number;
+  entropy?: string;
 }
 
-export interface ContractExecuteRequest {
+export interface ContractMessageResponse<T> {
+  parse(): T;
+  getRaw(): ExecuteResult;
+  isEmpty(): boolean;
+}
+
+export type ContractQueryRequest = Record<string, Record<string, any>>;
+
+export interface ContractMessageRequest {
   handleMsg: Record<string, unknown>;
   memo?: string;
   transferAmount?: readonly Coin[];
   fee?: StdFee;
+}
+
+export interface ContractDefinition {
+  queries?: Record<
+    string,
+    (context: Context, ...args: any[]) => ContractQueryRequest
+  >;
+  messages?: Record<
+    string,
+    (context: Context, ...args: any[]) => ContractMessageRequest
+  >;
 }
 
 export interface BaseContractProps {
@@ -28,22 +42,16 @@ export interface BaseContractProps {
 
 export interface BaseContract extends BaseContractProps {}
 
-export interface Snip20Contract extends BaseContract {
-  getBalance(): ContractRequest;
-  getTokenInfo(): ContractRequest;
-  getTransferHistory(page_size: number, page?: number): ContractRequest;
-  getExchangeRate(): ContractRequest;
-  transfer(recipient: string, amount: string): ContractRequest;
-  send(recipient: string, amount: string, msg?: string): ContractRequest;
-  registerReceived(code_hash: string): ContractRequest;
-  createViewingKey(entropy: string): ContractRequest;
-  setViewingKey(key: string): ContractRequest;
-  deposit(): ContractRequest;
-  redeem(amount: string, denom?: string): ContractRequest;
-}
-
 export interface ContractSpecification extends BaseContractProps {
   definition: ContractDefinition;
+}
+
+export interface ContractInstantiationRequest {
+  id: string;
+  codeId: number;
+  definition: ContractDefinition;
+  label: string;
+  initMsg: object;
 }
 
 export class ErrorHandler {

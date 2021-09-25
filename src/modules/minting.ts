@@ -1,24 +1,43 @@
-import axios, { AxiosInstance } from 'axios';
 import { getConfig } from '../bootstrap';
+import BlockchainModule from './base';
+import { ModuleBaseResponse, ModuleSimpleResponse } from './types';
 
-export class MintingModule {
-  private client: AxiosInstance;
+/**
+ * @member {string} height indicates the current block in the chain
+ * @member { ParametersResult } result is an object with mintable parameters
+ */
+export interface MintParametersResponse extends ModuleBaseResponse {
+  result: {
+    mint_denom: string;
+    inflation_rate_change: string;
+    inflation_max: string;
+    inflation_min: string;
+    goal_bonded: string;
+    blocks_per_year: string;
+  };
+}
 
-  constructor(baseURL: string) {
-    this.client = axios.create({ baseURL });
-  }
-
-  async getParameters(): Promise<object> {
+export class MintingModule extends BlockchainModule {
+  /**
+   * @returns MintParametersResponse object with 'height' contains current block, 'result' contains all data
+   */
+  async getParameters(): Promise<MintParametersResponse> {
     const res = await this.client.get('/minting/parameters');
     return res.data;
   }
 
-  async getInflation(): Promise<object> {
+  /**
+   * @returns ModuleSimpleResponse object with 'height' contains current block, 'result' contains inflation as string
+   */
+  async getInflation(): Promise<ModuleSimpleResponse> {
     const res = await this.client.get('/minting/inflation');
     return res.data;
   }
 
-  async getAnualProvisions(): Promise<object> {
+  /**
+   * @returns ModuleSimpleResponse object with 'height' contains current block, 'result' contains anual provisions as string
+   */
+  async getAnualProvisions(): Promise<ModuleSimpleResponse> {
     const res = await this.client.get('/minting/annual-provisions');
     return res.data;
   }

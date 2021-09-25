@@ -1,19 +1,35 @@
-import axios, { AxiosInstance } from 'axios';
 import { getConfig } from '../bootstrap';
+import BlockchainModule from './base';
+import {
+  Amount,
+  ModuleBaseResponse,
+  ModuleErrorResponse,
+  ModuleSimpleResponse,
+} from './types';
 
-export class SupplyModule {
-  private client: AxiosInstance;
+export interface TotalSupplyResponse extends ModuleBaseResponse {
+  /** Array of totals supplies  */
+  result: Amount[];
+}
 
-  constructor(baseURL: string) {
-    this.client = axios.create({ baseURL });
-  }
-
-  async getTotal(): Promise<object> {
+export class SupplyModule extends BlockchainModule {
+  /**
+   * Get total supply in native denom
+   *
+   * @returns TotalSupplyResponse object
+   */
+  async getTotal(): Promise<TotalSupplyResponse> {
     const res = await this.client.get('/supply/total');
     return res.data;
   }
 
-  async getTotalForDenom(denom: string): Promise<object> {
+  /**
+   * Get total supply for an specific denom
+   * @returns ModuleSimpleResponse or ModuleErrorResponse
+   * */
+  async getTotalForDenom(
+    denom: string
+  ): Promise<ModuleSimpleResponse | ModuleErrorResponse> {
     const res = await this.client.get(`/supply/total/${denom}`);
     return res.data;
   }

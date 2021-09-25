@@ -1,81 +1,55 @@
+import { ExecuteResult } from 'secretjs';
 import {
   queryContract,
   executeContract,
   getHeight,
   getAddress,
+  instantiate,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
   Context,
-  ContractExecuteRequest,
-  BaseContract,
-  BaseContractProps,
-  ContractRequest,
+  ContractMessageRequest,
   ContractDefinition,
   ContractSpecification,
+  ContractMessageResponse,
+  ContractInstantiationRequest,
 } from './types';
 import { getErrorHandler } from './errors';
+import { getEntropyString, calculateCommonKeys } from './utils';
+
+const decoder = new TextDecoder('utf-8');
 
 const QUERY_TYPE = 'query';
 const MESSAGE_TYPE = 'message';
 
-function getEntropyString(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function getValue(object: any, key: string): any {
-  let value;
-  Object.keys(object).some((k) => {
-    if (k === key) {
-      value = object[k];
-      return true;
-    }
-    if (object[k] && typeof object[k] === 'object') {
-      value = getValue(object[k], key);
-      return value !== undefined;
-    }
-  });
-  return value;
-}
-
-function hasOwnDeepProperty(obj: any, prop: string): boolean {
-  if (typeof obj === 'object' && obj !== null) {
-    if (obj.hasOwnProperty(prop)) {
-      return true;
-    }
-    for (const p in obj) {
-      if (obj.hasOwnProperty(p) && hasOwnDeepProperty(obj[p], prop)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function warn(func: any, result: any, msg: string): void {
-  console.warn(`Cannot call ${func.type} -> ${JSON.stringify(result)}: ${msg}`);
-}
-
-function calculateCommonKeys(
-  baseKeys: Array<string>,
-  defKeys: Array<string>
-): Array<string> {
-  if (baseKeys.length === 0 || defKeys.length === 0) return [];
-
-  const result: Array<string> = baseKeys.filter((key) =>
-    defKeys.find((k) => k === key)
-  );
-  return result;
-}
-
 const contractRegistry: any[] = [];
+
+export class ContractTxResponseHandler<T>
+  implements ContractMessageResponse<T>
+{
+  private readonly response: ExecuteResult;
+
+  private constructor(response: ExecuteResult) {
+    this.response = response;
+  }
+
+  parse(): any {
+    return JSON.parse(decoder.decode(this.response.data));
+  }
+
+  getRaw(): ExecuteResult {
+    return this.response;
+  }
+
+  isEmpty(): boolean {
+    return typeof this.response === 'undefined';
+  }
+
+  static of<T>(response: ExecuteResult): ContractMessageResponse<T> {
+    return new ContractTxResponseHandler<T>(response);
+  }
+}
 
 export function createContract<Type>(contract: ContractSpecification): Type {
   const handler = {
@@ -93,39 +67,28 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           const key = viewingKeyManager.get(contractAddress);
           const height = await getHeight();
           const padding = getEntropyString(12);
-
+          const entropy = getEntropyString(12);
           // Set the context.
-          const ctx = { address, key, height, padding } as Context;
+          const ctx = { address, key, height, padding, entropy } as Context;
           const args = [ctx, ...argumentsList];
 
           // Call the method, injecting the context.
           const result = Reflect.apply(func, thisArg, args);
 
-          const hasAddress = getValue(result, 'address');
-          if (hasOwnDeepProperty(result, 'address') && !hasAddress) {
-            warn(func, result, 'No address available');
-            return;
-          }
-
-          const hasKey = getValue(result, 'key');
-          if (hasOwnDeepProperty(result, 'key') && !hasKey) {
-            warn(func, result, 'No key available');
-            return;
-          }
-
           if (func.type === QUERY_TYPE) {
             return queryContract(contractAddress, result);
           } else if (func.type === MESSAGE_TYPE) {
             const { handleMsg, memo, transferAmount, fee } =
-              result as ContractExecuteRequest;
+              result as ContractMessageRequest;
             try {
-              return await executeContract(
+              const response = await executeContract(
                 contractAddress,
                 handleMsg,
                 memo,
                 transferAmount,
                 fee
               );
+              return ContractTxResponseHandler.of(response);
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
@@ -154,8 +117,8 @@ export function createContract<Type>(contract: ContractSpecification): Type {
   let messages = m || {};
 
   // Setting the type of queries and messages.
-  Object.keys(queries).forEach((it) => (queries[it].type = QUERY_TYPE));
-  Object.keys(messages).forEach((it) => (messages[it].type = MESSAGE_TYPE));
+  Object.keys(queries).forEach(it => (queries[it].type = QUERY_TYPE));
+  Object.keys(messages).forEach(it => (messages[it].type = MESSAGE_TYPE));
 
   // Define the target object.
   const target = { id, at, ...queries, ...messages };
@@ -164,7 +127,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
   const result = new Proxy(target, handler);
 
   // Add to contract registry.
-  const idx = contractRegistry.findIndex((it) => it.id === contract.id);
+  const idx = contractRegistry.findIndex(it => it.id === contract.id);
   if (idx === -1) {
     contractRegistry.push(result);
   }
@@ -175,7 +138,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
 export function extendContract(
   base: ContractDefinition,
   extended: ContractDefinition
-): Record<string, any> {
+): ContractDefinition {
   const { messages: baseMessages = {}, queries: baseQueries = {} } = base;
   const { messages: defMessages = {}, queries: defQueries = {} } = extended;
 
@@ -202,12 +165,12 @@ export function extendContract(
   };
 
   // Override common keys with def values.
-  messageKeys.forEach((key) => {
-    result.messages[key] = extended.messages[key];
+  messageKeys.forEach(key => {
+    result.messages[key] = defMessages[key];
   });
 
-  queriesKey.forEach((key) => {
-    result.queries[key] = extended.queries[key];
+  queriesKey.forEach(key => {
+    result.queries[key] = defQueries[key];
   });
 
   // Warnings.
@@ -229,9 +192,33 @@ export function extendContract(
 
 export function refContract<Type>(idOrAddress: string): Type {
   const contract = contractRegistry.find(
-    (it) => it.id === idOrAddress || it.at === idOrAddress
+    it => it.id === idOrAddress || it.at === idOrAddress
   );
   if (!contract)
     throw new Error(`No contract found with id or address ${idOrAddress}`);
   return contract;
+}
+
+/**
+ * Instantiate a contract by providing a {@link ContractInstantiationRequest}.
+ * The instantiated contract is then available in the Contract Registry,
+ * therefore, you can get the returned reference of get one using
+ * {@link refContract}.
+ *
+ * @template T
+ * @param {ContractInstantiationRequest} req - The request to instantiate
+ * a contract.
+ * @return {Promise<T>} a contract instance.
+ */
+export async function instantiateContract<T>(
+  req: ContractInstantiationRequest
+): Promise<T> {
+  const { id, definition, codeId, label, initMsg } = req;
+  const { contractAddress: at } = await instantiate(codeId, initMsg, label);
+  const spec: ContractSpecification = {
+    id,
+    at,
+    definition,
+  };
+  return createContract<T>(spec);
 }
