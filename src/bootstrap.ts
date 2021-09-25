@@ -5,6 +5,7 @@ import {
   SigningCosmWasmClient,
   ExecuteResult,
   FeeTable,
+  Contract,
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
@@ -212,4 +213,16 @@ export function getHeight(): Promise<number> {
 export function instantiate(codeId: number, initMsg: object, label: string) {
   if (!signingClient) throw new Error('No signing client available');
   return signingClient.instantiate(codeId, initMsg, label);
+}
+
+export function getContracts(codeId: number): Promise<
+  readonly {
+    readonly address: string;
+    readonly codeId: number;
+    readonly creator: string;
+    readonly label: string;
+  }[]
+> {
+  if (!client) throw new Error('No client available');
+  return client?.getContracts(codeId);
 }
