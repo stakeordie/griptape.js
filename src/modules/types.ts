@@ -62,6 +62,13 @@ export interface PubKey {
   value: string;
 }
 
+export interface Validator {
+  address: string;
+  pub_key: string;
+  voting_power: string;
+  proposer_priority: string;
+}
+
 //Common module types
 
 export interface ModuleBaseResponse {
