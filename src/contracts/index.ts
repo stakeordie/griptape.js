@@ -16,7 +16,12 @@ import {
   ContractInstantiationRequest,
 } from './types';
 import { getErrorHandler } from './errors';
-import { getEntropyString, calculateCommonKeys } from './utils';
+import { StdFee } from 'secretjs/types/types';
+import {
+  getEntropyString,
+  calculateCommonKeys,
+  getFeeForExecute,
+} from './utils';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -80,13 +85,14 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           } else if (func.type === MESSAGE_TYPE) {
             const { handleMsg, memo, transferAmount, fee } =
               result as ContractMessageRequest;
+            const calculatedFee = getFeeForExecute(fee);
             try {
               const response = await executeContract(
                 contractAddress,
                 handleMsg,
                 memo,
                 transferAmount,
-                fee
+                calculatedFee
               );
               return ContractTxResponseHandler.of(response);
             } catch (e: any) {

@@ -21,7 +21,7 @@ export interface ContractMessageRequest {
   handleMsg: Record<string, unknown>;
   memo?: string;
   transferAmount?: readonly Coin[];
-  fee?: StdFee;
+  fee?: number;
 }
 
 export interface ContractDefinition {
