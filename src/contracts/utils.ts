@@ -1,3 +1,5 @@
+import { StdFee } from 'secretjs/types/types';
+
 export function getValue(object: any, key: string): any {
   let value;
   Object.keys(object).some(k => {
@@ -48,4 +50,18 @@ export function calculateCommonKeys(
     defKeys.find(k => k === key)
   );
   return result;
+}
+
+const gasPriceUscrt = 0.25;
+export function getFeeForExecute(gas: number | undefined): StdFee | undefined {
+  if (!gas) return undefined;
+  return {
+    amount: [
+      {
+        amount: String(Math.floor(gas * gasPriceUscrt) + 1),
+        denom: 'uscrt',
+      },
+    ],
+    gas: String(gas),
+  };
 }
