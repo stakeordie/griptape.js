@@ -56,7 +56,7 @@ export class ContractTxResponseHandler<T>
   }
 }
 
-export function createContract<Type>(contract: ContractSpecification): Type {
+export function createContract<T>(contract: ContractSpecification): T {
   const handler = {
     get(contract: Record<string, any>, prop: string) {
       if (typeof contract[prop] !== 'function') {
@@ -73,6 +73,7 @@ export function createContract<Type>(contract: ContractSpecification): Type {
           const height = await getHeight();
           const padding = getEntropyString(12);
           const entropy = getEntropyString(12);
+
           // Set the context.
           const ctx = { address, key, height, padding, entropy } as Context;
           const args = [ctx, ...argumentsList];
@@ -196,7 +197,7 @@ export function extendContract(
   return result;
 }
 
-export function refContract<Type>(idOrAddress: string): Type {
+export function refContract<T>(idOrAddress: string): T {
   const contract = contractRegistry.find(
     it => it.id === idOrAddress || it.at === idOrAddress
   );
