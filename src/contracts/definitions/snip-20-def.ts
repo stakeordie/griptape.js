@@ -1,10 +1,9 @@
-import { Amount } from '../../modules/types';
 import {
   BaseContract,
   Context,
   ContractDefinition,
-  ContractQueryRequest,
   ContractMessageResponse,
+  ContractQueryRequest
 } from '../types';
 
 export const snip20Def: ContractDefinition = {

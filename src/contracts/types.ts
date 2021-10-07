@@ -1,5 +1,5 @@
 import { ExecuteResult } from 'secretjs';
-import { Coin, StdFee } from 'secretjs/types/types.js';
+import { Coin } from 'secretjs/types/types.js';
 
 export interface Context {
   address?: string;
