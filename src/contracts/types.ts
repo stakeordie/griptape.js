@@ -77,6 +77,6 @@ export type MessageGetter = (
 
 export interface MultiMessageInfo {
   getMessage: (...args: unknown[]) => ContractMessageRequest;
-  contractAddress: string;
+  contract: BaseContract;
   args: unknown[];
 }

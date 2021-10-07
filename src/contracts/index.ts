@@ -19,7 +19,6 @@ import {
   MultiMessageInfo,
 } from './types';
 import { getErrorHandler } from './errors';
-import { Coin } from 'secretjs/types/types';
 import {
   getEntropyString,
   calculateCommonKeys,
@@ -79,8 +78,6 @@ export function createContract<T>(contract: ContractSpecification): T {
         return Reflect.get(contract, prop);
       }
 
-      const { at: contractAddress } = contract;
-
       return new Proxy(contract[prop], {
         // Trap to get the target function.
         get: (func, prop) => {
@@ -91,6 +88,7 @@ export function createContract<T>(contract: ContractSpecification): T {
         },
 
         apply: async (func: any, thisArg: any, argumentsList: any) => {
+          const { at: contractAddress } = contract;
           const ctx = await getContext(contractAddress);
           const args = [ctx, ...argumentsList];
 
