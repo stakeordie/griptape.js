@@ -1,4 +1,4 @@
-import { coinConvert } from './utils';
+import { coinConvert } from '../src/utils';
 
 describe('coinConvert', () => {
   test('Should convert from human to machine', () => {
