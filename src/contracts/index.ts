@@ -14,14 +14,18 @@ import {
   ContractSpecification,
   ContractMessageResponse,
   ContractInstantiationRequest,
+  MessageEntry,
+  MessageGetter,
+  MultiMessageInfo,
 } from './types';
 import { getErrorHandler } from './errors';
-import { StdFee } from 'secretjs/types/types';
+import { Coin } from 'secretjs/types/types';
 import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
 } from './utils';
+import { BaseContract, getSigningClient } from '..';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -56,6 +60,18 @@ export class ContractTxResponseHandler<T>
   }
 }
 
+async function getContext(contractAddress: string): Promise<Context> {
+  // Get all context variables.
+  const address = getAddress();
+  const key = viewingKeyManager.get(contractAddress);
+  const height = await getHeight();
+  const padding = getEntropyString(12);
+  const entropy = getEntropyString(12);
+
+  // Set the context.
+  return { address, key, height, padding, entropy } as Context;
+}
+
 export function createContract<T>(contract: ContractSpecification): T {
   const handler = {
     get(contract: Record<string, any>, prop: string) {
@@ -63,19 +79,19 @@ export function createContract<T>(contract: ContractSpecification): T {
         return Reflect.get(contract, prop);
       }
 
+      const { at: contractAddress } = contract;
+
       return new Proxy(contract[prop], {
+        // Trap to get the target function.
+        get: (func, prop) => {
+          if (prop === 'target') {
+            return func;
+          }
+          return Reflect.get(func, prop);
+        },
+
         apply: async (func: any, thisArg: any, argumentsList: any) => {
-          const { at: contractAddress } = contract;
-
-          // Get all context variables.
-          const address = getAddress();
-          const key = viewingKeyManager.get(contractAddress);
-          const height = await getHeight();
-          const padding = getEntropyString(12);
-          const entropy = getEntropyString(12);
-
-          // Set the context.
-          const ctx = { address, key, height, padding, entropy } as Context;
+          const ctx = await getContext(contractAddress);
           const args = [ctx, ...argumentsList];
 
           // Call the method, injecting the context.
@@ -228,4 +244,57 @@ export async function instantiateContract<T>(
     definition,
   };
   return createContract<T>(spec);
+}
+
+/**
+ * Execute multiple messages from multiple contracts.
+ * @param infos An object provided by {@link message} call.
+ * @param memo An optional memo for this message execution.
+ * @returns Contract message responses.
+ */
+export async function multiMessage<R>(
+  infos: MultiMessageInfo[],
+  memo?: string
+): Promise<ContractMessageResponse<R>> {
+  const messages: MessageEntry[] = [];
+  let fees = 0;
+
+  for (const info of infos) {
+    const { id: contractId, at: contractAddress } = info.contract;
+    const ctx = await getContext(contractAddress);
+    const message = info.getMessage(ctx, ...info.args);
+    const entry = {
+      contractAddress: contractAddress,
+      handleMsg: message.handleMsg,
+      transferAmount: message.transferAmount,
+    };
+    messages.push(entry);
+    fees += message.fees ? message.fees : 0;
+  }
+
+  const response = await getSigningClient().multiExecute(
+    messages,
+    memo,
+    getFeeForExecute(fees)
+  );
+  return ContractTxResponseHandler.of(response);
+}
+
+/**
+ * Provides {@link multiMessage} with all required information to execute a
+ * transaction on the given contract in order to perform multiple executions of
+ * messages.
+ * @param contract Contract that has the message to execute.
+ * @param message Message to execute.
+ * @param args Arguments of the message to execute.
+ * @returns {MultiMessageInfo} All info to execute the message.
+ */
+export function message(
+  contract: BaseContract,
+  message: MessageGetter,
+  ...args: unknown[]
+): MultiMessageInfo {
+  // @ts-ignore
+  const getMessage = message.target;
+  return { getMessage, contract, args };
 }

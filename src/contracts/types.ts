@@ -64,3 +64,19 @@ export class ErrorHandler {
     this.handler = handler;
   }
 }
+
+export type MessageEntry = {
+  contractAddress: string;
+  handleMsg: object;
+  transferAmount?: readonly Coin[] | undefined;
+};
+
+export type MessageGetter = (
+  ...args: any[]
+) => Promise<ContractMessageResponse<unknown>>;
+
+export interface MultiMessageInfo {
+  getMessage: (...args: unknown[]) => ContractMessageRequest;
+  contractAddress: string;
+  args: unknown[];
+}
