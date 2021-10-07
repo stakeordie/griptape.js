@@ -84,9 +84,9 @@ export function createContract<T>(contract: ContractSpecification): T {
           if (func.type === QUERY_TYPE) {
             return queryContract(contractAddress, result);
           } else if (func.type === MESSAGE_TYPE) {
-            const { handleMsg, memo, transferAmount, fee } =
+            const { handleMsg, memo, transferAmount, fees } =
               result as ContractMessageRequest;
-            const calculatedFee = getFeeForExecute(fee);
+            const calculatedFee = getFeeForExecute(fees);
             try {
               const response = await executeContract(
                 contractAddress,
