@@ -5,7 +5,6 @@ import {
   SigningCosmWasmClient,
   ExecuteResult,
   FeeTable,
-  Contract,
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
@@ -87,6 +86,12 @@ export async function gripApp(
 
     // Set the provider.
     getProvider = accountProviderGetter;
+
+    emitEvent('app-ready');
+
+    const connected = localStorage.getItem('connected');
+    if (connected == null) throw new Error('Not connected yet');
+
     provider = await getProvider(chainId);
 
     // At this point we have an account available...
@@ -134,9 +139,11 @@ export async function bootstrap(): Promise<void> {
   await initClient();
   const chainId = await getChainId();
   provider = await getProvider(chainId);
+  emitEvent('app-ready');
   emitEvent('account-available');
   accountAvailable = true;
   await initSigningClient();
+  localStorage.setItem('connected', 'connected');
 }
 
 // TODO Move this to `contracts.ts`
