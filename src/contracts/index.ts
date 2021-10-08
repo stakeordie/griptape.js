@@ -267,7 +267,7 @@ export async function multiMessage<R>(
   let fees = 0;
 
   for (const info of infos) {
-    const { id: contractId, at: contractAddress } = info.contract;
+    const { at: contractAddress } = info.contract;
     const ctx = await getContext(contractAddress);
     const message = info.getMessage(ctx, ...info.args);
     const transferAmount = message.transferAmount
