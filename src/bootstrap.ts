@@ -87,10 +87,11 @@ export async function gripApp(
     // Set the provider.
     getProvider = accountProviderGetter;
 
-    emitEvent('app-ready');
-
     const connected = localStorage.getItem('connected');
-    if (connected == null) throw new Error('Not connected yet');
+    if (connected == null) {
+      emitEvent('account-not-available');
+      throw new Error('Not connected yet');
+    }
 
     provider = await getProvider(chainId);
 
@@ -139,7 +140,6 @@ export async function bootstrap(): Promise<void> {
   await initClient();
   const chainId = await getChainId();
   provider = await getProvider(chainId);
-  emitEvent('app-ready');
   emitEvent('account-available');
   accountAvailable = true;
   await initSigningClient();

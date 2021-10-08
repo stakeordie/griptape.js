@@ -20,6 +20,6 @@ export function onAccountChange(callback: Callback) {
   subscribeEvent('account-change', callback);
 }
 
-export function onAppReady(callback: Callback) {
-  subscribeEvent('app-ready', callback);
+export function onAccountNotAvailable(callback: Callback) {
+  subscribeEvent('account-not-available', callback);
 }
