@@ -19,3 +19,7 @@ export function onAccountAvailable(callback: Callback) {
 export function onAccountChange(callback: Callback) {
   subscribeEvent('account-change', callback);
 }
+
+export function onAccountNotAvailable(callback: Callback) {
+  subscribeEvent('account-not-available', callback);
+}

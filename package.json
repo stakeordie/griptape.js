@@ -11,15 +11,21 @@
   "license": "MIT",
   "scripts": {
     "build": "npx prettier --write . && tsc --skipLibCheck",
-    "dev": "tsc -w --skipLibCheck"
+    "dev": "tsc -w --skipLibCheck",
+    "test": "jest",
+    "prettier": "npx prettier --write ."
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-typescript": "^7.15.0",
     "@keplr-wallet/types": "^0.9.0-alpha.4",
+    "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "eslint": "7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
+    "jest": "^27.2.4",
     "prettier": "2.3.2",
     "typescript": "^4.3.2"
   },

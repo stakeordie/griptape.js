@@ -7,8 +7,11 @@
     "declaration": true,
     "declarationDir": "types",
     "esModuleInterop": true,
-    "noImplicitThis": false
+    "noImplicitThis": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "removeComments": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/**/*.test.ts"]
 }

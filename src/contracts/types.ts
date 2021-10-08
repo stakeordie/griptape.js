@@ -1,5 +1,5 @@
 import { ExecuteResult } from 'secretjs';
-import { Coin, StdFee } from 'secretjs/types/types.js';
+import { Coin } from 'secretjs/types/types.js';
 
 export interface Context {
   address?: string;
@@ -20,8 +20,8 @@ export type ContractQueryRequest = Record<string, Record<string, any>>;
 export interface ContractMessageRequest {
   handleMsg: Record<string, unknown>;
   memo?: string;
-  transferAmount?: readonly Coin[];
-  fee?: StdFee;
+  transferAmount?: Coin;
+  fees?: number;
 }
 
 export interface ContractDefinition {
@@ -63,4 +63,20 @@ export class ErrorHandler {
     this.test = test;
     this.handler = handler;
   }
+}
+
+export type MessageEntry = {
+  contractAddress: string;
+  handleMsg: object;
+  transferAmount?: Coin[] | undefined;
+};
+
+export type MessageGetter = (
+  ...args: any[]
+) => Promise<ContractMessageResponse<unknown>>;
+
+export interface MultiMessageInfo {
+  getMessage: (...args: unknown[]) => ContractMessageRequest;
+  contract: BaseContract;
+  args: unknown[];
 }
