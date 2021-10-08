@@ -108,7 +108,7 @@ export function createContract<T>(contract: ContractSpecification): T {
             } = result as ContractMessageRequest;
             const calculatedFee = getFeeForExecute(fees);
             const transferAmount = rawTransferAmount
-              ? ([rawTransferAmount] as unknown as Coin[])
+              ? ([rawTransferAmount] as Coin[])
               : [];
             try {
               const response = await executeContract(
@@ -270,10 +270,13 @@ export async function multiMessage<R>(
     const { id: contractId, at: contractAddress } = info.contract;
     const ctx = await getContext(contractAddress);
     const message = info.getMessage(ctx, ...info.args);
+    const transferAmount = message.transferAmount
+      ? ([message.transferAmount] as Coin[])
+      : [];
     const entry = {
       contractAddress: contractAddress,
       handleMsg: message.handleMsg,
-      transferAmount: message.transferAmount,
+      transferAmount: transferAmount,
     };
     messages.push(entry);
     fees += message.fees ? message.fees : 0;
