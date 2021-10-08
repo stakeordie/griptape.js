@@ -5,6 +5,7 @@ import {
   getHeight,
   getAddress,
   instantiate,
+  getSigningClient,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -17,6 +18,7 @@ import {
   MessageEntry,
   MessageGetter,
   MultiMessageInfo,
+  BaseContract,
 } from './types';
 import { getErrorHandler } from './errors';
 import {
@@ -24,7 +26,7 @@ import {
   calculateCommonKeys,
   getFeeForExecute,
 } from './utils';
-import { BaseContract, getSigningClient } from '..';
+import { Coin } from 'secretjs/types/types';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -98,9 +100,16 @@ export function createContract<T>(contract: ContractSpecification): T {
           if (func.type === QUERY_TYPE) {
             return queryContract(contractAddress, result);
           } else if (func.type === MESSAGE_TYPE) {
-            const { handleMsg, memo, transferAmount, fees } =
-              result as ContractMessageRequest;
+            const {
+              handleMsg,
+              memo,
+              transferAmount: rawTransferAmount,
+              fees,
+            } = result as ContractMessageRequest;
             const calculatedFee = getFeeForExecute(fees);
+            const transferAmount = rawTransferAmount
+              ? ([rawTransferAmount] as unknown as Coin[])
+              : [];
             try {
               const response = await executeContract(
                 contractAddress,

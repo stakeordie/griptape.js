@@ -20,7 +20,7 @@ export type ContractQueryRequest = Record<string, Record<string, any>>;
 export interface ContractMessageRequest {
   handleMsg: Record<string, unknown>;
   memo?: string;
-  transferAmount?: readonly Coin[];
+  transferAmount?: { readonly amount: string; readonly demon: string };
   fees?: number;
 }
 
