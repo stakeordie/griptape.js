@@ -3,7 +3,7 @@ import {
   Context,
   ContractDefinition,
   ContractMessageResponse,
-  ContractQueryRequest
+  ContractQueryRequest,
 } from '../types';
 
 export const snip20Def: ContractDefinition = {
