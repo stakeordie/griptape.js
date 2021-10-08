@@ -12,7 +12,8 @@
   "scripts": {
     "build": "npx prettier --write . && tsc --skipLibCheck",
     "dev": "tsc -w --skipLibCheck",
-    "test": "jest"
+    "test": "jest",
+    "prettier": "npx prettier --write ."
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.6",
