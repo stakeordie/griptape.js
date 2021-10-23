@@ -252,7 +252,7 @@ export const snip721Def: ContractDefinition = {
   },
 };
 
-type Expiration =
+export type Expiration =
   | {
       at_height: number;
     }
@@ -261,11 +261,41 @@ type Expiration =
     }
   | 'never';
 
-type AccessLevel = 'approve_token' | 'all' | 'revoke_token' | 'none';
+export type AccessLevel = 'approve_token' | 'all' | 'revoke_token' | 'none';
 
-type Approval = {
+export type Approval = {
   spender: string;
   expires: Expiration;
+};
+export type Extension = {
+  image?: String;
+  image_data?: String;
+  external_uri?: String;
+  description?: String;
+  name?: String;
+  attributes?: Trait[];
+  background_color?: String;
+  animation_url?: String;
+  youtube_url?: String;
+  media?: Media[];
+  protected_attributes?: String[];
+};
+
+export type Media = {
+  file_type?: String;
+  extension?: String;
+  authentication?: {
+    key?: String;
+    user?: String;
+  };
+  url?: String;
+};
+
+export type Trait = {
+  displa_type?: String;
+  trait_type?: String;
+  value?: String;
+  max_value?: String;
 };
 
 export interface Snip721Contract extends BaseContract {
@@ -346,9 +376,8 @@ export interface Snip721Contract extends BaseContract {
    */
   getPrivateMetadata(token_id: string): Promise<{
     private_metadata: {
-      name: string;
-      description: string;
-      image: string;
+      token_uri?: string;
+      extension?: Extension;
     };
   }>;
 
@@ -366,14 +395,12 @@ export interface Snip721Contract extends BaseContract {
     nft_dossier: {
       owner: string;
       public_metadata: {
-        name: string;
-        description: string;
-        image: string;
+        token_uri?: string;
+        extension?: Extension;
       };
       private_metadata: {
-        name: string;
-        description: string;
-        image: string;
+        token_uri?: string;
+        extension?: Extension;
       };
       display_private_metadata_error: string;
       royalty_info: {
