@@ -268,34 +268,34 @@ export type Approval = {
   expires: Expiration;
 };
 export type Extension = {
-  image?: String;
-  image_data?: String;
-  external_uri?: String;
-  description?: String;
-  name?: String;
+  image?: string;
+  image_data?: string;
+  external_uri?: string;
+  description?: string;
+  name?: string;
   attributes?: Trait[];
-  background_color?: String;
-  animation_url?: String;
-  youtube_url?: String;
+  background_color?: string;
+  animation_url?: string;
+  youtube_url?: string;
   media?: Media[];
-  protected_attributes?: String[];
+  protected_attributes?: string[];
 };
 
 export type Media = {
-  file_type?: String;
-  extension?: String;
+  file_type?: string;
+  extension?: string;
   authentication?: {
-    key?: String;
-    user?: String;
+    key?: string;
+    user?: string;
   };
-  url?: String;
+  url?: string;
 };
 
 export type Trait = {
-  displa_type?: String;
-  trait_type?: String;
-  value?: String;
-  max_value?: String;
+  displa_type?: string;
+  trait_type?: string;
+  value?: string;
+  max_value?: string;
 };
 
 export interface Snip721Contract extends BaseContract {
