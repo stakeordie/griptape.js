@@ -5,6 +5,7 @@ import {
   SigningCosmWasmClient,
   ExecuteResult,
   FeeTable,
+  BroadcastMode,
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
@@ -30,6 +31,7 @@ const customFees: FeeTable = {
 
 export interface Config {
   restUrl: string;
+  broadcastMode?: BroadcastMode;
 }
 
 export interface AccountProvider {
@@ -124,6 +126,7 @@ async function initSigningClient(): Promise<void> {
   const address = provider.getAddress();
   const signer = provider.getSigner();
   const seed = provider.getSeed();
+  const broadcastMode = config.broadcastMode ?? BroadcastMode.Sync;
 
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
@@ -131,7 +134,8 @@ async function initSigningClient(): Promise<void> {
     address,
     signer,
     seed,
-    customFees
+    customFees,
+    broadcastMode
   );
 }
 
