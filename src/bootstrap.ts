@@ -238,6 +238,11 @@ export function getContracts(codeId: number): Promise<
   return client?.getContracts(codeId);
 }
 
+export function getClient() {
+  if (!client) throw new Error('No client available');
+  return client;
+}
+
 export function getSigningClient() {
   if (!signingClient) throw new Error('No singing client available');
   return signingClient;
