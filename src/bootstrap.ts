@@ -242,3 +242,15 @@ export function getSigningClient() {
   if (!signingClient) throw new Error('No singing client available');
   return signingClient;
 }
+
+export async function getBalance(address: string): Promise<string> {
+  try {
+    if (!client) return `No client available`;
+    const account = await client.getAccount(address);
+    if (!account) return `No account exiting on chain `;
+    if (account.balance.length == 0) return '0';
+    return account.balance[0].amount;
+  } catch (error) {
+    return `Problem at query SCRT balance ${error}`;
+  }
+}
