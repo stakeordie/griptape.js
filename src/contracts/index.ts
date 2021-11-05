@@ -259,7 +259,7 @@ export async function instantiateContract<T>(
  * @param memo An optional memo for this message execution.
  * @returns Contract message responses.
  */
-export async function multiMessage<R>(
+export async function executeMultiMessage<R>(
   infos: MultiMessageInfo[],
   memo?: string
 ): Promise<ContractMessageResponse<R>> {
@@ -291,7 +291,7 @@ export async function multiMessage<R>(
 }
 
 /**
- * Provides {@link multiMessage} with all required information to execute a
+ * Provides {@link executeMultiMessage} with all required information to execute a
  * transaction on the given contract in order to perform multiple executions of
  * messages.
  * @param contract Contract that has the message to execute.
@@ -299,7 +299,7 @@ export async function multiMessage<R>(
  * @param args Arguments of the message to execute.
  * @returns {MultiMessageInfo} All info to execute the message.
  */
-export function message(
+export function buildMessage(
   contract: BaseContract,
   message: MessageGetter,
   ...args: unknown[]
