@@ -66,8 +66,8 @@ async function getContext(contractAddress: string): Promise<Context> {
   const address = getAddress();
   const key = viewingKeyManager.get(contractAddress);
   const height = await getHeight();
-  const padding = getEntropyString(12);
-  const entropy = getEntropyString(12);
+  const padding = getEntropyString(32);
+  const entropy = window.btoa(getEntropyString(32));
 
   // Set the context.
   return { address, key, height, padding, entropy } as Context;
