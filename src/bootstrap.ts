@@ -160,10 +160,12 @@ export function shutdown() {
 // TODO Move this to `contracts.ts`
 export function queryContract(
   address: string,
-  queryMsg: Record<string, unknown>
+  queryMsg: Record<string, unknown>,
+  addedParams?: Record<string, unknown>,
+  codeHash?: string
 ): Promise<Record<string, unknown>> {
   if (!client) throw new Error('No client available');
-  return client.queryContractSmart(address, queryMsg);
+  return client.queryContractSmart(address, queryMsg, addedParams, codeHash);
 }
 
 // TODO Move this to `contracts.ts`

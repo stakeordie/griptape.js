@@ -32,6 +32,6 @@
   "dependencies": {
     "axios": "^0.21.1",
     "decimal.js": "^10.2.1",
-    "secretjs": "^0.11.0"
+    "secretjs": "0.16.7"
   }
 }

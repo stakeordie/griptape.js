@@ -98,7 +98,8 @@ export function createContract<T>(contract: ContractSpecification): T {
           const result = Reflect.apply(func, thisArg, args);
 
           if (func.type === QUERY_TYPE) {
-            return queryContract(contractAddress, result);
+            const _ = undefined; // TODO: Handle added params
+            return queryContract(contractAddress, result, _, contract.codeHash);
           } else if (func.type === MESSAGE_TYPE) {
             const {
               handleMsg,
@@ -202,20 +203,6 @@ export function extendContract(
   queriesKey.forEach(key => {
     result.queries[key] = defQueries[key];
   });
-
-  // Warnings.
-  if (messageKeys.length > 0) {
-    console.warn(
-      `You overrided the following values from Messages object:
-        ${messageKeys.toString()}`
-    );
-  }
-  if (queriesKey.length > 0) {
-    console.warn(
-      `You overrided the following values from Queries object:
-        ${queriesKey.toString()}`
-    );
-  }
 
   return result;
 }
