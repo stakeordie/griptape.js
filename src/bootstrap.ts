@@ -150,6 +150,13 @@ export async function bootstrap(): Promise<void> {
   localStorage.setItem('connected', 'connected');
 }
 
+export function shutdown() {
+  const connected = localStorage.getItem('connected');
+  if (!connected) return;
+  emitEvent('shutdown');
+  localStorage.removeItem('connected');
+}
+
 // TODO Move this to `contracts.ts`
 export function queryContract(
   address: string,
@@ -246,4 +253,16 @@ export function getClient() {
 export function getSigningClient() {
   if (!signingClient) throw new Error('No singing client available');
   return signingClient;
+}
+
+export async function getBalance(address: string): Promise<string> {
+  try {
+    if (!client) return `No client available`;
+    const account = await client.getAccount(address);
+    if (!account) return `No account exiting on chain `;
+    if (account.balance.length == 0) return '0';
+    return account.balance[0].amount;
+  } catch (error) {
+    return `Problem at query SCRT balance ${error}`;
+  }
 }
