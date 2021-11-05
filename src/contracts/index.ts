@@ -1,4 +1,4 @@
-import { ExecuteResult } from 'secretjs';
+import { ExecuteResult, BroadcastMode, TxsResponse } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -6,6 +6,7 @@ import {
   getAddress,
   instantiate,
   getSigningClient,
+  getConfig,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -25,6 +26,7 @@ import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
+  sleep,
 } from './utils';
 import { Coin } from 'secretjs/types/types';
 
@@ -73,6 +75,36 @@ async function getContext(contractAddress: string): Promise<Context> {
   return { address, key, height, padding, entropy } as Context;
 }
 
+async function handleResponse(txHash: string): Promise<TxsResponse> {
+  let result = false;
+  let tx;
+
+  // eslint-disable-next-line
+  while (true) {
+    try {
+      // eslint-disable-next-line
+      // @ts-ignore
+      tx = await getClient().restClient.txById(txHash);
+
+      if (!tx.raw_log.startsWith('[')) {
+        result = false;
+      } else {
+        result = true;
+      }
+
+      break;
+    } catch (error) {
+      // waiting for the transaction to commit
+    }
+
+    await sleep(6000);
+  }
+
+  if (!tx) throw new Error('No TX available');
+
+  return tx;
+}
+
 export function createContract<T>(contract: ContractSpecification): T {
   const handler = {
     get(contract: Record<string, any>, prop: string) {
@@ -119,7 +151,14 @@ export function createContract<T>(contract: ContractSpecification): T {
                 transferAmount,
                 calculatedFee
               );
-              return ContractTxResponseHandler.of(response);
+
+              const config = getConfig();
+              if (!config) throw new Error('No config available');
+              if (config.broadcastMode === BroadcastMode.Sync) {
+                return handleResponse(response.transactionHash);
+              } else {
+                return ContractTxResponseHandler.of(response);
+              }
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {

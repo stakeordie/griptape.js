@@ -65,3 +65,6 @@ export function getFeeForExecute(gas: number | undefined): StdFee | undefined {
     gas: String(gas),
   };
 }
+
+export const sleep = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
