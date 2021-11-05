@@ -203,20 +203,6 @@ export function extendContract(
     result.queries[key] = defQueries[key];
   });
 
-  // Warnings.
-  if (messageKeys.length > 0) {
-    console.warn(
-      `You overrided the following values from Messages object:
-        ${messageKeys.toString()}`
-    );
-  }
-  if (queriesKey.length > 0) {
-    console.warn(
-      `You overrided the following values from Queries object:
-        ${queriesKey.toString()}`
-    );
-  }
-
   return result;
 }
 
