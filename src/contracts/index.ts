@@ -7,6 +7,7 @@ import {
   instantiate,
   getSigningClient,
   getConfig,
+  getClient,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -29,6 +30,7 @@ import {
   sleep,
 } from './utils';
 import { Coin } from 'secretjs/types/types';
+import { Encoding } from '@iov/encoding';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -40,9 +42,9 @@ const contractRegistry: any[] = [];
 export class ContractTxResponseHandler<T>
   implements ContractMessageResponse<T>
 {
-  private readonly response: ExecuteResult;
+  private readonly response: ExecuteResult | TxsResponse;
 
-  private constructor(response: ExecuteResult) {
+  private constructor(response: ExecuteResult | TxsResponse) {
     this.response = response;
   }
 
@@ -50,7 +52,7 @@ export class ContractTxResponseHandler<T>
     return JSON.parse(decoder.decode(this.response.data));
   }
 
-  getRaw(): ExecuteResult {
+  getRaw(): ExecuteResult | TxsResponse {
     return this.response;
   }
 
@@ -58,7 +60,9 @@ export class ContractTxResponseHandler<T>
     return typeof this.response === 'undefined';
   }
 
-  static of<T>(response: ExecuteResult): ContractMessageResponse<T> {
+  static of<T>(
+    response: ExecuteResult | TxsResponse
+  ): ContractMessageResponse<T> {
     return new ContractTxResponseHandler<T>(response);
   }
 }
@@ -83,7 +87,12 @@ async function getContext(contractAddress: string): Promise<Context> {
   return { address, key, height, padding, entropy, permit } as Context;
 }
 
-async function handleResponse(txHash: string): Promise<TxsResponse> {
+interface TxHandlerResponse {
+  found: boolean;
+  response: TxsResponse | undefined;
+}
+
+async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
   let result = false;
   let tx;
 
@@ -108,12 +117,11 @@ async function handleResponse(txHash: string): Promise<TxsResponse> {
     await sleep(6000);
   }
 
-  if (!tx) throw new Error('No TX available');
-
-  return tx;
+  return { found: result, response: tx };
 }
 
 export function createContract<T>(contract: ContractSpecification): T {
+  const codeHash = contract.codeHash;
   const handler = {
     get(contract: Record<string, any>, prop: string) {
       if (typeof contract[prop] !== 'function') {
@@ -139,7 +147,7 @@ export function createContract<T>(contract: ContractSpecification): T {
 
           if (func.type === QUERY_TYPE) {
             const _ = undefined; // TODO: Handle added params
-            return queryContract(contractAddress, result, _, contract.codeHash);
+            return queryContract(contractAddress, result, _, codeHash);
           } else if (func.type === MESSAGE_TYPE) {
             const {
               handleMsg,
@@ -157,13 +165,26 @@ export function createContract<T>(contract: ContractSpecification): T {
                 handleMsg,
                 memo,
                 transferAmount,
-                calculatedFee
+                calculatedFee,
+                codeHash
               );
 
               const config = getConfig();
               if (!config) throw new Error('No config available');
-              if (config.broadcastMode === BroadcastMode.Sync) {
-                return handleResponse(response.transactionHash);
+              if (config.broadcastMode == BroadcastMode.Sync) {
+                const result = await handleResponse(response.transactionHash);
+                if (result.found && result.response) {
+                  const { response: txResponse } = result;
+                  const res =
+                    await getSigningClient().restClient.decryptTxsResponse(
+                      txResponse
+                    );
+                  return ContractTxResponseHandler.of(res);
+                } else {
+                  throw new Error(
+                    `Could not found TX: ${response.transactionHash}`
+                  );
+                }
               } else {
                 return ContractTxResponseHandler.of(response);
               }

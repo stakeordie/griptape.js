@@ -4,7 +4,7 @@ import { getKeplr } from './wallet';
 
 export function hasPermit(contract: BaseContract): boolean {
   const address = getAddress();
-  if (!address) throw new Error('No error available');
+  if (!address) throw new Error('No address available');
   return localStorage.getItem(`query_permit_${address + contract.at}`) != null;
 }
 
@@ -13,7 +13,7 @@ export async function enablePermit(
   permissions: string[] = []
 ): Promise<void> {
   const address = getAddress();
-  if (!address) throw new Error('No error available');
+  if (!address) throw new Error('No address available');
   let permit = JSON.parse(
     localStorage.getItem(`query_permit_${address + contract.at}`) as string
   );

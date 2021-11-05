@@ -29,6 +29,8 @@ const customFees: FeeTable = {
   },
 };
 
+export { BroadcastMode };
+
 export interface Config {
   restUrl: string;
   broadcastMode?: BroadcastMode;
@@ -69,13 +71,18 @@ export function isAccountAvailable() {
 }
 
 export async function gripApp(
-  restUrl: string,
+  _config: string | Config,
   accountProviderGetter: AccountProviderGetter,
   runApp: () => void
 ): Promise<void> {
   if (!config) {
     // Set the configuration.
-    config = { restUrl };
+    if (typeof _config === 'string') {
+      config = { restUrl: _config, broadcastMode: BroadcastMode.Sync };
+    } else {
+      _config.broadcastMode = _config.broadcastMode ?? BroadcastMode.Sync;
+      config = _config;
+    }
 
     // `CosmWasmClient` should be created first.
     await initClient();
@@ -126,7 +133,7 @@ async function initSigningClient(): Promise<void> {
   const address = provider.getAddress();
   const signer = provider.getSigner();
   const seed = provider.getSeed();
-  const broadcastMode = config.broadcastMode ?? BroadcastMode.Sync;
+  const broadcastMode = config.broadcastMode;
 
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
@@ -174,7 +181,8 @@ export async function executeContract(
   handleMsg: Record<string, unknown>,
   memo?: string,
   transferAmount?: readonly Coin[],
-  fee?: StdFee
+  fee?: StdFee,
+  codeHash?: string
 ): Promise<ExecuteResult> {
   if (!signingClient) throw new Error('No signing client available');
   return signingClient.execute(
@@ -182,7 +190,8 @@ export async function executeContract(
     handleMsg,
     memo,
     transferAmount,
-    fee
+    fee,
+    codeHash
   );
 }
 
@@ -257,14 +266,12 @@ export function getSigningClient() {
   return signingClient;
 }
 
-export async function getBalance(address: string): Promise<string> {
-  try {
-    if (!client) return `No client available`;
-    const account = await client.getAccount(address);
-    if (!account) return `No account exiting on chain `;
-    if (account.balance.length == 0) return '0';
-    return account.balance[0].amount;
-  } catch (error) {
-    return `Problem at query SCRT balance ${error}`;
-  }
+export async function getNativeCoinBalance(): Promise<string> {
+  if (!client) throw new Error('No client available');
+  const address = getAddress();
+  if (!address) throw new Error('No address available');
+  const account = await client.getAccount(address);
+  if (!account) throw new Error('No account exiting on chain');
+  if (account.balance.length == 0) return '0';
+  return account.balance[0].amount;
 }
