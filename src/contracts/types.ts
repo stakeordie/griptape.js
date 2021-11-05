@@ -38,6 +38,7 @@ export interface ContractDefinition {
 export interface BaseContractProps {
   id: string;
   at: string;
+  codeHash?: string;
 }
 
 export interface BaseContract extends BaseContractProps {}
