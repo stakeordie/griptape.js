@@ -5,6 +5,7 @@ import {
   SigningCosmWasmClient,
   ExecuteResult,
   FeeTable,
+  BroadcastMode,
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
@@ -28,8 +29,11 @@ const customFees: FeeTable = {
   },
 };
 
+export { BroadcastMode };
+
 export interface Config {
   restUrl: string;
+  broadcastMode?: BroadcastMode;
 }
 
 export interface AccountProvider {
@@ -67,13 +71,18 @@ export function isAccountAvailable() {
 }
 
 export async function gripApp(
-  restUrl: string,
+  _config: string | Config,
   accountProviderGetter: AccountProviderGetter,
   runApp: () => void
 ): Promise<void> {
   if (!config) {
     // Set the configuration.
-    config = { restUrl };
+    if (typeof _config === 'string') {
+      config = { restUrl: _config, broadcastMode: BroadcastMode.Sync };
+    } else {
+      _config.broadcastMode = _config.broadcastMode ?? BroadcastMode.Sync;
+      config = _config;
+    }
 
     // `CosmWasmClient` should be created first.
     await initClient();
@@ -124,6 +133,7 @@ async function initSigningClient(): Promise<void> {
   const address = provider.getAddress();
   const signer = provider.getSigner();
   const seed = provider.getSeed();
+  const broadcastMode = config.broadcastMode;
 
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
@@ -131,7 +141,8 @@ async function initSigningClient(): Promise<void> {
     address,
     signer,
     seed,
-    customFees
+    customFees,
+    broadcastMode
   );
 }
 
@@ -146,13 +157,22 @@ export async function bootstrap(): Promise<void> {
   localStorage.setItem('connected', 'connected');
 }
 
+export function shutdown() {
+  const connected = localStorage.getItem('connected');
+  if (!connected) return;
+  emitEvent('shutdown');
+  localStorage.removeItem('connected');
+}
+
 // TODO Move this to `contracts.ts`
 export function queryContract(
   address: string,
-  queryMsg: Record<string, unknown>
+  queryMsg: Record<string, unknown>,
+  addedParams?: Record<string, unknown>,
+  codeHash?: string
 ): Promise<Record<string, unknown>> {
   if (!client) throw new Error('No client available');
-  return client.queryContractSmart(address, queryMsg);
+  return client.queryContractSmart(address, queryMsg, addedParams, codeHash);
 }
 
 // TODO Move this to `contracts.ts`
@@ -161,7 +181,8 @@ export async function executeContract(
   handleMsg: Record<string, unknown>,
   memo?: string,
   transferAmount?: readonly Coin[],
-  fee?: StdFee
+  fee?: StdFee,
+  codeHash?: string
 ): Promise<ExecuteResult> {
   if (!signingClient) throw new Error('No signing client available');
   return signingClient.execute(
@@ -169,7 +190,8 @@ export async function executeContract(
     handleMsg,
     memo,
     transferAmount,
-    fee
+    fee,
+    codeHash
   );
 }
 
@@ -234,7 +256,22 @@ export function getContracts(codeId: number): Promise<
   return client?.getContracts(codeId);
 }
 
+export function getClient() {
+  if (!client) throw new Error('No client available');
+  return client;
+}
+
 export function getSigningClient() {
   if (!signingClient) throw new Error('No singing client available');
   return signingClient;
+}
+
+export async function getNativeCoinBalance(): Promise<string> {
+  if (!client) throw new Error('No client available');
+  const address = getAddress();
+  if (!address) throw new Error('No address available');
+  const account = await client.getAccount(address);
+  if (!account) throw new Error('No account exiting on chain');
+  if (account.balance.length == 0) return '0';
+  return account.balance[0].amount;
 }

@@ -23,3 +23,7 @@ export function onAccountChange(callback: Callback) {
 export function onAccountNotAvailable(callback: Callback) {
   subscribeEvent('account-not-available', callback);
 }
+
+export function onAccountDisconnect(callback: Callback) {
+  subscribeEvent('shutdown', callback);
+}

@@ -1,4 +1,4 @@
-import { ExecuteResult } from 'secretjs';
+import { ExecuteResult, TxsResponse } from 'secretjs';
 import { Coin } from 'secretjs/types/types.js';
 
 export interface Context {
@@ -7,11 +7,12 @@ export interface Context {
   padding?: string;
   height?: number;
   entropy?: string;
+  permit?: Record<string, unknown>;
 }
 
 export interface ContractMessageResponse<T> {
   parse(): T;
-  getRaw(): ExecuteResult;
+  getRaw(): ExecuteResult | TxsResponse;
   isEmpty(): boolean;
 }
 
@@ -38,6 +39,7 @@ export interface ContractDefinition {
 export interface BaseContractProps {
   id: string;
   at: string;
+  codeHash?: string;
 }
 
 export interface BaseContract extends BaseContractProps {}

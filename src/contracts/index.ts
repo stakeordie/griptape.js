@@ -1,4 +1,4 @@
-import { ExecuteResult } from 'secretjs';
+import { ExecuteResult, BroadcastMode, TxsResponse } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -6,6 +6,8 @@ import {
   getAddress,
   instantiate,
   getSigningClient,
+  getConfig,
+  getClient,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -25,8 +27,10 @@ import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
+  sleep,
 } from './utils';
 import { Coin } from 'secretjs/types/types';
+import { Encoding } from '@iov/encoding';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -38,9 +42,9 @@ const contractRegistry: any[] = [];
 export class ContractTxResponseHandler<T>
   implements ContractMessageResponse<T>
 {
-  private readonly response: ExecuteResult;
+  private readonly response: ExecuteResult | TxsResponse;
 
-  private constructor(response: ExecuteResult) {
+  private constructor(response: ExecuteResult | TxsResponse) {
     this.response = response;
   }
 
@@ -48,7 +52,7 @@ export class ContractTxResponseHandler<T>
     return JSON.parse(decoder.decode(this.response.data));
   }
 
-  getRaw(): ExecuteResult {
+  getRaw(): ExecuteResult | TxsResponse {
     return this.response;
   }
 
@@ -56,7 +60,9 @@ export class ContractTxResponseHandler<T>
     return typeof this.response === 'undefined';
   }
 
-  static of<T>(response: ExecuteResult): ContractMessageResponse<T> {
+  static of<T>(
+    response: ExecuteResult | TxsResponse
+  ): ContractMessageResponse<T> {
     return new ContractTxResponseHandler<T>(response);
   }
 }
@@ -66,14 +72,56 @@ async function getContext(contractAddress: string): Promise<Context> {
   const address = getAddress();
   const key = viewingKeyManager.get(contractAddress);
   const height = await getHeight();
-  const padding = getEntropyString(12);
-  const entropy = getEntropyString(12);
+  const padding = getEntropyString(32);
+  const entropy = window.btoa(getEntropyString(32));
+
+  let permit;
+  const rawPermit = localStorage.getItem(
+    `query_permit_${address + contractAddress}`
+  ) as string;
+  if (rawPermit) {
+    permit = JSON.parse(rawPermit);
+  }
 
   // Set the context.
-  return { address, key, height, padding, entropy } as Context;
+  return { address, key, height, padding, entropy, permit } as Context;
+}
+
+interface TxHandlerResponse {
+  found: boolean;
+  response: TxsResponse | undefined;
+}
+
+async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
+  let result = false;
+  let tx;
+
+  // eslint-disable-next-line
+  while (true) {
+    try {
+      // eslint-disable-next-line
+      // @ts-ignore
+      tx = await getClient().restClient.txById(txHash);
+
+      if (!tx.raw_log.startsWith('[')) {
+        result = false;
+      } else {
+        result = true;
+      }
+
+      break;
+    } catch (error) {
+      // waiting for the transaction to commit
+    }
+
+    await sleep(6000);
+  }
+
+  return { found: result, response: tx };
 }
 
 export function createContract<T>(contract: ContractSpecification): T {
+  const codeHash = contract.codeHash;
   const handler = {
     get(contract: Record<string, any>, prop: string) {
       if (typeof contract[prop] !== 'function') {
@@ -98,7 +146,8 @@ export function createContract<T>(contract: ContractSpecification): T {
           const result = Reflect.apply(func, thisArg, args);
 
           if (func.type === QUERY_TYPE) {
-            return queryContract(contractAddress, result);
+            const _ = undefined; // TODO: Handle added params
+            return queryContract(contractAddress, result, _, codeHash);
           } else if (func.type === MESSAGE_TYPE) {
             const {
               handleMsg,
@@ -116,9 +165,29 @@ export function createContract<T>(contract: ContractSpecification): T {
                 handleMsg,
                 memo,
                 transferAmount,
-                calculatedFee
+                calculatedFee,
+                codeHash
               );
-              return ContractTxResponseHandler.of(response);
+
+              const config = getConfig();
+              if (!config) throw new Error('No config available');
+              if (config.broadcastMode == BroadcastMode.Sync) {
+                const result = await handleResponse(response.transactionHash);
+                if (result.found && result.response) {
+                  const { response: txResponse } = result;
+                  const res =
+                    await getSigningClient().restClient.decryptTxsResponse(
+                      txResponse
+                    );
+                  return ContractTxResponseHandler.of(res);
+                } else {
+                  throw new Error(
+                    `Could not found TX: ${response.transactionHash}`
+                  );
+                }
+              } else {
+                return ContractTxResponseHandler.of(response);
+              }
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
@@ -203,20 +272,6 @@ export function extendContract(
     result.queries[key] = defQueries[key];
   });
 
-  // Warnings.
-  if (messageKeys.length > 0) {
-    console.warn(
-      `You overrided the following values from Messages object:
-        ${messageKeys.toString()}`
-    );
-  }
-  if (queriesKey.length > 0) {
-    console.warn(
-      `You overrided the following values from Queries object:
-        ${queriesKey.toString()}`
-    );
-  }
-
   return result;
 }
 
@@ -259,7 +314,7 @@ export async function instantiateContract<T>(
  * @param memo An optional memo for this message execution.
  * @returns Contract message responses.
  */
-export async function multiMessage<R>(
+export async function executeMultiMessage<R>(
   infos: MultiMessageInfo[],
   memo?: string
 ): Promise<ContractMessageResponse<R>> {
@@ -291,7 +346,7 @@ export async function multiMessage<R>(
 }
 
 /**
- * Provides {@link multiMessage} with all required information to execute a
+ * Provides {@link executeMultiMessage} with all required information to execute a
  * transaction on the given contract in order to perform multiple executions of
  * messages.
  * @param contract Contract that has the message to execute.
@@ -299,7 +354,7 @@ export async function multiMessage<R>(
  * @param args Arguments of the message to execute.
  * @returns {MultiMessageInfo} All info to execute the message.
  */
-export function message(
+export function buildMessage(
   contract: BaseContract,
   message: MessageGetter,
   ...args: unknown[]
