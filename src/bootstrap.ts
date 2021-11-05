@@ -150,6 +150,13 @@ export async function bootstrap(): Promise<void> {
   localStorage.setItem('connected', 'connected');
 }
 
+export function shutdown() {
+  const connected = localStorage.getItem('connected');
+  if (!connected) return;
+  emitEvent('shutdown');
+  localStorage.removeItem('connected');
+}
+
 // TODO Move this to `contracts.ts`
 export function queryContract(
   address: string,
