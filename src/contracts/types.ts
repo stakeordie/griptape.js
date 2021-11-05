@@ -7,6 +7,7 @@ export interface Context {
   padding?: string;
   height?: number;
   entropy?: string;
+  permit?: Record<string, unknown>;
 }
 
 export interface ContractMessageResponse<T> {

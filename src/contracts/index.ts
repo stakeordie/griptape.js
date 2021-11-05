@@ -71,8 +71,16 @@ async function getContext(contractAddress: string): Promise<Context> {
   const padding = getEntropyString(32);
   const entropy = window.btoa(getEntropyString(32));
 
+  let permit;
+  const rawPermit = localStorage.getItem(
+    `query_permit_${address + contractAddress}`
+  ) as string;
+  if (rawPermit) {
+    permit = JSON.parse(rawPermit);
+  }
+
   // Set the context.
-  return { address, key, height, padding, entropy } as Context;
+  return { address, key, height, padding, entropy, permit } as Context;
 }
 
 async function handleResponse(txHash: string): Promise<TxsResponse> {
