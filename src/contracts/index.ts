@@ -98,7 +98,8 @@ export function createContract<T>(contract: ContractSpecification): T {
           const result = Reflect.apply(func, thisArg, args);
 
           if (func.type === QUERY_TYPE) {
-            return queryContract(contractAddress, result);
+            const _ = undefined; // TODO: Handle added params
+            return queryContract(contractAddress, result, _, contract.codeHash);
           } else if (func.type === MESSAGE_TYPE) {
             const {
               handleMsg,
