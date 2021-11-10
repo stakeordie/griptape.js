@@ -10,7 +10,8 @@
   "author": "Stake Or Die!",
   "license": "MIT",
   "scripts": {
-    "build": "npx prettier --write . && tsc --skipLibCheck",
+    "build": "tsc --skipLibCheck",
+    "release-build": "npx prettier --write . && tsc --skipLibCheck",
     "dev": "tsc -w --skipLibCheck",
     "test": "jest",
     "prettier": "npx prettier --write ."
@@ -30,8 +31,7 @@
     "typescript": "^4.3.2"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "decimal.js": "^10.2.1",
-    "secretjs": "0.16.7"
+    "decimal.js": "10.2.1",
+    "secretjs": "0.17.0-beta.4"
   }
 }

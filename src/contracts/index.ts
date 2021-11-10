@@ -49,7 +49,7 @@ export class ContractTxResponseHandler<T>
   }
 
   parse(): any {
-    return JSON.parse(decoder.decode(this.response.data));
+    return this.response.data;
   }
 
   getRaw(): ExecuteResult | TxsResponse {
