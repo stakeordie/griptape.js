@@ -4015,10 +4015,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-secretjs@0.17.0-beta.4:
-  version "0.17.0-beta.4"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.0-beta.4.tgz#9a71642ffaac46bf59b0b6ef511ace3a90c44344"
-  integrity sha512-sMWIAE9rdOn9Gd4eNjf5pwt3BW+8Kg/EJfYAcidluEwBfhtpxibQbbtaQXcLYi4VTXIxX+OpfV4KAy4+VUQpEw==
+secretjs@0.17.1:
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.1.tgz#7060e1de68e149ca78a353afa7d5a69c6bd32e66"
+  integrity sha512-MQ9qehRRUFuTvGIEWYyPZhZ6xE+42+riGRDmSMxsJuyijq8xepY+tlS7x+ljnoXR0BeAggltp9H9RI/PJ6oF9Q==
   dependencies:
     "@iov/crypto" "2.1.0"
     "@iov/encoding" "2.1.0"
