@@ -175,11 +175,7 @@ export function createContract<T>(contract: ContractSpecification): T {
                 const result = await handleResponse(response.transactionHash);
                 if (result.found && result.response) {
                   const { response: txResponse } = result;
-                  const res =
-                    await getSigningClient().restClient.decryptTxsResponse(
-                      txResponse
-                    );
-                  return ContractTxResponseHandler.of(res);
+                  return ContractTxResponseHandler.of(txResponse);
                 } else {
                   throw new Error(
                     `Could not found TX: ${response.transactionHash}`
