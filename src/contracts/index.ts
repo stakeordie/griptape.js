@@ -7,7 +7,6 @@ import {
   instantiate,
   getSigningClient,
   getConfig,
-  getClient,
 } from '../bootstrap';
 import { viewingKeyManager } from '../bootstrap';
 import {
@@ -49,7 +48,7 @@ export class ContractTxResponseHandler<T>
   }
 
   parse(): any {
-    return this.response.data;
+    return JSON.parse(decoder.decode(this.response.data));
   }
 
   getRaw(): ExecuteResult | TxsResponse {
@@ -96,12 +95,9 @@ async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
   let result = false;
   let tx;
 
-  // eslint-disable-next-line
   while (true) {
     try {
-      // eslint-disable-next-line
-      // @ts-ignore
-      tx = await getClient().restClient.txById(txHash);
+      tx = await getSigningClient().restClient.txById(txHash);
 
       if (!tx.raw_log.startsWith('[')) {
         result = false;
