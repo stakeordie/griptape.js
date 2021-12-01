@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "decimal.js": "10.2.1",
-    "secretjs": "0.17.3"
+    "secretjs": "0.17.5"
   }
 }
