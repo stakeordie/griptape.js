@@ -26,10 +26,11 @@ import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
-  sleep,
+  sleep
 } from './utils';
 import { Coin } from 'secretjs/types/types';
 import { Encoding } from '@iov/encoding';
+import { getWindow } from '../utils';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -72,7 +73,7 @@ async function getContext(contractAddress: string): Promise<Context> {
   const key = viewingKeyManager.get(contractAddress);
   const height = await getHeight();
   const padding = getEntropyString(32);
-  const entropy = window.btoa(getEntropyString(32));
+  const entropy = getWindow()?.btoa(getEntropyString(32));
 
   let permit;
   const rawPermit = localStorage.getItem(

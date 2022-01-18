@@ -61,3 +61,7 @@ export function bech32(str: string, abbrv: number): string {
     str.substring(str.length - half, str.length)
   );
 }
+
+export function getWindow() {
+  return typeof window !== 'undefined' ? window : undefined;
+}
