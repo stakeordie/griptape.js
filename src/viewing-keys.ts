@@ -2,6 +2,7 @@ import { emitEvent } from './events';
 import { getAddress, getChainId } from './bootstrap';
 import { BaseContract } from './contracts/types';
 import { getKeplr } from './wallet';
+import { getWindow } from './utils';
 
 export interface Key {
   id: string;
@@ -24,11 +25,9 @@ export class ViewingKeyManager {
   private readonly accounts: Array<Account> = [];
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      const item = localStorage.getItem('griptape.js');
-      if (item) {
-        this.accounts = JSON.parse(item);
-      }
+    const item = getWindow()?.localStorage.getItem('griptape.js');
+    if (item) {
+      this.accounts = JSON.parse(item);
     }
   }
 
@@ -52,9 +51,7 @@ export class ViewingKeyManager {
 
     const newKey = this.createKey(form);
     account.keys.push(newKey);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
-    }
+    getWindow()?.localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
     emitEvent('viewing-key-created');
     return newKey.value;
   }
@@ -76,9 +73,7 @@ export class ViewingKeyManager {
     theKey.value = key;
 
     // Update local storage.
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
-    }
+    getWindow()?.localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
   }
 
   public get(idOrAddress: string): string | undefined {

@@ -9,6 +9,7 @@ import {
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
+import { getWindow } from './utils';
 
 const customFees: FeeTable = {
   upload: {
@@ -202,7 +203,7 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
   return async (chainId: string) => {
     const keplr = await getKeplr();
 
-    if (!keplr || !window.getOfflineSigner)
+    if (!keplr || !getWindow()?.getOfflineSigner)
       throw new Error('Install keplr extension');
 
     try {
@@ -212,12 +213,13 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
       return;
     }
 
-    const offlineSigner = window.getOfflineSigner(chainId);
+    const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
+    if (!offlineSigner) throw new Error('No offline signer');
     const [{ address }] = await offlineSigner.getAccounts();
     const enigmaUtils = keplr.getEnigmaUtils(chainId);
 
     // And also we want to be able to react to an account change.
-    window.addEventListener('keplr_keystorechange', () => {
+    getWindow()?.addEventListener('keplr_keystorechange', () => {
       emitEvent('account-change');
     });
 

@@ -1,12 +1,13 @@
 import { Keplr } from '@keplr-wallet/types';
+import { getWindow } from './utils';
 
 export async function getKeplr(): Promise<Keplr | undefined> {
-  if (window.keplr) {
-    return window.keplr;
+  if (getWindow()?.keplr) {
+    return getWindow()?.keplr;
   }
 
   if (document.readyState === 'complete') {
-    return window.keplr;
+    return getWindow()?.keplr;
   }
 
   return new Promise(resolve => {
@@ -15,7 +16,7 @@ export async function getKeplr(): Promise<Keplr | undefined> {
         event.target &&
         (event.target as Document).readyState === 'complete'
       ) {
-        resolve(window.keplr);
+        resolve(getWindow()?.keplr);
         document.removeEventListener('readystatechange', documentStateChange);
       }
     };
