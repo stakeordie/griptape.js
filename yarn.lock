@@ -1260,16 +1260,16 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@keplr-wallet/types@0.9.4":
-  version "0.9.4"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.9.4.tgz#de08ff01b7ad10401f24862b61f47b73c627114d"
-  integrity sha512-+ffe3WgThvd6K6YTjWqTBOp4rpqbQnsm2/n4yb6hEu0DF9bZQbn2JNMKU7i+BCjzGxN6oifq1mftlKPLfqSMnw==
+"@keplr-wallet/types@0.9.10":
+  version "0.9.10"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.9.10.tgz#3b7f8bdb96edffd73bcd5b65f6fe0aef1c9d1f98"
+  integrity sha512-Qzz7YGhFpwGNGSLGYXiKEy0mvd5t9Wa8NmQyN8xSFUIy1HjNxKunhMbfSIyIpBRK7n6ujvlS519rkd+TUjUdqQ==
   dependencies:
     "@cosmjs/launchpad" "^0.24.0-alpha.25"
     "@cosmjs/proto-signing" "^0.24.0-alpha.25"
     axios "^0.21.0"
     long "^4.0.0"
-    secretjs "^0.16.0"
+    secretjs "^0.17.0"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -4015,7 +4015,7 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-secretjs@0.17.5:
+secretjs@0.17.5, secretjs@^0.17.0:
   version "0.17.5"
   resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.5.tgz#5b55e46cfa2719714831fc2019e21c21959fe587"
   integrity sha512-sf0+Je9KIEMQr/wJOgeqyBOV0ruiMNHSwP4L2vXiJbtzJWQqyVHyPkpavAhruNZ+91XlSzAFP2X5MPxqPBC9fQ==
@@ -4030,22 +4030,6 @@ secretjs@0.17.5:
     miscreant "0.3.2"
     pako "1.0.11"
     protobufjs "^6.11.2"
-    secure-random "1.1.2"
-
-secretjs@^0.16.0:
-  version "0.16.7"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.16.7.tgz#8c816ddef476a1d7ac877f86807a037c249cedf0"
-  integrity sha512-HL2Ekui0TFQhWrzQ5IenI3a54IaD9UdXwdyYMMLhisQCm5/quMw/v4CxmjEro+b5FxlEYvWcgzFO6nntduywDg==
-  dependencies:
-    "@iov/crypto" "2.1.0"
-    "@iov/encoding" "2.1.0"
-    "@iov/utils" "2.0.2"
-    axios "0.21.1"
-    curve25519-js "0.0.4"
-    fast-deep-equal "3.1.1"
-    js-crypto-hkdf "0.7.3"
-    miscreant "0.3.2"
-    pako "1.0.11"
     secure-random "1.1.2"
 
 secure-random@1.1.2:
