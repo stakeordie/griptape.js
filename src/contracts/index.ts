@@ -26,7 +26,7 @@ import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
-  sleep
+  sleep,
 } from './utils';
 import { Coin } from 'secretjs/types/types';
 import { Encoding } from '@iov/encoding';

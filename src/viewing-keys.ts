@@ -51,7 +51,10 @@ export class ViewingKeyManager {
 
     const newKey = this.createKey(form);
     account.keys.push(newKey);
-    getWindow()?.localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    getWindow()?.localStorage.setItem(
+      'griptape.js',
+      JSON.stringify(this.accounts)
+    );
     emitEvent('viewing-key-created');
     return newKey.value;
   }
@@ -73,7 +76,10 @@ export class ViewingKeyManager {
     theKey.value = key;
 
     // Update local storage.
-    getWindow()?.localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    getWindow()?.localStorage.setItem(
+      'griptape.js',
+      JSON.stringify(this.accounts)
+    );
   }
 
   public get(idOrAddress: string): string | undefined {
