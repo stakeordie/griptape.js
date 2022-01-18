@@ -24,9 +24,11 @@ export class ViewingKeyManager {
   private readonly accounts: Array<Account> = [];
 
   constructor() {
-    const item = localStorage.getItem('griptape.js');
-    if (item) {
-      this.accounts = JSON.parse(item);
+    if (typeof window !== 'undefined') {
+      const item = localStorage.getItem('griptape.js');
+      if (item) {
+        this.accounts = JSON.parse(item);
+      }
     }
   }
 
@@ -50,7 +52,9 @@ export class ViewingKeyManager {
 
     const newKey = this.createKey(form);
     account.keys.push(newKey);
-    localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    }
     emitEvent('viewing-key-created');
     return newKey.value;
   }
@@ -72,7 +76,9 @@ export class ViewingKeyManager {
     theKey.value = key;
 
     // Update local storage.
-    localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('griptape.js', JSON.stringify(this.accounts));
+    }
   }
 
   public get(idOrAddress: string): string | undefined {
