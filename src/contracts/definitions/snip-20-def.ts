@@ -1,3 +1,4 @@
+import { extendContract } from '..';
 import {
   BaseContract,
   Context,
@@ -175,6 +176,40 @@ export const snip20Def: ContractDefinition = {
     },
   },
 };
+export const snip20Permit: ContractDefinition = {
+  queries: {
+    getBalance({ permit: per }: Context): ContractQueryRequest {
+      const permit = per ? per : null;
+      const query = { balance: {} };
+
+      return { with_permit: { query, permit } };
+    },
+
+    getTransferHistory(
+      { permit: per }: Context,
+      page_size: number,
+      page?: number
+    ): ContractQueryRequest {
+      const permit = per ? per : null;
+      const query = { transfer_history: { page_size, page } };
+
+      return { with_permit: { query, permit } };
+    },
+
+    getAllowance(
+      { permit: per }: Context,
+      owner: string,
+      spender: string
+    ): ContractQueryRequest {
+      const query = { allowance: { owner, spender } };
+      const permit = per ? per : null;
+
+      return { with_permit: { query, permit } };
+    },
+  },
+};
+
+export const snip20DefPermit = extendContract(snip20Def, snip20Permit);
 
 export interface MessageResponse {
   status: string;
