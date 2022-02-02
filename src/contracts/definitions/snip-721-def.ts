@@ -516,7 +516,7 @@ export const snip721Def: ContractDefinition = {
   },
 };
 
-const snip721Permit: ContractDefinition = {
+const snip721BasePermitDef: ContractDefinition = {
   queries: {
     getNumTokens(
       { permit }: Context,
@@ -687,7 +687,10 @@ const snip721Permit: ContractDefinition = {
   },
 };
 
-export const snip721DefPermit = extendContract(snip721Def, snip721Permit);
+export const snip721PermitDef = extendContract(
+  snip721Def,
+  snip721BasePermitDef
+);
 
 export type Expiration =
   | {
