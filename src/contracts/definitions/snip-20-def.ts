@@ -178,31 +178,28 @@ export const snip20Def: ContractDefinition = {
 };
 export const snip20Permit: ContractDefinition = {
   queries: {
-    getBalance({ permit: per }: Context): ContractQueryRequest {
-      const permit = per ? per : null;
+    getBalance({ permit }: Context): ContractQueryRequest {
       const query = { balance: {} };
 
       return { with_permit: { query, permit } };
     },
 
     getTransferHistory(
-      { permit: per }: Context,
+      { permit }: Context,
       page_size: number,
       page?: number
     ): ContractQueryRequest {
-      const permit = per ? per : null;
       const query = { transfer_history: { page_size, page } };
 
       return { with_permit: { query, permit } };
     },
 
     getAllowance(
-      { permit: per }: Context,
+      { permit }: Context,
       owner: string,
       spender: string
     ): ContractQueryRequest {
       const query = { allowance: { owner, spender } };
-      const permit = per ? per : null;
 
       return { with_permit: { query, permit } };
     },
