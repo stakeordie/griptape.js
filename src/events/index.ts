@@ -27,3 +27,10 @@ export function emitEvent(
 export function subscribeEvent(name: string, callback: Callback) {
   getWindow()?.addEventListener(name, callback);
 }
+
+export function unsubscribeEventCallback(
+  name: string,
+  callback: Callback
+): Callback {
+  return () => getWindow()?.removeEventListener(name, callback);
+}
