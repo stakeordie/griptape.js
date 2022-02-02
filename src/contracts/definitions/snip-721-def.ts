@@ -12,17 +12,22 @@ export const snip721Def: ContractDefinition = {
       return { contract_info: {} };
     },
 
-    getNumTokens({ address, key: viewing_key }: Context): ContractQueryRequest {
-      const viewer = { address, viewing_key };
+    getNumTokens(
+      { address, key: viewing_key }: Context,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const viewer = sendViewer ? { address, viewing_key } : null;
+
       return { num_tokens: { viewer } };
     },
 
     getOwnerOf(
       { address, key: viewing_key }: Context,
       token_id: string,
-      include_expired?: boolean
+      include_expired?: boolean,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewer = { address, viewing_key };
+      const viewer = sendViewer ? { address, viewing_key } : null;
       return { owner_of: { token_id, viewer, include_expired } };
     },
 
@@ -33,17 +38,20 @@ export const snip721Def: ContractDefinition = {
     getAllNftInfo(
       { address, key: viewing_key }: Context,
       token_id: string,
-      include_expired?: boolean
+      include_expired?: boolean,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewer = { address, viewing_key };
+      const viewer = sendViewer ? { address, viewing_key } : null;
       return { all_nft_info: { token_id, viewer, include_expired } };
     },
 
     getPrivateMetadata(
       { address, key: viewing_key }: Context,
-      token_id: string
+      token_id: string,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewer = { viewing_key, address };
+      const viewer = sendViewer ? { address, viewing_key } : null;
+
       return {
         private_metadata: {
           token_id,
@@ -55,9 +63,10 @@ export const snip721Def: ContractDefinition = {
     getNftDossier(
       { address, key: viewing_key }: Context,
       token_id: string,
-      include_expired?: boolean
+      include_expired?: boolean,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewer = { viewing_key, address };
+      const viewer = sendViewer ? { address, viewing_key } : null;
       return {
         nft_dossier: {
           token_id,
@@ -82,12 +91,14 @@ export const snip721Def: ContractDefinition = {
     },
 
     getApprovedForAll(
-      { address: owner }: Context,
+      { address: owner, key }: Context,
       include_expired?: boolean
     ): ContractQueryRequest {
+      const viewing_key = key ? key : null;
       return {
         approved_for_all: {
           owner,
+          viewing_key,
           include_expired,
         },
       };
@@ -107,15 +118,17 @@ export const snip721Def: ContractDefinition = {
     },
 
     getTokens(
-      { address: viewer }: Context,
-      owner: string,
+      { address: owner, key }: Context,
+      viewer?: string,
       start_after?: string,
       limit?: number
     ): ContractQueryRequest {
+      const viewing_key = key ? key : null;
       return {
         tokens: {
-          viewer,
           owner,
+          viewer,
+          viewing_key,
           start_after,
           limit,
         },
@@ -135,6 +148,34 @@ export const snip721Def: ContractDefinition = {
           page_size,
         },
       };
+    },
+
+    getAllTokens(
+      { address, key: viewing_key }: Context,
+      limit?: number,
+      sendViewer?: boolean
+    ) {
+      const viewer = sendViewer ? { address, viewing_key } : null;
+      return { all_tokens: { viewer, limit } };
+    },
+
+    getMinters(_: Context) {
+      return { minters: {} };
+    },
+
+    getRoyaltyInfo(_: Context, token_id?: string) {
+      return { royalty_info: { token_id } };
+    },
+
+    getIsUnwrapped(_: Context, token_id: string) {
+      return { is_unwrapped: { token_id } };
+    },
+
+    getVerifyTransferApproval(
+      { address, key: viewing_key }: Context,
+      token_ids: Array<string>
+    ) {
+      return { verify_transfer_approval: { token_ids, address, viewing_key } };
     },
   },
 
@@ -249,6 +290,226 @@ export const snip721Def: ContractDefinition = {
       };
       return { handleMsg };
     },
+
+    mintNft(
+      { address, padding }: Context,
+      token_id?: string,
+      owner?: string,
+      public_metadata?: Metadata,
+      private_metadata?: Metadata,
+      serial_number?: SerialNumber,
+      royalty_info?: RoyaltyInfo,
+      memo?: string
+    ) {
+      const handleMsg = {
+        mint_nft: {
+          token_id,
+          owner: owner || address,
+          public_metadata,
+          private_metadata,
+          serial_number,
+          royalty_info,
+          memo,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    mintNftClones(
+      { address, padding }: Context,
+      quantity: number,
+      mint_run_id?: string,
+      owner?: string,
+      public_metadata?: Metadata,
+      private_metadata?: Metadata,
+      royalty_info?: RoyaltyInfo,
+      memo?: string
+    ) {
+      const handleMsg = {
+        mint_nft_clones: {
+          mint_run_id,
+          quantity,
+          owner: owner || address,
+          public_metadata,
+          private_metadata,
+          royalty_info,
+          memo,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    addMinters({ padding }: Context, minters: Array<string>) {
+      const handleMsg = {
+        add_minters: {
+          minters,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    removeMinters({ padding }: Context, minters: Array<string>) {
+      const handleMsg = {
+        remove_minters: {
+          minters,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    setMinters({ padding }: Context, minters: Array<string>) {
+      const handleMsg = {
+        set_minters: {
+          minters,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    setMetadata(
+      { padding }: Context,
+      token_id: string,
+      public_metadata?: Metadata,
+      private_metadata?: Metadata
+    ) {
+      const handleMsg = {
+        set_metadata: {
+          token_id,
+          public_metadata,
+          private_metadata,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    setRoyaltyInfo(
+      { padding }: Context,
+      token_id?: string,
+      royalty_info?: RoyaltyInfo
+    ) {
+      const handleMsg = {
+        set_royalty_info: {
+          token_id,
+          royalty_info,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    batchMintNft({ padding }: Context, mints: Array<Mint>) {
+      const handleMsg = {
+        batch_mint_nft: {
+          mints,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    batchTransferNft({ padding }: Context, transfers: Array<Transfer>) {
+      const handleMsg = {
+        batch_transfer_nft: {
+          transfers,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    batchSendNft({ padding }: Context, sends: Array<Send>) {
+      const handleMsg = {
+        batch_send_nft: {
+          sends,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    burnNft({ padding }: Context, token_id: string, memo?: string) {
+      const handleMsg = {
+        burn_nft: {
+          token_id,
+          memo,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    BurnNft({ padding }: Context, burns: Array<Burn>) {
+      const handleMsg = {
+        batch_burn_nft: {
+          burns,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    setGlobalApproval(
+      { padding }: Context,
+      token_id: string,
+      view_owner?: AccessLevel,
+      view_private_metadata?: AccessLevel,
+      expires?: Expiration
+    ) {
+      const handleMsg = {
+        set_global_approval: {
+          token_id,
+          view_owner,
+          view_private_metadata,
+          expires,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
+
+    reveal({ padding }: Context, token_id: string) {
+      const handleMsg = {
+        reveal: {
+          token_id,
+          padding,
+        },
+      };
+      return {
+        handleMsg,
+      };
+    },
   },
 };
 
@@ -262,10 +523,54 @@ export type Expiration =
   | 'never';
 
 export type AccessLevel = 'approve_token' | 'all' | 'revoke_token' | 'none';
-
+export type Transfer = {
+  recipient: string;
+  token_ids: Array<string>;
+  memo?: string;
+};
+export type ReceiverInfo = {
+  recipient_code_hash: string;
+  also_implements_batch_receive_nft?: boolean;
+};
+export type Send = {
+  contract: string;
+  receiver_info?: ReceiverInfo;
+  token_ids: Array<string>;
+  msg?: string;
+  memo?: string;
+};
+export type Burn = {
+  token_ids: Array<string>;
+  memo?: string;
+};
+export type SerialNumber = {
+  mint_run?: number;
+  serial_number: number;
+  quantity_minted_this_run?: number;
+};
 export type Approval = {
   spender: string;
   expires: Expiration;
+};
+export type Metadata = {
+  token_uri?: string;
+  extension?: Extension;
+};
+export type RoyaltyInfo = {
+  decimal_places_in_rates: number;
+  royalties: Array<{
+    recipient: string;
+    rate: number;
+  }>;
+};
+export type Mint = {
+  token_id?: string;
+  owner?: string;
+  public_metadata?: Metadata;
+  private_metadata?: Metadata;
+  serial_number?: SerialNumber;
+  royalty_info?: RoyaltyInfo;
+  memo?: string;
 };
 export type Extension = {
   image?: string;
@@ -292,7 +597,7 @@ export type Media = {
 };
 
 export type Trait = {
-  displa_type?: string;
+  display_type?: string;
   trait_type?: string;
   value?: string;
   max_value?: string;
@@ -310,8 +615,11 @@ export interface Snip721Contract extends BaseContract {
    * Returns the number of tokens controlled by the contract. If the contract's
    * token supply is private, the SNIP-721 contract may choose to only allow an
    * authenticated minter's address to perform this query.
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    */
-  getNumTokens(): Promise<{ num_tokens: { count: number } }>;
+  getNumTokens(
+    sendViewer?: boolean
+  ): Promise<{ num_tokens: { count: number } }>;
 
   /**
    * Returns the owner of the specified token if the querier is the owner or has
@@ -320,11 +628,13 @@ export interface Snip721Contract extends BaseContract {
    * permission.
    * @param token_id ID of the token being queried.
    * @param include_expired True if expired transfer approvals should be
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    * included in the response.
    */
   getOwnerOf(
     token_id: string,
-    include_expired?: boolean
+    include_expired?: boolean,
+    sendViewer?: boolean
   ): Promise<{
     owner_of: {
       owner: string;
@@ -350,10 +660,12 @@ export interface Snip721Contract extends BaseContract {
    * @param token_id ID of the token being queried.
    * @param include_expired True if expired transfer approvals should be
    * included in the response.
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    */
   getAllNftInfo(
     token_id: string,
-    include_expired?: boolean
+    include_expired?: boolean,
+    sendViewer?: boolean
   ): Promise<{
     all_nft_info: {
       access: {
@@ -373,12 +685,13 @@ export interface Snip721Contract extends BaseContract {
    * it. All metadata fields are optional to allow for SNIP-721 contracts that
    * choose not to implement private metadata.
    * @param token_id ID of the token being queried.
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    */
-  getPrivateMetadata(token_id: string): Promise<{
-    private_metadata: {
-      token_uri?: string;
-      extension?: Extension;
-    };
+  getPrivateMetadata(
+    token_id: string,
+    sendViewer?: boolean
+  ): Promise<{
+    private_metadata: Metadata;
   }>;
 
   /**
@@ -386,22 +699,18 @@ export interface Snip721Contract extends BaseContract {
    * view.
    * @param token_id ID of the token being queried.
    * @param include_expired True if expired transfer approvals should be
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    * included in the response.
    */
   getNftDossier(
     token_id: string,
-    include_expired?: boolean
+    include_expired?: boolean,
+    sendViewer?: boolean
   ): Promise<{
     nft_dossier: {
       owner: string;
-      public_metadata: {
-        token_uri?: string;
-        extension?: Extension;
-      };
-      private_metadata: {
-        token_uri?: string;
-        extension?: Extension;
-      };
+      public_metadata: Metadata;
+      private_metadata: Metadata;
       display_private_metadata_error: string;
       royalty_info: {
         decimal_places_in_rates: number;
@@ -501,11 +810,13 @@ export interface Snip721Contract extends BaseContract {
    * @param start_after string	Results will only list token IDs that come after
    * this token ID in the list.
    * @param limit 	Number of token IDs to return.
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    */
   getTokens(
     owner: string,
     start_after?: string,
-    limit?: number
+    limit?: number,
+    sendViewer?: boolean
   ): Promise<{
     token_list: {
       tokens: string[];
@@ -548,6 +859,60 @@ export interface Snip721Contract extends BaseContract {
         };
         memo: string;
       }[];
+    };
+  }>;
+
+  /**
+   * Returns a list of tokens' ids minted in order minted. Only if the token supply is public
+   * @param limit 	Number of token IDs to return.
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
+   */
+  getAllTokens(
+    limit?: number,
+    sendViewer?: boolean
+  ): Promise<{
+    token_list: {
+      tokens: Array<string>;
+    };
+  }>;
+
+  /**
+   * Minters returns the list of addresses that are authorized to mint tokens. This query is not authenticated.
+   */
+  getMinters(): Promise<{
+    minters: {
+      minters: Array<string>;
+    };
+  }>;
+
+  /**
+   * If a token_id is provided in the request, RoyaltyInfo returns the royalty information for that token.
+   * If no token_id is requested, RoyaltyInfo displays the default royalty information for the contract.
+   * @param token_id ID of the token being queried
+   */
+  getRoyaltyInfo(token_id?: string): Promise<{
+    royalty_info: RoyaltyInfo;
+  }>;
+
+  /**
+   * IsUnwrapped indicates whether the token has been unwrapped. This query is not authenticated.
+   * @param token_id ID of the token being queried
+   */
+  getIsUnwrapped(token_id: string): Promise<{
+    is_unwrapped: {
+      token_is_unwrapped: boolean;
+    };
+  }>;
+
+  /**
+   * VerifyTransferApproval will verify that the specified address has approval
+   * to transfer the entire provided list of tokens.
+   * @param token_ids Array of IDs of the tokens to verify
+   */
+  getVerifyTransferApproval(token_ids: Array<string>): Promise<{
+    verify_transfer_approval: {
+      approved_for_all: boolean;
+      first_unapproved_token: string;
     };
   }>;
 
@@ -735,6 +1100,233 @@ export interface Snip721Contract extends BaseContract {
     ContractMessageResponse<{
       viewing_key: {
         key: string;
+      };
+    }>
+  >;
+  /**
+   * mints a single token.
+   * @param token_id optional_ID_of_new_token,
+   * @param public_metadata optional public object of type Metadata to set for a token
+   * @param private_metadata optional private object of type Metadata to set for a token
+   * @param serial_number optional SerialNumber for this token
+   * @param royalty_info optional RoyaltyInfo for this token
+   * @param memo memo for the mint tx that is only viewable by addresses involved in the mint (minter, owner)
+   */
+  mintNft(
+    token_id?: string,
+    owner?: string,
+    public_metadata?: Metadata,
+    private_metadata?: Metadata,
+    serial_number?: SerialNumber,
+    royalty_info?: RoyaltyInfo,
+    memo?: string
+  ): Promise<
+    ContractMessageResponse<{
+      mint_nft: {
+        token_id: string;
+      };
+    }>
+  >;
+
+  /**
+   * MintNftClones mints copies of an NFT, giving each one a MintRunInfo that indicates
+   * its serial number and the number of identical NFTs minted with it.
+   * @param token_id optional_ID_of_new_token,
+   * @param quantity number of clones to mint in this run
+   * @param public_metadata optional public object of type Metadata to set for a token
+   * @param private_metadata optional private object of type Metadata to set for a token
+   * @param serial_number optional SerialNumber for this token
+   * @param royalty_info optional RoyaltyInfo for this token
+   * @param memo memo for the mint tx that is only viewable by addresses involved in the mint (minter, owner)
+   */
+  mintNftClones(
+    quantity: number,
+    mint_run_id?: string,
+    owner?: string,
+    public_metadata?: Metadata,
+    private_metadata?: Metadata,
+    royalty_info?: RoyaltyInfo,
+    memo?: string
+  ): Promise<
+    ContractMessageResponse<{
+      mint_nft_clones: {
+        first_minted: string;
+        last_minted: string;
+      };
+    }>
+  >;
+
+  /**
+   * AddMinters must add the provided addresses to the list of authorized minters.
+   * This should only be callable by an admin address.
+   * @param minters list of addresses to add
+   */
+  addMinters(minters: Array<string>): Promise<
+    ContractMessageResponse<{
+      add_minters: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * RemoveMinters must remove the provided addresses from the list of authorized minters.
+   * This should only be callable by an admin address.
+   * @param minters list of addresses to remove
+   */
+  removeMinters(minters: Array<string>): Promise<
+    ContractMessageResponse<{
+      remove_minters: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * SetMinters must precisely define the list of authorized minters. This should
+   * only be callable by an admin address.
+   * @param minters list of addresses to set
+   */
+  setMinters(minters: Array<string>): Promise<
+    ContractMessageResponse<{
+      set_minters: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * SetMetadata will set the public and/or private metadata to the corresponding input.
+   * @param token_id ID of the token whose metadata should be updated,
+   * @param public_metadata optional public object of type Metadata to set for a token
+   * @param private_metadata optional private object of type Metadata to set for a token
+   */
+  setMetadata(
+    token_id: string,
+    public_metadata?: Metadata,
+    private_metadata?: Metadata
+  ): Promise<
+    ContractMessageResponse<{
+      set_metadata: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * The contract's default RoyaltyInfo is the RoyaltyInfo that will be assigned
+   * to any token that is minted without explicitly defining its own RoyaltyInfo.
+   * [more info](https://github.com/SecretFoundation/SNIPs/blob/master/SNIP-721.md#setroyaltyinfo)
+   * @param token_id Optional ID of the token whose RoyaltyInfo should be updated
+   * @param royalty_info The new RoyaltyInfo
+   */
+  setRoyaltyInfo(
+    token_id?: string,
+    royalty_info?: RoyaltyInfo
+  ): Promise<
+    ContractMessageResponse<{
+      set_royalty_info: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * BatchMintNft mints a list of tokens.
+   * @param mints A list of all the mint operations to perform
+   */
+  batchMintNft(mints: Array<Mint>): Promise<
+    ContractMessageResponse<{
+      batch_mint_nft: {
+        token_ids: Array<string>;
+      };
+    }>
+  >;
+
+  /**
+   * BatchTransferNft is used to perform multiple token transfers.
+   * @param transfers List of Transfer objects to process
+   */
+  batchTransferNft(transfers: Array<Transfer>): Promise<
+    ContractMessageResponse<{
+      batch_transfer_nft: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * BatchSendNft is used to perform multiple token transfers
+   * [more info](https://github.com/SecretFoundation/SNIPs/blob/master/SNIP-721.md#batchsendnft)
+   *
+   * @param sends List of Send objects to process
+   */
+  batchSendNft(sends: Array<Send>): Promise<
+    ContractMessageResponse<{
+      batch_send_nft: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * BurnNft is used to burn a single token, providing an optional memo to include
+   * in the burn's transaction history if desired.
+   * @param token_id Identifier of the token to burn
+   * @param memo memo for the burn tx that is only viewable by addresses involved in the burn
+   */
+  burnNft(
+    token_id: string,
+    memo?: string
+  ): Promise<
+    ContractMessageResponse<{
+      burn_nft: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * The Burn object provides a list of tokens to burn, as well as an optional
+   * memo that would be included with every token burn transaction history.
+   * @param burns List of Burn objects to process
+   */
+  BurnNft(burns: Array<Burn>): Promise<
+    ContractMessageResponse<{
+      batch_burn_nft: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * The owner of a token can use SetGlobalApproval to make ownership and/or private metadata viewable by everyone
+   * @param token_id If supplying either approve_token or revoke_token access, the token whose privacy is being set
+   * @param view_owner Grant or revoke everyone's permission to view the ownership of a token/inventory
+   * @param view_private_metadata Grant or revoke everyone's permission to view the private metadata of a token/inventory
+   * @param expires Expiration of any approval granted in this message. Can be a blockheight, time, or never
+   */
+  setGlobalApproval(
+    token_id: string,
+    view_owner?: AccessLevel,
+    view_private_metadata?: AccessLevel,
+    expires?: Expiration
+  ): Promise<
+    ContractMessageResponse<{
+      set_global_approval: {
+        status: string;
+      };
+    }>
+  >;
+
+  /**
+   * Reveal unwraps the sealed private metadata, irreversibly marking the token as unwrapped.
+   * @param token_id ID of the token to unwrap
+   */
+  reveal(token_id: string): Promise<
+    ContractMessageResponse<{
+      reveal: {
+        status: string;
       };
     }>
   >;
