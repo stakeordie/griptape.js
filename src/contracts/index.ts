@@ -26,7 +26,7 @@ import {
   getEntropyString,
   calculateCommonKeys,
   getFeeForExecute,
-  sleep
+  sleep,
 } from './utils';
 import { Coin } from 'secretjs/types/types';
 import { Encoding } from '@iov/encoding';
@@ -117,6 +117,11 @@ async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
   return { found: result, response: tx };
 }
 
+/**
+ * @deprecated use the new {@link createContractClient} API instead
+ * @param contract object of contract specification
+ * @returns T
+ */
 export function createContract<T>(contract: ContractSpecification): T {
   const codeHash = contract.codeHash;
   const handler = {
@@ -225,6 +230,14 @@ export function createContract<T>(contract: ContractSpecification): T {
   }
 
   return result;
+}
+
+/**
+ * @param contract object of contract specification
+ * @returns T
+ */
+export function createContractClient<T>(contract: ContractSpecification): T {
+  return createContract<T>(contract);
 }
 
 export function extendContract(
