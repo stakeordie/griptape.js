@@ -1,3 +1,4 @@
+import { extendContract } from '..';
 import {
   Context,
   ContractQueryRequest,
@@ -92,9 +93,10 @@ export const snip721Def: ContractDefinition = {
 
     getApprovedForAll(
       { address: owner, key }: Context,
-      include_expired?: boolean
+      include_expired?: boolean,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewing_key = key ? key : null;
+      const viewing_key = sendViewer ? key : null;
       return {
         approved_for_all: {
           owner,
@@ -121,9 +123,10 @@ export const snip721Def: ContractDefinition = {
       { address: owner, key }: Context,
       viewer?: string,
       start_after?: string,
-      limit?: number
+      limit?: number,
+      sendViewer?: boolean
     ): ContractQueryRequest {
-      const viewing_key = key ? key : null;
+      const viewing_key = sendViewer ? key : null;
       return {
         tokens: {
           owner,
@@ -513,6 +516,182 @@ export const snip721Def: ContractDefinition = {
   },
 };
 
+const snip721BasePermitDef: ContractDefinition = {
+  queries: {
+    getNumTokens(
+      { permit }: Context,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = { num_tokens: {} };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getOwnerOf(
+      { permit }: Context,
+      token_id: string,
+      include_expired?: boolean,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = { owner_of: { token_id, include_expired } };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getAllNftInfo(
+      { permit }: Context,
+      token_id: string,
+      include_expired?: boolean,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = { all_nft_info: { token_id, include_expired } };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getPrivateMetadata(
+      { permit }: Context,
+      token_id: string,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        private_metadata: {
+          token_id,
+        },
+      };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getNftDossier(
+      { permit }: Context,
+      token_id: string,
+      include_expired?: boolean,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        nft_dossier: {
+          token_id,
+          include_expired,
+        },
+      };
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getTokenApprovals(
+      { permit }: Context,
+      token_id: string,
+      include_expired?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        token_approvals: {
+          token_id,
+          include_expired,
+        },
+      };
+
+      return { with_permit: { query, permit } };
+    },
+
+    getApprovedForAll(
+      { address: owner, permit }: Context,
+      include_expired?: boolean,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        approved_for_all: {
+          owner,
+          include_expired,
+        },
+      };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getInventoryApprovals(
+      { address, permit }: Context,
+      include_expired?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        inventory_approvals: {
+          address,
+          include_expired,
+        },
+      };
+
+      return { with_permit: { query, permit } };
+    },
+
+    getTokens(
+      { address: owner, permit }: Context,
+      viewer?: string,
+      start_after?: string,
+      limit?: number,
+      sendViewer?: boolean
+    ): ContractQueryRequest {
+      const query = {
+        tokens: {
+          owner,
+          viewer,
+          start_after,
+          limit,
+        },
+      };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getTransactionHistory(
+      { address, permit }: Context,
+      page?: number,
+      page_size?: number
+    ): ContractQueryRequest {
+      const query = {
+        transaction_history: {
+          address,
+          page,
+          page_size,
+        },
+      };
+
+      return { with_permit: { query, permit } };
+    },
+
+    getAllTokens({ permit }: Context, limit?: number, sendViewer?: boolean) {
+      const query = { all_tokens: { limit } };
+
+      if (!sendViewer) return query;
+
+      return { with_permit: { query, permit } };
+    },
+
+    getVerifyTransferApproval({ permit }: Context, token_ids: Array<string>) {
+      const query = { verify_transfer_approval: { token_ids } };
+
+      return { with_permit: { query, permit } };
+    },
+  },
+};
+
+export const snip721PermitDef = extendContract(
+  snip721Def,
+  snip721BasePermitDef
+);
+
 export type Expiration =
   | {
       at_height: number;
@@ -769,6 +948,7 @@ export interface Snip721Contract extends BaseContract {
    * Displays all the addresses that have approval to transfer all of the
    * specified owner's tokens.
    * @param include_expired True if expired transfer approvals should be
+   * @param sendViewer optional boolean for authenticating with a viewer, false as default
    * included in the response
    */
   getApprovedForAll(include_expired?: boolean): {
