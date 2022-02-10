@@ -3,6 +3,10 @@ import { getWindow } from '../utils';
  * Event API options.
  * Check https://developer.mozilla.org/en-US/docs/Web/API/Event.
  */
+
+export * from './accounts';
+export * from './viewing-keys';
+
 export interface EventOptions {
   bubbles: boolean;
   cancelable: boolean;
