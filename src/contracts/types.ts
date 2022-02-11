@@ -25,6 +25,16 @@ export interface ContractMessageRequest {
   fees?: number;
 }
 
+export interface ContractQueryResponse<T> {
+  meta: QueryMeta;
+  data: T;
+}
+
+export interface QueryMeta {
+  contractAddress: string;
+  block: number;
+}
+
 export interface ContractDefinition {
   queries?: Record<
     string,

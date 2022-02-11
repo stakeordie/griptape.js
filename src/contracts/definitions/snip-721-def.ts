@@ -1,4 +1,5 @@
 import { extendContract } from '..';
+import { ContractQueryResponse } from '../types';
 import {
   Context,
   ContractQueryRequest,
@@ -786,9 +787,11 @@ export interface Snip721Contract extends BaseContract {
   /**
    * Returns the contract's name and symbol. This query is not authenticated.
    */
-  getContractInfo(): Promise<{
-    contract_info: { name: string; symbol: string };
-  }>;
+  getContractInfo(): Promise<
+    ContractQueryResponse<{
+      contract_info: { name: string; symbol: string };
+    }>
+  >;
 
   /**
    * Returns the number of tokens controlled by the contract. If the contract's
@@ -798,7 +801,7 @@ export interface Snip721Contract extends BaseContract {
    */
   getNumTokens(
     sendViewer?: boolean
-  ): Promise<{ num_tokens: { count: number } }>;
+  ): Promise<ContractQueryResponse<{ num_tokens: { count: number } }>>;
 
   /**
    * Returns the owner of the specified token if the querier is the owner or has
@@ -814,25 +817,29 @@ export interface Snip721Contract extends BaseContract {
     token_id: string,
     include_expired?: boolean,
     sendViewer?: boolean
-  ): Promise<{
-    owner_of: {
-      owner: string;
-      approvals: Approval[];
-    };
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      owner_of: {
+        owner: string;
+        approvals: Approval[];
+      };
+    }>
+  >;
 
   /**
    * Returns the public metadata of a token. All metadata fields are optional to
    * allow for SNIP-721 contracts that choose not to implement metadata.
    * @param token_id ID of the token being queried.
    */
-  getNftInfo(token_id: string): Promise<{
-    nft_info: {
-      name: string;
-      description: string;
-      image: string;
-    };
-  }>;
+  getNftInfo(token_id: string): Promise<
+    ContractQueryResponse<{
+      nft_info: {
+        name: string;
+        description: string;
+        image: string;
+      };
+    }>
+  >;
 
   /**
    * Displays the result of both getOwnerOf and getNftInfo in a single query.
@@ -845,19 +852,21 @@ export interface Snip721Contract extends BaseContract {
     token_id: string,
     include_expired?: boolean,
     sendViewer?: boolean
-  ): Promise<{
-    all_nft_info: {
-      access: {
-        owner: string;
-        approvals: Approval[];
+  ): Promise<
+    ContractQueryResponse<{
+      all_nft_info: {
+        access: {
+          owner: string;
+          approvals: Approval[];
+        };
+        info: {
+          name: string;
+          description: string;
+          image: string;
+        };
       };
-      info: {
-        name: string;
-        description: string;
-        image: string;
-      };
-    };
-  }>;
+    }>
+  >;
 
   /**
    * Returns the private metadata of a token if the querier is permitted to view
@@ -869,9 +878,11 @@ export interface Snip721Contract extends BaseContract {
   getPrivateMetadata(
     token_id: string,
     sendViewer?: boolean
-  ): Promise<{
-    private_metadata: Metadata;
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      private_metadata: Metadata;
+    }>
+  >;
 
   /**
    * Returns all the information about a token that the viewer is permitted to
@@ -885,45 +896,47 @@ export interface Snip721Contract extends BaseContract {
     token_id: string,
     include_expired?: boolean,
     sendViewer?: boolean
-  ): Promise<{
-    nft_dossier: {
-      owner: string;
-      public_metadata: Metadata;
-      private_metadata: Metadata;
-      display_private_metadata_error: string;
-      royalty_info: {
-        decimal_places_in_rates: number;
-        royalties: {
-          recipient: string;
-          rate: number;
+  ): Promise<
+    ContractQueryResponse<{
+      nft_dossier: {
+        owner: string;
+        public_metadata: Metadata;
+        private_metadata: Metadata;
+        display_private_metadata_error: string;
+        royalty_info: {
+          decimal_places_in_rates: number;
+          royalties: {
+            recipient: string;
+            rate: number;
+          }[];
+        };
+        mint_run_info: {
+          collection_creator: string;
+          token_creator: string;
+          time_of_minting: number;
+          mint_run: number;
+          serial_number: number;
+          quantity_minted_this_run: number;
+        };
+        owner_is_public: boolean;
+        public_ownership_expiration: Expiration;
+        private_metadata_is_public: boolean;
+        private_metadata_is_public_expiration: Expiration;
+        token_approvals: {
+          address: string;
+          view_owner_expiration: Expiration;
+          view_private_metadata_expiration: Expiration;
+          transfer_expiration: Expiration;
+        }[];
+        inventory_approvals: {
+          address: string;
+          view_owner_expiration: Expiration;
+          view_private_metadata_expiration: Expiration;
+          transfer_expiration: Expiration;
         }[];
       };
-      mint_run_info: {
-        collection_creator: string;
-        token_creator: string;
-        time_of_minting: number;
-        mint_run: number;
-        serial_number: number;
-        quantity_minted_this_run: number;
-      };
-      owner_is_public: boolean;
-      public_ownership_expiration: Expiration;
-      private_metadata_is_public: boolean;
-      private_metadata_is_public_expiration: Expiration;
-      token_approvals: {
-        address: string;
-        view_owner_expiration: Expiration;
-        view_private_metadata_expiration: Expiration;
-        transfer_expiration: Expiration;
-      }[];
-      inventory_approvals: {
-        address: string;
-        view_owner_expiration: Expiration;
-        view_private_metadata_expiration: Expiration;
-        transfer_expiration: Expiration;
-      }[];
-    };
-  }>;
+    }>
+  >;
 
   /**
    * Returns whether the owner and private metadata of a token is public, and
@@ -936,13 +949,15 @@ export interface Snip721Contract extends BaseContract {
   getTokenApprovals(
     token_id: string,
     include_expired?: boolean
-  ): Promise<{
-    token_approvals: {
-      token_id: string;
-      viewing_key: string;
-      include_expired: boolean;
-    };
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      token_approvals: {
+        token_id: string;
+        viewing_key: string;
+        include_expired: boolean;
+      };
+    }>
+  >;
 
   /**
    * Displays all the addresses that have approval to transfer all of the
@@ -951,14 +966,16 @@ export interface Snip721Contract extends BaseContract {
    * @param sendViewer optional boolean for authenticating with a viewer, false as default
    * included in the response
    */
-  getApprovedForAll(include_expired?: boolean): {
-    approved_for_all: {
-      operators: {
-        spender: string;
-        expires: string;
-      }[];
-    };
-  };
+  getApprovedForAll(include_expired?: boolean): Promise<
+    ContractQueryResponse<{
+      approved_for_all: {
+        operators: {
+          spender: string;
+          expires: string;
+        }[];
+      };
+    }>
+  >;
 
   /**
    * Returns whether all the address' tokens have public ownership and/or public
@@ -967,20 +984,22 @@ export interface Snip721Contract extends BaseContract {
    * @param include_expired True if expired transfer approvals should be
    * included in the response.
    */
-  getInventoryApprovals(include_expired?: boolean): Promise<{
-    inventory_approvals: {
-      owner_is_public: boolean;
-      public_ownership_expiration: string;
-      private_metadata_is_public: boolean;
-      private_metadata_is_public_expiration: string;
+  getInventoryApprovals(include_expired?: boolean): Promise<
+    ContractQueryResponse<{
       inventory_approvals: {
-        address: string;
-        view_owner_expiration: string;
-        view_private_metadata_expiration: string;
-        transfer_expiration: string;
-      }[];
-    };
-  }>;
+        owner_is_public: boolean;
+        public_ownership_expiration: string;
+        private_metadata_is_public: boolean;
+        private_metadata_is_public_expiration: string;
+        inventory_approvals: {
+          address: string;
+          view_owner_expiration: string;
+          view_private_metadata_expiration: string;
+          transfer_expiration: string;
+        }[];
+      };
+    }>
+  >;
 
   /**
    * Displays an optionally paginated list of all the token IDs that belong to
@@ -997,11 +1016,13 @@ export interface Snip721Contract extends BaseContract {
     start_after?: string,
     limit?: number,
     sendViewer?: boolean
-  ): Promise<{
-    token_list: {
-      tokens: string[];
-    };
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      token_list: {
+        tokens: string[];
+      };
+    }>
+  >;
 
   /**
    * Displays an optionally paginated list of transactions
@@ -1014,33 +1035,35 @@ export interface Snip721Contract extends BaseContract {
   getTransactionHistory(
     page?: number,
     page_size?: number
-  ): Promise<{
-    transaction_history: {
-      total: number;
-      txs: {
-        tx_id: number;
-        block_height: number;
-        block_time: number;
-        token_id: string;
-        action: {
-          transfer?: {
-            from: string;
-            sender: string;
-            recipient: string;
+  ): Promise<
+    ContractQueryResponse<{
+      transaction_history: {
+        total: number;
+        txs: {
+          tx_id: number;
+          block_height: number;
+          block_time: number;
+          token_id: string;
+          action: {
+            transfer?: {
+              from: string;
+              sender: string;
+              recipient: string;
+            };
+            mint?: {
+              minter: string;
+              recipient: string;
+            };
+            burn?: {
+              owner: string;
+              burner: string;
+            };
           };
-          mint?: {
-            minter: string;
-            recipient: string;
-          };
-          burn?: {
-            owner: string;
-            burner: string;
-          };
-        };
-        memo: string;
-      }[];
-    };
-  }>;
+          memo: string;
+        }[];
+      };
+    }>
+  >;
 
   /**
    * Returns a list of tokens' ids minted in order minted. Only if the token supply is public
@@ -1050,51 +1073,61 @@ export interface Snip721Contract extends BaseContract {
   getAllTokens(
     limit?: number,
     sendViewer?: boolean
-  ): Promise<{
-    token_list: {
-      tokens: Array<string>;
-    };
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      token_list: {
+        tokens: Array<string>;
+      };
+    }>
+  >;
 
   /**
    * Minters returns the list of addresses that are authorized to mint tokens. This query is not authenticated.
    */
-  getMinters(): Promise<{
-    minters: {
-      minters: Array<string>;
-    };
-  }>;
+  getMinters(): Promise<
+    ContractQueryResponse<{
+      minters: {
+        minters: Array<string>;
+      };
+    }>
+  >;
 
   /**
    * If a token_id is provided in the request, RoyaltyInfo returns the royalty information for that token.
    * If no token_id is requested, RoyaltyInfo displays the default royalty information for the contract.
    * @param token_id ID of the token being queried
    */
-  getRoyaltyInfo(token_id?: string): Promise<{
-    royalty_info: RoyaltyInfo;
-  }>;
+  getRoyaltyInfo(token_id?: string): Promise<
+    ContractQueryResponse<{
+      royalty_info: RoyaltyInfo;
+    }>
+  >;
 
   /**
    * IsUnwrapped indicates whether the token has been unwrapped. This query is not authenticated.
    * @param token_id ID of the token being queried
    */
-  getIsUnwrapped(token_id: string): Promise<{
-    is_unwrapped: {
-      token_is_unwrapped: boolean;
-    };
-  }>;
+  getIsUnwrapped(token_id: string): Promise<
+    ContractQueryResponse<{
+      is_unwrapped: {
+        token_is_unwrapped: boolean;
+      };
+    }>
+  >;
 
   /**
    * VerifyTransferApproval will verify that the specified address has approval
    * to transfer the entire provided list of tokens.
    * @param token_ids Array of IDs of the tokens to verify
    */
-  getVerifyTransferApproval(token_ids: Array<string>): Promise<{
-    verify_transfer_approval: {
-      approved_for_all: boolean;
-      first_unapproved_token: string;
-    };
-  }>;
+  getVerifyTransferApproval(token_ids: Array<string>): Promise<
+    ContractQueryResponse<{
+      verify_transfer_approval: {
+        approved_for_all: boolean;
+        first_unapproved_token: string;
+      };
+    }>
+  >;
 
   /**
    * Is used to transfer ownership of the token to the recipient address.

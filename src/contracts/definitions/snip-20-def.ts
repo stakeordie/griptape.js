@@ -1,5 +1,6 @@
 import { Coin } from 'secretjs/types/types';
 import { extendContract } from '..';
+import { ContractQueryResponse } from '../types';
 import {
   BaseContract,
   Context,
@@ -217,48 +218,58 @@ export interface MessageResponse {
   status: string;
 }
 export interface Snip20Contract extends BaseContract {
-  getBalance(): Promise<{ balance: { amount: string } }>;
-  getTokenInfo(): Promise<{
-    name: string;
-    symbol: string;
-    decimals: number;
-    total_supply: string;
-  }>;
+  getBalance(): Promise<ContractQueryResponse<{ balance: { amount: string } }>>;
+  getTokenInfo(): Promise<
+    ContractQueryResponse<{
+      name: string;
+      symbol: string;
+      decimals: number;
+      total_supply: string;
+    }>
+  >;
   getTransferHistory(
     page_size: number,
     page?: number
-  ): Promise<{
-    transfer_history: {
-      txs: [
-        {
-          id: string;
-          from: string;
-          sender: string;
-          receiver: string;
-        }
-      ];
-      coins: {
-        amount: string;
-        denom: string;
+  ): Promise<
+    ContractQueryResponse<{
+      transfer_history: {
+        txs: [
+          {
+            id: string;
+            from: string;
+            sender: string;
+            receiver: string;
+          }
+        ];
+        coins: {
+          amount: string;
+          denom: string;
+        };
       };
-    };
-  }>;
-  getMinters(): Promise<{ minters: { minters: string[] } }>;
+    }>
+  >;
+  getMinters(): Promise<
+    ContractQueryResponse<{ minters: { minters: string[] } }>
+  >;
   getAllowance(
     owner: string,
     spender: string,
     key: string
-  ): Promise<{
-    allowance: {
-      spender: string;
-      owner: string;
-      allowance: string;
-      expiration: number;
-    };
-  }>;
-  getExchangeRate(): Promise<{
-    exchange_rate: { rate: string; denom: string };
-  }>;
+  ): Promise<
+    ContractQueryResponse<{
+      allowance: {
+        spender: string;
+        owner: string;
+        allowance: string;
+        expiration: number;
+      };
+    }>
+  >;
+  getExchangeRate(): Promise<
+    ContractQueryResponse<{
+      exchange_rate: { rate: string; denom: string };
+    }>
+  >;
   transfer(
     recipient: string,
     amount: string

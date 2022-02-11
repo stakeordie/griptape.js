@@ -10,6 +10,7 @@ import {
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
+import { ContractQueryResponse, QueryMeta } from '.';
 
 const customFees: FeeTable = {
   upload: {
@@ -166,14 +167,26 @@ export function shutdown() {
 }
 
 // TODO Move this to `contracts.ts`
-export function queryContract(
+export async function queryContract(
   address: string,
   queryMsg: Record<string, unknown>,
   addedParams?: Record<string, unknown>,
   codeHash?: string
-): Promise<Record<string, unknown>> {
+): Promise<ContractQueryResponse<unknown>> {
   if (!client) throw new Error('No client available');
-  return client.queryContractSmart(address, queryMsg, addedParams, codeHash);
+  const meta: QueryMeta = {
+    contractAddress: address,
+    block: await getHeight(),
+  };
+
+  const data: unknown = await client.queryContractSmart(
+    address,
+    queryMsg,
+    addedParams,
+    codeHash
+  );
+
+  return { data, meta };
 }
 
 // TODO Move this to `contracts.ts`
