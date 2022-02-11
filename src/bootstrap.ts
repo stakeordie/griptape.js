@@ -158,6 +158,16 @@ export async function bootstrap(): Promise<void> {
   localStorage.setItem('connected', 'connected');
 }
 
+// Copy of bootstrap without triggering the onAccountAvailable event
+async function reloadSigningClient(): Promise<void> {
+  if (!getProvider) throw new Error('No provider available');
+  await initClient();
+  const chainId = await getChainId();
+  provider = await getProvider(chainId);
+  accountAvailable = true;
+  await initSigningClient();
+}
+
 export function shutdown() {
   const connected = localStorage.getItem('connected');
   if (!connected) return;
@@ -219,7 +229,8 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
     const enigmaUtils = keplr.getEnigmaUtils(chainId);
 
     // And also we want to be able to react to an account change.
-    getWindow()?.addEventListener('keplr_keystorechange', () => {
+    getWindow()?.addEventListener('keplr_keystorechange', async () => {
+      await reloadSigningClient();
       emitEvent('account-change');
     });
 
