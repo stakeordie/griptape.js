@@ -43,6 +43,10 @@ export interface AccountProvider {
   getSeed: () => any;
 }
 
+export interface KeplrAccountProvider extends AccountProvider {
+  getOnAccountChangeCallback(): () => void;
+}
+
 export type AccountProviderGetter = (
   chainId: string
 ) => Promise<AccountProvider | undefined>;
@@ -50,9 +54,10 @@ export type AccountProviderGetter = (
 let config: Config | undefined;
 let client: CosmWasmClient | undefined;
 let signingClient: SigningCosmWasmClient | undefined;
-let provider: AccountProvider | undefined;
-let getProvider: AccountProviderGetter | undefined;
 let accountAvailable = false;
+let getProvider: AccountProviderGetter | undefined;
+
+export let provider: AccountProvider | undefined;
 
 export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
@@ -160,10 +165,19 @@ export async function bootstrap(): Promise<void> {
 
 // Copy of bootstrap without triggering the onAccountAvailable event
 async function reloadSigningClient(): Promise<void> {
-  if (!getProvider) throw new Error('No provider available');
-  await initClient();
   const chainId = await getChainId();
-  provider = await getProvider(chainId);
+
+  /**
+   * POSSIBLE FIX:
+   */
+  // const _provider = await getKeplrAccountProviderInternal(chainId);
+  // provider = {
+  //   ..._provider,
+  //   getOnAccountChangeCallback: (provider as KeplrAccountProvider)
+  //     .getOnAccountChangeCallback,
+  // } as KeplrAccountProvider;
+
+  provider = await getKeplrAccountProviderInternal(chainId);
   accountAvailable = true;
   await initSigningClient();
 }
@@ -209,36 +223,45 @@ export async function executeContract(
 // So this is a very rough implementation of an Account provider.
 // This is not the way it suppose to be, but for now will do the trick.
 // This will require a refactor at some point.
+async function getKeplrAccountProviderInternal(
+  chainId: string
+): Promise<AccountProvider | undefined> {
+  const keplr = await getKeplr();
+
+  if (!keplr || !getWindow()?.getOfflineSigner)
+    throw new Error('Install keplr extension');
+
+  try {
+    // Enabling keplr is recommended. But is not what I like...
+    await keplr.enable(chainId);
+  } catch (e) {
+    return;
+  }
+
+  const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
+  if (!offlineSigner) throw new Error('No offline signer');
+  const [{ address }] = await offlineSigner.getAccounts();
+  const enigmaUtils = keplr.getEnigmaUtils(chainId);
+  return {
+    getAddress: () => address,
+    getSigner: () => offlineSigner,
+    getSeed: () => enigmaUtils,
+  };
+}
+
 export function getKeplrAccountProvider(): AccountProviderGetter {
   return async (chainId: string) => {
-    const keplr = await getKeplr();
-
-    if (!keplr || !getWindow()?.getOfflineSigner)
-      throw new Error('Install keplr extension');
-
-    try {
-      // Enabling keplr is recommended. But is not what I like...
-      await keplr.enable(chainId);
-    } catch (e) {
-      return;
-    }
-
-    const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
-    if (!offlineSigner) throw new Error('No offline signer');
-    const [{ address }] = await offlineSigner.getAccounts();
-    const enigmaUtils = keplr.getEnigmaUtils(chainId);
-
+    const keplrProvider = await getKeplrAccountProviderInternal(chainId);
     // And also we want to be able to react to an account change.
-    getWindow()?.addEventListener('keplr_keystorechange', async () => {
+    const callback = async () => {
       await reloadSigningClient();
       emitEvent('account-change');
-    });
-
-    return {
-      getAddress: () => address,
-      getSigner: () => offlineSigner,
-      getSeed: () => enigmaUtils,
     };
+    getWindow()?.addEventListener('keplr_keystorechange', callback);
+    return {
+      ...keplrProvider,
+      getOnAccountChangeCallback: () => callback,
+    } as AccountProvider;
   };
 }
 
