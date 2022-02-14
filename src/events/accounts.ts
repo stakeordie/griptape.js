@@ -4,7 +4,7 @@ import {
   unsubscribeEventCallback,
   CleanListenerCallback,
 } from './index';
-import { getWindow, KeplrAccountProvider, provider } from '..';
+import { getWindow, accountChangedCallback, provider } from '..';
 /**
  * `account` event gets triggered when the Account Provider has an account ready.
  */
@@ -28,12 +28,12 @@ export function onAccountChange(
     if (!provider) {
       throw new Error('No provider available');
     }
-
+    console.log(provider);
     getWindow()?.removeEventListener('account-change', callback);
-    if (!(provider as KeplrAccountProvider).getOnAccountChangeCallback) return;
+    if (!accountChangedCallback) return;
     getWindow()?.removeEventListener(
       'keplr_keystorechange',
-      (provider as KeplrAccountProvider).getOnAccountChangeCallback()
+      accountChangedCallback
     );
   };
 }
