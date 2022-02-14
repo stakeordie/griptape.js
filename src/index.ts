@@ -12,6 +12,3 @@ export * from './events/index';
 
 export * from './modules';
 export * from './permits';
-
-
-

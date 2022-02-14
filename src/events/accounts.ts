@@ -5,6 +5,7 @@ import {
   CleanListenerCallback,
 } from './index';
 import { getWindow, accountChangedCallback, provider } from '..';
+
 /**
  * `account` event gets triggered when the Account Provider has an account ready.
  */
