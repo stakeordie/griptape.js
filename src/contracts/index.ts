@@ -21,7 +21,7 @@ import {
   MultiMessageInfo,
   BaseContract,
 } from './types';
-import { getErrorHandler } from './errors';
+import { getErrorHandler, BaseError } from './errors';
 import {
   getEntropyString,
   calculateCommonKeys,
@@ -98,7 +98,7 @@ async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
 
   while (true) {
     try {
-      tx = await getSigningClient().restClient.txById(txHash);
+      tx = await getSigningClient().restClient.txById(txHash, true);
 
       if (!tx.raw_log.startsWith('[')) {
         result = false;
@@ -179,8 +179,10 @@ export function createContract<T>(contract: ContractSpecification): T {
                   const { response: txResponse } = result;
                   return ContractTxResponseHandler.of(txResponse);
                 } else {
-                  throw new Error(
-                    `Could not found TX: ${response.transactionHash}`
+                  const { response: txResponse } = result;
+                  throw new BaseError(
+                    `Could not found TX: ${response.transactionHash}`,
+                    { cause: subtractErrorFromResponse(txResponse) }
                   );
                 }
               } else {
@@ -232,6 +234,21 @@ export function createContract<T>(contract: ContractSpecification): T {
   return result;
 }
 
+function subtractErrorFromResponse(response: TxsResponse | undefined): string {
+  if (!response || !response.raw_log) return 'Empty response or unknown error';
+  const raw = response.raw_log;
+
+  // Generic Errors are return as JSON stringified
+  // Exam. '{"generic_error": { "msg":"" } }'
+  const jsonStart = raw.indexOf('{');
+  const jsonEnd = raw.lastIndexOf('}');
+
+  if (jsonStart > 0 && jsonEnd > 0) {
+    return raw.substring(jsonStart, jsonEnd);
+  } else {
+    return raw;
+  }
+}
 /**
  * @param contract object of contract specification
  * @returns T

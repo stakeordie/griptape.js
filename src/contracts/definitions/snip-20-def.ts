@@ -1,3 +1,4 @@
+import { Coin } from 'secretjs/types/types';
 import { extendContract } from '..';
 import {
   BaseContract,
@@ -161,11 +162,15 @@ export const snip20Def: ContractDefinition = {
       return { handleMsg };
     },
 
-    deposit({ padding }: Context) {
+    deposit({ padding }: Context, amount: string) {
       const handleMsg = {
         deposit: { padding },
       };
-      return { handleMsg };
+      const transferAmount: Coin = {
+        denom: 'uscrt',
+        amount,
+      };
+      return { handleMsg, transferAmount };
     },
 
     redeem({ padding }: Context, amount: string, denom?: string) {
@@ -176,7 +181,7 @@ export const snip20Def: ContractDefinition = {
     },
   },
 };
-export const snip20Permit: ContractDefinition = {
+export const snip20BasePermitDef: ContractDefinition = {
   queries: {
     getBalance({ permit }: Context): ContractQueryRequest {
       const query = { balance: {} };
@@ -206,7 +211,7 @@ export const snip20Permit: ContractDefinition = {
   },
 };
 
-export const snip20DefPermit = extendContract(snip20Def, snip20Permit);
+export const snip20PermitDef = extendContract(snip20Def, snip20BasePermitDef);
 
 export interface MessageResponse {
   status: string;

@@ -50,9 +50,10 @@ export type AccountProviderGetter = (
 let config: Config | undefined;
 let client: CosmWasmClient | undefined;
 let signingClient: SigningCosmWasmClient | undefined;
-let provider: AccountProvider | undefined;
-let getProvider: AccountProviderGetter | undefined;
 let accountAvailable = false;
+let getProvider: AccountProviderGetter | undefined;
+
+export let provider: AccountProvider | undefined;
 
 export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
@@ -158,6 +159,15 @@ export async function bootstrap(): Promise<void> {
   localStorage.setItem('connected', 'connected');
 }
 
+// Copy of bootstrap without triggering the onAccountAvailable event
+async function reloadSigningClient(): Promise<void> {
+  const chainId = await getChainId();
+
+  provider = await getKeplrAccountProviderInternal(chainId, false);
+  accountAvailable = true;
+  await initSigningClient();
+}
+
 export function shutdown() {
   const connected = localStorage.getItem('connected');
   if (!connected) return;
@@ -195,39 +205,53 @@ export async function executeContract(
     codeHash
   );
 }
+export let accountChangedCallback: () => void;
 
 // So this is a very rough implementation of an Account provider.
 // This is not the way it suppose to be, but for now will do the trick.
 // This will require a refactor at some point.
+async function getKeplrAccountProviderInternal(
+  chainId: string,
+  keplrEnabled = true
+): Promise<AccountProvider | undefined> {
+  const keplr = await getKeplr();
+
+  if (!keplr || !getWindow()?.getOfflineSigner)
+    throw new Error('Install keplr extension');
+
+  try {
+    // Enabling keplr is recommended. But is not what I like...
+    await keplr.enable(chainId);
+  } catch (e) {
+    return;
+  }
+
+  const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
+  if (!offlineSigner) throw new Error('No offline signer');
+  const [{ address }] = await offlineSigner.getAccounts();
+  const enigmaUtils = keplr.getEnigmaUtils(chainId);
+
+  if (keplrEnabled) {
+    // And also we want to be able to react to an account change.
+    accountChangedCallback = async () => {
+      await reloadSigningClient();
+      emitEvent('account-change');
+    };
+    getWindow()?.addEventListener(
+      'keplr_keystorechange',
+      accountChangedCallback
+    );
+  }
+  return {
+    getAddress: () => address,
+    getSigner: () => offlineSigner,
+    getSeed: () => enigmaUtils,
+  };
+}
+
 export function getKeplrAccountProvider(): AccountProviderGetter {
   return async (chainId: string) => {
-    const keplr = await getKeplr();
-
-    if (!keplr || !getWindow()?.getOfflineSigner)
-      throw new Error('Install keplr extension');
-
-    try {
-      // Enabling keplr is recommended. But is not what I like...
-      await keplr.enable(chainId);
-    } catch (e) {
-      return;
-    }
-
-    const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
-    if (!offlineSigner) throw new Error('No offline signer');
-    const [{ address }] = await offlineSigner.getAccounts();
-    const enigmaUtils = keplr.getEnigmaUtils(chainId);
-
-    // And also we want to be able to react to an account change.
-    getWindow()?.addEventListener('keplr_keystorechange', () => {
-      emitEvent('account-change');
-    });
-
-    return {
-      getAddress: () => address,
-      getSigner: () => offlineSigner,
-      getSeed: () => enigmaUtils,
-    };
+    return await getKeplrAccountProviderInternal(chainId);
   };
 }
 

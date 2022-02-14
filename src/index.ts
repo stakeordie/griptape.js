@@ -7,9 +7,7 @@ export * from './contracts/types';
 
 export * from './utils';
 export * from './wallet';
-
-export * from './events/accounts';
-export * from './events/viewing-keys';
+export * from './events';
 
 export * from './modules';
 export * from './permits';
