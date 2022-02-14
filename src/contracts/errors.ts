@@ -11,7 +11,20 @@ export class DefaultErrorHandler extends ErrorHandler {
     super(e => true, handler);
   }
 }
+export class BaseError {
+  readonly message: string;
 
+  cause: string | undefined;
+
+  constructor(msg: string, opt?: { cause: string }) {
+    this.message = msg;
+    this.cause = opt?.cause;
+  }
+
+  toString() {
+    return this.message;
+  }
+}
 const errorHandlers: Record<string, ErrorHandler[]> = {};
 
 export function onContractError(

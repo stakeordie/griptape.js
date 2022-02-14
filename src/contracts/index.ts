@@ -21,7 +21,7 @@ import {
   MultiMessageInfo,
   BaseContract,
 } from './types';
-import { getErrorHandler } from './errors';
+import { getErrorHandler, BaseError } from './errors';
 import {
   getEntropyString,
   calculateCommonKeys,
@@ -180,10 +180,9 @@ export function createContract<T>(contract: ContractSpecification): T {
                   return ContractTxResponseHandler.of(txResponse);
                 } else {
                   const { response: txResponse } = result;
-                  throw new Error(
-                    `Could not found TX: ${
-                      response.transactionHash
-                    } \n \n Message: ${subtractErrorFromResponse(txResponse)}`
+                  throw new BaseError(
+                    `Could not found TX: ${response.transactionHash}`,
+                    { cause: subtractErrorFromResponse(txResponse) }
                   );
                 }
               } else {
