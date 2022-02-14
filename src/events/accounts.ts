@@ -29,7 +29,6 @@ export function onAccountChange(
     if (!provider) {
       throw new Error('No provider available');
     }
-    console.log(provider);
     getWindow()?.removeEventListener('account-change', callback);
     if (!accountChangedCallback) return;
     getWindow()?.removeEventListener(
