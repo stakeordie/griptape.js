@@ -106,10 +106,10 @@ export async function gripApp(
 
     provider = await getProvider(chainId);
 
+    accountAvailable = true;
+
     // At this point we have an account available...
     emitEvent('account-available');
-
-    accountAvailable = true;
 
     // `SigningCosmWasmClient` should be created later.
     await initSigningClient();
@@ -153,8 +153,8 @@ export async function bootstrap(): Promise<void> {
   await initClient();
   const chainId = await getChainId();
   provider = await getProvider(chainId);
-  emitEvent('account-available');
   accountAvailable = true;
+  emitEvent('account-available');
   await initSigningClient();
   localStorage.setItem('connected', 'connected');
 }
@@ -171,6 +171,7 @@ async function reloadSigningClient(): Promise<void> {
 export function shutdown() {
   const connected = localStorage.getItem('connected');
   if (!connected) return;
+  accountAvailable = false;
   emitEvent('shutdown');
   localStorage.removeItem('connected');
 }
