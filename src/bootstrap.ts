@@ -123,7 +123,6 @@ async function initClient(): Promise<void> {
 }
 
 async function initSigningClient(): Promise<void> {
-  if (signingClient) return;
   if (!config) throw new Error('No configuration was set');
   if (!client) throw new Error('No client available');
   if (!provider) throw new Error('No provider available');
