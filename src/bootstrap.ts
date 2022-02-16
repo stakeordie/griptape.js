@@ -54,7 +54,7 @@ let accountAvailable = false;
 let getProvider: AccountProviderGetter | undefined;
 
 export let provider: AccountProvider | undefined;
-console.log(ViewingKeyManager)
+
 export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
   viewingKeyManager
