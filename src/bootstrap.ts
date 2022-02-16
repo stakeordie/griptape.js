@@ -18,10 +18,10 @@ const defaultFee: StdFee = {
 }
 
 const systemDefaultFees: FeeTable = {
-  upload: getFeeForExecute(2_000_000) || defaultFee,
-  init: getFeeForExecute(5_000_000) || defaultFee,
-  exec: getFeeForExecute(7_500_000) || defaultFee,
-  send: getFeeForExecute(8_000_000) || defaultFee,
+  upload: getFeeForExecute(3_000_000) || defaultFee,
+  init: getFeeForExecute(2_000_000) || defaultFee,
+  exec: getFeeForExecute(100_000) || defaultFee,
+  send: getFeeForExecute(90_000) || defaultFee,
 };
 
 export { BroadcastMode };
