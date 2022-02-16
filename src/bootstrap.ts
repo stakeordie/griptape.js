@@ -7,8 +7,7 @@ import {
   FeeTable,
   BroadcastMode,
 } from 'secretjs';
-import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
-import { PermitManager } from './auth';
+import { KeplrViewingKeyManager, ViewingKeyManager, PermitManager } from './auth/index';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
 
@@ -55,7 +54,7 @@ let accountAvailable = false;
 let getProvider: AccountProviderGetter | undefined;
 
 export let provider: AccountProvider | undefined;
-
+console.log(ViewingKeyManager)
 export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
   viewingKeyManager

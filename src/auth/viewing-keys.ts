@@ -1,8 +1,8 @@
-import { emitEvent } from './events';
-import { getAddress, getChainId } from './bootstrap';
-import { BaseContract } from './contracts/types';
-import { getKeplr } from './wallet';
-import { getWindow } from './utils';
+import { emitEvent } from '../events';
+import { getAddress, getChainId } from '../bootstrap';
+import { BaseContract } from '../contracts/types';
+import { getKeplr } from '../wallet';
+import { getWindow } from '../utils';
 
 export interface Key {
   id: string;

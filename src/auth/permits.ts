@@ -1,13 +1,36 @@
-import { getAddress, getChainId } from './bootstrap';
-import { BaseContract } from './contracts/types';
-import { getKeplr } from './wallet';
+import { getAddress, getChainId } from '../bootstrap';
+import { BaseContract } from '../contracts/types';
+import { getKeplr } from '../wallet';
 
+export class PermitManager {
+  public get(contract: BaseContract): boolean {
+    return hasPermit(contract);
+  }
+
+  public async add(
+    contract: BaseContract,
+    permissions: string[] = []
+  ): Promise<void> {
+    return await enablePermit(contract, permissions);
+  }
+}
+
+/**
+ * @deprecated
+ * @param contract is an object that represents a contract client (returned by createContractClient)
+ * @returns boolean
+ */
 export function hasPermit(contract: BaseContract): boolean {
   const address = getAddress();
   if (!address) throw new Error('No address available');
   return localStorage.getItem(`query_permit_${address + contract.at}`) != null;
 }
 
+/**
+ * @deprecated
+ * @param contract is an object that represents a contract client (returned by createContractClient)
+ * @param permissions 
+ */
 export async function enablePermit(
   contract: BaseContract,
   permissions: string[] = []
