@@ -8,6 +8,7 @@ import {
   BroadcastMode,
 } from 'secretjs';
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
+import { PermitManager } from './auth';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
 
@@ -59,6 +60,8 @@ export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
   viewingKeyManager
 );
+
+export const permitManager = new PermitManager();
 
 export function getConfig(): Config | undefined {
   return config;
