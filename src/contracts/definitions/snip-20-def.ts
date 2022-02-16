@@ -328,7 +328,7 @@ export interface Snip20Contract extends BaseContract {
     owner: string,
     amount: string
   ): Promise<ContractMessageResponse<{ burn_from: { status: string } }>>;
-  deposit(): Promise<ContractMessageResponse<{ deposit: { status: string } }>>;
+  deposit(amount:string): Promise<ContractMessageResponse<{ deposit: { status: string } }>>;
   redeem(
     amount: string,
     denom?: string
