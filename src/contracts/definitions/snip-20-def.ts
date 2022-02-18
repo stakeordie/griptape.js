@@ -34,7 +34,7 @@ export const snip20Def: ContractDefinition = {
       _: Context,
       owner: string,
       spender: string,
-      key: string
+      key?: string
     ): ContractQueryRequest {
       return { allowance: { owner, spender, key } };
     },
@@ -247,7 +247,7 @@ export interface Snip20Contract extends BaseContract {
   getAllowance(
     owner: string,
     spender: string,
-    key: string
+    key?: string
   ): Promise<{
     allowance: {
       spender: string;

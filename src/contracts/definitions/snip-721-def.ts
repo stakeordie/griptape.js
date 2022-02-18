@@ -951,7 +951,7 @@ export interface Snip721Contract extends BaseContract {
    * @param sendViewer optional boolean for authenticating with a viewer, false as default
    * included in the response
    */
-  getApprovedForAll(include_expired?: boolean): {
+  getApprovedForAll(include_expired?: boolean, sendViewer?: boolean): {
     approved_for_all: {
       operators: {
         spender: string;
