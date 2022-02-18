@@ -237,14 +237,13 @@ export function createContract<T>(contract: ContractSpecification): T {
 function subtractErrorFromResponse(response: TxsResponse | undefined): string {
   if (!response || !response.raw_log) return 'Empty response or unknown error';
   const raw = response.raw_log;
-
   // Generic Errors are return as JSON stringified
   // Exam. '{"generic_error": { "msg":"" } }'
   const jsonStart = raw.indexOf('{');
   const jsonEnd = raw.lastIndexOf('}');
 
   if (jsonStart > 0 && jsonEnd > 0) {
-    return raw.substring(jsonStart, jsonEnd);
+    return raw.substring(jsonStart, jsonEnd + 1);
   } else {
     return raw;
   }
