@@ -31,7 +31,7 @@ export function onContractError(
   contract: BaseContractProps,
   handler: ErrorHandler
 ) {
-  const contractId  = contract.id || contract.at;
+  const contractId = contract.id || contract.at;
   const currentContracts = Object.keys(errorHandlers);
   if (!currentContracts.includes(contractId)) {
     errorHandlers[contractId] = [];
