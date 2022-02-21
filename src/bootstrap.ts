@@ -296,7 +296,9 @@ export async function getNativeCoinBalance(): Promise<string> {
   const address = getAddress();
   if (!address) throw new Error('No address available');
   const account = await client.getAccount(address);
-  if (!account) throw new Error('No account exiting on chain');
+  if (!account) throw new Error('No account exists on chain');
   if (account.balance.length == 0) return '0';
-  return account.balance[0].amount;
+  const balance = account.balance.find(it => it.denom === 'uscrt');
+  if (!balance) throw new Error('No balance available');
+  return balance.amount;
 }
