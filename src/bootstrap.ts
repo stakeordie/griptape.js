@@ -18,8 +18,8 @@ import { getFeeForExecute } from './contracts/utils';
 
 const defaultFee: StdFee = {
   amount: [{ amount: '500000', denom: 'uscrt' }],
-  gas: '500000'
-}
+  gas: '500000',
+};
 
 const systemDefaultFees: FeeTable = {
   upload: getFeeForExecute(3_000_000) || defaultFee,
@@ -146,15 +146,16 @@ async function initSigningClient(): Promise<void> {
 
   let fees: FeeTable = systemDefaultFees;
 
-  if(config.defaultFees){
+  if (config.defaultFees) {
     fees = {
-      upload: getFeeForExecute(config.defaultFees.upload) || systemDefaultFees.upload,
+      upload:
+        getFeeForExecute(config.defaultFees.upload) || systemDefaultFees.upload,
       init: getFeeForExecute(config.defaultFees.init) || systemDefaultFees.init,
       exec: getFeeForExecute(config.defaultFees.exec) || systemDefaultFees.exec,
       send: getFeeForExecute(config.defaultFees.send) || systemDefaultFees.send,
     };
   }
-  
+
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
     restUrl,
