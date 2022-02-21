@@ -220,8 +220,8 @@ export function createContract<T>(contract: ContractSpecification): T {
   Object.keys(messages).forEach(it => (messages[it].type = MESSAGE_TYPE));
 
   // Define the target object.
-  const otherID = contract.id || contract.at;
-  const target = { otherID, at, ...queries, ...messages };
+  const givenId = contract.id || contract.at;
+  const target = { id: givenId, at, ...queries, ...messages };
 
   // Create a new proxy for that target.
   const result = new Proxy(target, handler);
