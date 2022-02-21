@@ -10,4 +10,4 @@ export * from './wallet';
 export * from './events';
 
 export * from './modules';
-export * from './auth'
+export * from './auth';

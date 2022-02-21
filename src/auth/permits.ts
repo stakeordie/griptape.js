@@ -29,7 +29,7 @@ export function hasPermit(contract: BaseContract): boolean {
 /**
  * @deprecated
  * @param contract is an object that represents a contract client (returned by createContractClient)
- * @param permissions 
+ * @param permissions
  */
 export async function enablePermit(
   contract: BaseContract,

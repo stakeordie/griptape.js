@@ -7,7 +7,11 @@ import {
   FeeTable,
   BroadcastMode,
 } from 'secretjs';
-import { KeplrViewingKeyManager, ViewingKeyManager, PermitManager } from './auth/index';
+import {
+  KeplrViewingKeyManager,
+  ViewingKeyManager,
+  PermitManager,
+} from './auth/index';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
 
