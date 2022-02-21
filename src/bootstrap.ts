@@ -7,7 +7,11 @@ import {
   FeeTable,
   BroadcastMode,
 } from 'secretjs';
-import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
+import {
+  KeplrViewingKeyManager,
+  ViewingKeyManager,
+  PermitManager,
+} from './auth/index';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
 import { getFeeForExecute } from './contracts/utils';
@@ -61,6 +65,8 @@ export const viewingKeyManager = new ViewingKeyManager();
 export const keplrViewingKeyManager = new KeplrViewingKeyManager(
   viewingKeyManager
 );
+
+export const permitManager = new PermitManager();
 
 export function getConfig(): Config | undefined {
   return config;
