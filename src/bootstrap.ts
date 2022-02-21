@@ -10,31 +10,33 @@ import {
 import { KeplrViewingKeyManager, ViewingKeyManager } from './viewing-keys';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
+import { getFeeForExecute } from './contracts/utils';
 
-const customFees: FeeTable = {
-  upload: {
-    amount: [{ amount: '2000000', denom: 'uscrt' }],
-    gas: '2000000',
-  },
-  init: {
-    amount: [{ amount: '500000', denom: 'uscrt' }],
-    gas: '500000',
-  },
-  exec: {
-    amount: [{ amount: '750000', denom: 'uscrt' }],
-    gas: '750000',
-  },
-  send: {
-    amount: [{ amount: '80000', denom: 'uscrt' }],
-    gas: '80000',
-  },
+const defaultFee: StdFee = {
+  amount: [{ amount: '500000', denom: 'uscrt' }],
+  gas: '500000'
+}
+
+const systemDefaultFees: FeeTable = {
+  upload: getFeeForExecute(3_000_000) || defaultFee,
+  init: getFeeForExecute(2_000_000) || defaultFee,
+  exec: getFeeForExecute(100_000) || defaultFee,
+  send: getFeeForExecute(90_000) || defaultFee,
 };
 
 export { BroadcastMode };
 
+export interface DefaultFees {
+  upload?: number;
+  init?: number;
+  exec?: number;
+  send?: number;
+}
+
 export interface Config {
   restUrl: string;
   broadcastMode?: BroadcastMode;
+  defaultFees?: DefaultFees;
 }
 
 export interface AccountProvider {
@@ -106,10 +108,10 @@ export async function gripApp(
 
     provider = await getProvider(chainId);
 
+    accountAvailable = true;
+
     // At this point we have an account available...
     emitEvent('account-available');
-
-    accountAvailable = true;
 
     // `SigningCosmWasmClient` should be created later.
     await initSigningClient();
@@ -136,13 +138,24 @@ async function initSigningClient(): Promise<void> {
   const seed = provider.getSeed();
   const broadcastMode = config.broadcastMode;
 
+  let fees: FeeTable = systemDefaultFees;
+
+  if(config.defaultFees){
+    fees = {
+      upload: getFeeForExecute(config.defaultFees.upload) || systemDefaultFees.upload,
+      init: getFeeForExecute(config.defaultFees.init) || systemDefaultFees.init,
+      exec: getFeeForExecute(config.defaultFees.exec) || systemDefaultFees.exec,
+      send: getFeeForExecute(config.defaultFees.send) || systemDefaultFees.send,
+    };
+  }
+  
   signingClient = new SigningCosmWasmClient(
     // @ts-ignore
     restUrl,
     address,
     signer,
     seed,
-    customFees,
+    fees,
     broadcastMode
   );
 }
@@ -152,8 +165,8 @@ export async function bootstrap(): Promise<void> {
   await initClient();
   const chainId = await getChainId();
   provider = await getProvider(chainId);
-  emitEvent('account-available');
   accountAvailable = true;
+  emitEvent('account-available');
   await initSigningClient();
   localStorage.setItem('connected', 'connected');
 }
@@ -170,6 +183,7 @@ async function reloadSigningClient(): Promise<void> {
 export function shutdown() {
   const connected = localStorage.getItem('connected');
   if (!connected) return;
+  accountAvailable = false;
   emitEvent('shutdown');
   localStorage.removeItem('connected');
 }

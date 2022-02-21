@@ -35,7 +35,7 @@ export class ViewingKeyManager {
     if (!key) throw new Error('Empty or undefined key cannot be added');
     // TODO We might want to remove the use of a form.
     const form: KeyForm = {
-      id: contract.id,
+      id: contract.id || contract.at,
       contractAddress: contract.at,
       key: key,
     };
@@ -61,7 +61,7 @@ export class ViewingKeyManager {
 
   public set(contract: BaseContract, key: string): void {
     const form: KeyForm = {
-      id: contract.id,
+      id: contract.id || contract.at,
       contractAddress: contract.at,
       key: key,
     };
