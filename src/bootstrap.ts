@@ -39,6 +39,7 @@ export interface DefaultFees {
 
 export interface Config {
   restUrl: string;
+  chainId?: string;
   broadcastMode?: BroadcastMode;
   defaultFees?: DefaultFees;
 }
@@ -101,8 +102,12 @@ export async function gripApp(
     runApp();
 
     // Current chain ID.
-    const chainId = await getChainId();
 
+    let chainId = config.chainId;
+
+    if (!chainId) {
+      chainId = await getChainId();
+    }
     // Set the provider.
     getProvider = accountProviderGetter;
 
