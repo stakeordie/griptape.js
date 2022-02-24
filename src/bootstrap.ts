@@ -114,7 +114,7 @@ export async function gripApp(
     const connected = localStorage.getItem('connected');
     if (connected == null) {
       emitEvent('account-not-available');
-      throw new Error('Not connected yet');
+      return;
     }
 
     provider = await getProvider(chainId);
