@@ -73,7 +73,7 @@ async function getContext(contractAddress: string): Promise<Context> {
   const key = viewingKeyManager.get(contractAddress);
   const padding = getEntropyString(32);
   const entropy = getWindow()?.btoa(getEntropyString(32));
-  function withHeight(cb: (height: number) => Record<string, unknown>) {
+  function withHeight(cb: (height: number) => Record<string, unknown>): any {
     return cb;
   }
   let permit;
@@ -146,14 +146,14 @@ export function createContract<T>(contract: ContractSpecification): T {
           const args = [ctx, ...argumentsList];
 
           // Call the method, injecting the context.
-          let tmp_result = Reflect.apply(func, thisArg, args);
+          let queryOrMessage = Reflect.apply(func, thisArg, args);
           let result;
           //get height when required
-          if (typeof tmp_result == 'function') {
+          if (typeof queryOrMessage == 'function') {
             const height = await getHeight();
-            result = tmp_result(height);
+            result = queryOrMessage(height);
           } else {
-            result = tmp_result;
+            result = queryOrMessage;
           }
           if (func.type === QUERY_TYPE) {
             const _ = undefined; // TODO: Handle added params
