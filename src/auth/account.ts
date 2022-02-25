@@ -21,7 +21,6 @@ export class AccountManager {
   }
 
   public getAccount(): Account | undefined {
-    console.log(this);
     const address = getAddress();
     return this.accounts.find(it => it.address === address);
   }
