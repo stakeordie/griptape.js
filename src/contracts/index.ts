@@ -71,10 +71,11 @@ async function getContext(contractAddress: string): Promise<Context> {
   // Get all context variables.
   const address = getAddress();
   const key = viewingKeyManager.get(contractAddress);
-  const height = await getHeight();
   const padding = getEntropyString(32);
   const entropy = getWindow()?.btoa(getEntropyString(32));
-
+  function withHeight(cb: (height: number) => Record<string, unknown>): any {
+    return cb;
+  }
   let permit;
   const rawPermit = localStorage.getItem(
     `query_permit_${address + contractAddress}`
@@ -84,7 +85,7 @@ async function getContext(contractAddress: string): Promise<Context> {
   }
 
   // Set the context.
-  return { address, key, height, padding, entropy, permit } as Context;
+  return { address, key, padding, withHeight, entropy, permit } as Context;
 }
 
 interface TxHandlerResponse {
@@ -145,8 +146,15 @@ export function createContract<T>(contract: ContractSpecification): T {
           const args = [ctx, ...argumentsList];
 
           // Call the method, injecting the context.
-          const result = Reflect.apply(func, thisArg, args);
-
+          let queryOrMessage = Reflect.apply(func, thisArg, args);
+          let result;
+          //get height when required
+          if (typeof queryOrMessage == 'function') {
+            const height = await getHeight();
+            result = queryOrMessage(height);
+          } else {
+            result = queryOrMessage;
+          }
           if (func.type === QUERY_TYPE) {
             const _ = undefined; // TODO: Handle added params
             return queryContract(contractAddress, result, _, codeHash);
