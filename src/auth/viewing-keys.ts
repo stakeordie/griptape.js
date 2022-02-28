@@ -1,41 +1,21 @@
-import { emitEvent } from './events';
-import { getAddress, getChainId } from './bootstrap';
-import { BaseContract } from './contracts/types';
-import { getKeplr } from './wallet';
-import { getWindow } from './utils';
+import { emitEvent } from '../events';
+import { getChainId } from '../bootstrap';
+import { BaseContract } from '../contracts/types';
+import { getKeplr } from '../wallet';
+import { getWindow } from '../utils';
+import { KeyForm, Key } from './types';
+import { AccountManager } from './account';
 
-export interface Key {
-  id: string;
-  contractAddress: string;
-  value: string;
-}
-
-export interface Account {
-  address: string;
-  keys: Array<Key>;
-}
-
-export interface KeyForm {
-  id: string;
-  contractAddress: string;
-  key: string;
-}
-
-export class ViewingKeyManager {
-  private readonly accounts: Array<Account> = [];
-
+export class ViewingKeyManager extends AccountManager {
   constructor() {
-    const item = getWindow()?.localStorage.getItem('griptape.js');
-    if (item) {
-      this.accounts = JSON.parse(item);
-    }
+    super();
   }
 
   public add(contract: BaseContract, key: string): string {
     if (!key) throw new Error('Empty or undefined key cannot be added');
     // TODO We might want to remove the use of a form.
     const form: KeyForm = {
-      id: contract.id,
+      id: contract.id || contract.at,
       contractAddress: contract.at,
       key: key,
     };
@@ -61,7 +41,7 @@ export class ViewingKeyManager {
 
   public set(contract: BaseContract, key: string): void {
     const form: KeyForm = {
-      id: contract.id,
+      id: contract.id || contract.at,
       contractAddress: contract.at,
       key: key,
     };
@@ -99,19 +79,6 @@ export class ViewingKeyManager {
       contractAddress,
       value,
     } as Key;
-  }
-
-  private addAccount(): Account | undefined {
-    const address = getAddress();
-    if (!address) return;
-    const account = { address, keys: [] };
-    this.accounts.push(account);
-    return account;
-  }
-
-  private getAccount(): Account | undefined {
-    const address = getAddress();
-    return this.accounts.find(it => it.address === address);
   }
 
   private isEqual(a: Key, idOrAddress: string): boolean {

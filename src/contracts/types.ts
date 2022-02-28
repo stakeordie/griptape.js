@@ -5,7 +5,9 @@ export interface Context {
   address?: string;
   key?: string;
   padding?: string;
-  height?: number;
+  withHeight(
+    callback: (height: number) => Record<string, unknown>
+  ): Record<string, unknown>;
   entropy?: string;
   permit?: Record<string, unknown>;
 }
@@ -37,7 +39,7 @@ export interface ContractDefinition {
 }
 
 export interface BaseContractProps {
-  id: string;
+  id?: string;
   at: string;
   codeHash?: string;
 }
