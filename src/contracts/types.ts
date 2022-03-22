@@ -1,5 +1,4 @@
-import { ExecuteResult, TxsResponse } from 'secretjs';
-import { Coin } from 'secretjs/types/types.js';
+import { Coin, Tx } from 'secretjs';
 
 export interface Context {
   address?: string;
@@ -14,7 +13,7 @@ export interface Context {
 
 export interface ContractMessageResponse<T> {
   parse(): T;
-  getRaw(): ExecuteResult | TxsResponse;
+  getRaw(): Tx;
   isEmpty(): boolean;
 }
 
