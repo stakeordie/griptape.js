@@ -25,9 +25,10 @@ export class PermitManager extends AccountManager {
     contract: BaseContract,
     permissions: string[] = []
   ): Promise<void> {
-    if ((permissions.length = 0))
+    if (permissions.length == 0){
       throw new Error('Must indicate permissions when creating a permit');
-
+    }
+      
     let account = this.getAccount();
     if (!account) {
       account = this.addAccount();
