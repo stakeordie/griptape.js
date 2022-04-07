@@ -189,7 +189,7 @@ export function createContract<T>(contract: ContractSpecification): T {
                 } else {
                   const { response: txResponse } = result;
                   throw new BaseError(
-                    `Could not found TX: ${response.transactionHash}`,
+                    `Could not find TX: ${response.transactionHash}`,
                     { cause: subtractErrorFromResponse(txResponse) }
                   );
                 }
