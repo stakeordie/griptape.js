@@ -78,10 +78,11 @@ async function getContext(contractAddress: string): Promise<Context> {
     return cb;
   }
   const account = permitManager.getAccount();
-  let permit = account?.permits.find(
+  let permitData = account?.permits.find(
     permit => permit.contractAddress == contractAddress
   );
 
+  const permit = permitData?.permit;
   // Set the context.
   return { address, key, padding, withHeight, entropy, permit } as Context;
 }
