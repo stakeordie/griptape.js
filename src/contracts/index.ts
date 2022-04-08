@@ -31,7 +31,7 @@ import {
 import { Coin } from 'secretjs/types/types';
 import { Encoding } from '@iov/encoding';
 import { getWindow } from '../utils';
-import { permitManager } from '..';
+import { permitManager } from '../bootstrap';
 
 const decoder = new TextDecoder('utf-8');
 
@@ -78,7 +78,7 @@ async function getContext(contractAddress: string): Promise<Context> {
     return cb;
   }
   const account = permitManager.getAccount();
-  let permitData = account?.permits.find(
+  const permitData = account?.permits.find(
     permit => permit.contractAddress == contractAddress
   );
 
