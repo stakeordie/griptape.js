@@ -1,4 +1,4 @@
-import { Coin } from 'secretjs/types/types';
+import { Coin } from 'secretjs';
 import { extendContract } from '..';
 import {
   BaseContract,
