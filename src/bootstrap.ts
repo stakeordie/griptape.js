@@ -39,6 +39,11 @@ export interface AccountProvider {
   getAddress: () => string;
   getSigner: () => any;
   getSeed: () => any;
+  getName: () => string;
+}
+interface WalletInfo {
+  address: string | undefined;
+  name: string | undefined;
 }
 
 export type AccountProviderGetter = (
@@ -66,6 +71,15 @@ export function getConfig(): Config | undefined {
 
 export function getAddress(): string | undefined {
   return provider?.getAddress();
+}
+
+export function getWalletInfo(): WalletInfo {
+  const address = provider?.getAddress();
+  const name = provider?.getName();
+  return {
+    address: address,
+    name: name,
+  };
 }
 
 export function isAccountAvailable() {
@@ -248,7 +262,7 @@ async function getKeplrAccountProviderInternal(
   if (!offlineSigner) throw new Error('No offline signer');
   const [{ address }] = await offlineSigner.getAccounts();
   const enigmaUtils = keplr.getEnigmaUtils(chainId);
-
+  const key = await keplr.getKey(chainId);
   if (keplrEnabled) {
     // And also we want to be able to react to an account change.
     accountChangedCallback = async () => {
@@ -264,6 +278,7 @@ async function getKeplrAccountProviderInternal(
     getAddress: () => address,
     getSigner: () => offlineSigner,
     getSeed: () => enigmaUtils,
+    getName: () => key.name,
   };
 }
 

@@ -37,6 +37,8 @@ import {
 } from './utils';
 import { Coin } from 'secretjs';
 import { getWindow } from '../utils';
+import { permitManager } from '../bootstrap';
+
 const decoder = new TextDecoder('utf-8');
 
 const QUERY_TYPE = 'query';
@@ -79,14 +81,12 @@ async function getContext(contractAddress: string): Promise<Context> {
   function withHeight(cb: (height: number) => Record<string, unknown>): any {
     return cb;
   }
-  let permit;
-  const rawPermit = localStorage.getItem(
-    `query_permit_${address + contractAddress}`
-  ) as string;
-  if (rawPermit) {
-    permit = JSON.parse(rawPermit);
-  }
+  const account = permitManager.getAccount();
+  const permitData = account?.permits.find(
+    permit => permit.contractAddress == contractAddress
+  );
 
+  const permit = permitData?.permit;
   // Set the context.
   return { address, key, padding, withHeight, entropy, permit } as Context;
 }
@@ -193,7 +193,7 @@ export function createContract<T>(contract: ContractSpecification): T {
                 } else {
                   const { response: txResponse } = result;
                   throw new BaseError(
-                    `Could not found TX: ${response.transactionHash}`,
+                    `Could not find TX: ${response.transactionHash}`,
                     { cause: subtractErrorFromResponse(txResponse) }
                   );
                 }
