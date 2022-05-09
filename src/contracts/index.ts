@@ -1,8 +1,5 @@
 import {
-  IMsg,
-  Msg,
   MsgExecuteContractParams,
-  MsgParams,
   Tx,
   TxOptions,
 } from 'secretjs';
