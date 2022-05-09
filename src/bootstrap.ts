@@ -4,7 +4,6 @@ import {
   Tx,
   Coin,
   MsgExecuteContractParams,
-  BroadcastMode,
   MsgInstantiateContractParams,
   QueryContractsByCodeResponse,
   TxOptions,
@@ -18,9 +17,6 @@ import { emitEvent } from './events';
 import { getWindow } from './utils';
 import { QueryBalanceResponse } from 'secretjs/dist/protobuf_stuff/cosmos/bank/v1beta1/query';
 import { StdFee } from 'secretjs/dist/wallet_amino';
-
-export { BroadcastMode };
-
 export interface DefaultFees {
   upload?: number;
   init?: number;
@@ -31,7 +27,6 @@ export interface DefaultFees {
 export interface Config {
   restUrl: string;
   chainId?: string;
-  broadcastMode?: BroadcastMode;
   defaultFees?: DefaultFees;
 }
 
@@ -94,9 +89,8 @@ export async function gripApp(
   if (!config) {
     // Set the configuration.
     if (typeof _config === 'string') {
-      config = { restUrl: _config, broadcastMode: BroadcastMode.Sync };
+      config = { restUrl: _config };
     } else {
-      _config.broadcastMode = _config.broadcastMode ?? BroadcastMode.Sync;
       config = _config;
     }
 
@@ -228,7 +222,6 @@ export async function executeContract(
     gasLimit: parseInt(
       fee?.gas || config?.defaultFees?.exec?.toString() || '30000'
     ),
-    broadcastMode: config?.broadcastMode || BroadcastMode.Sync,
   };
 
   return await signingClient.tx.compute.executeContract(
@@ -315,7 +308,6 @@ export function instantiate(codeId: number, initMsg: object, label: string) {
   };
   const txOptions: TxOptions = {
     gasLimit: parseInt(config?.defaultFees?.init?.toString() || '150000'),
-    broadcastMode: config?.broadcastMode || BroadcastMode.Sync,
   };
   return signingClient.tx.compute.instantiateContract(params, txOptions);
 }
