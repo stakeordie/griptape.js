@@ -1,8 +1,4 @@
-import {
-  MsgExecuteContractParams,
-  Tx,
-  TxOptions,
-} from 'secretjs';
+import { MsgExecuteContractParams, Tx, TxOptions } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -179,10 +175,8 @@ export function createContract<T>(contract: ContractSpecification): T {
                 codeHash
               );
 
-              const config = getConfig();
-              if (!config) throw new Error('No config available');
-
               return ContractTxResponseHandler.of(response);
+
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
