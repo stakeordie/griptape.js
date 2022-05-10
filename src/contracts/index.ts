@@ -1,12 +1,4 @@
-import {
-  BroadcastMode,
-  IMsg,
-  Msg,
-  MsgExecuteContractParams,
-  MsgParams,
-  Tx,
-  TxOptions,
-} from 'secretjs';
+import { MsgExecuteContractParams, Tx, TxOptions } from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -183,23 +175,8 @@ export function createContract<T>(contract: ContractSpecification): T {
                 codeHash
               );
 
-              const config = getConfig();
-              if (!config) throw new Error('No config available');
-              if (config.broadcastMode == BroadcastMode.Sync) {
-                const result = await handleResponse(response.transactionHash);
-                if (result.found && result.response) {
-                  const { response: txResponse } = result;
-                  return ContractTxResponseHandler.of(txResponse);
-                } else {
-                  const { response: txResponse } = result;
-                  throw new BaseError(
-                    `Could not find TX: ${response.transactionHash}`,
-                    { cause: subtractErrorFromResponse(txResponse) }
-                  );
-                }
-              } else {
-                return ContractTxResponseHandler.of(response);
-              }
+              return ContractTxResponseHandler.of(response);
+
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
