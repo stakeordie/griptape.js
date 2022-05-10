@@ -176,7 +176,6 @@ export function createContract<T>(contract: ContractSpecification): T {
               );
 
               return ContractTxResponseHandler.of(response);
-
             } catch (e: any) {
               const errorHandler = getErrorHandler(contract.id, e);
               if (errorHandler) {
