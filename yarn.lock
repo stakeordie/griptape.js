@@ -3799,6 +3799,25 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
+protobufjs@6.11.3:
+  version "6.11.3"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
+  integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
+  dependencies:
+    "@protobufjs/aspromise" "^1.1.2"
+    "@protobufjs/base64" "^1.1.2"
+    "@protobufjs/codegen" "^2.0.4"
+    "@protobufjs/eventemitter" "^1.1.0"
+    "@protobufjs/fetch" "^1.1.0"
+    "@protobufjs/float" "^1.0.2"
+    "@protobufjs/inquire" "^1.1.0"
+    "@protobufjs/path" "^1.1.2"
+    "@protobufjs/pool" "^1.1.0"
+    "@protobufjs/utf8" "^1.1.0"
+    "@types/long" "^4.0.1"
+    "@types/node" ">=13.7.0"
+    long "^4.0.0"
+
 protobufjs@^6.11.2:
   version "6.11.2"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.2.tgz#de39fabd4ed32beaa08e9bb1e30d08544c1edf8b"
@@ -4015,7 +4034,24 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-secretjs@0.17.5, secretjs@^0.17.0:
+secretjs@0.17.6:
+  version "0.17.6"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.6.tgz#387238c25f11191990345deea9bcf0a0c45f7f9c"
+  integrity sha512-Za0Ko30VcnK/wY3rzUrJAGQarJ4mEnXfsMer43HItNp3OLTEz7fL82BweElj5dyMh7Cfj9dX0/x6g2qM6UmYkQ==
+  dependencies:
+    "@iov/crypto" "2.1.0"
+    "@iov/encoding" "2.1.0"
+    "@iov/utils" "2.0.2"
+    axios "0.21.1"
+    curve25519-js "0.0.4"
+    fast-deep-equal "3.1.1"
+    js-crypto-hkdf "0.7.3"
+    miscreant "0.3.2"
+    pako "1.0.11"
+    protobufjs "6.11.3"
+    secure-random "1.1.2"
+
+secretjs@^0.17.0:
   version "0.17.5"
   resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.5.tgz#5b55e46cfa2719714831fc2019e21c21959fe587"
   integrity sha512-sf0+Je9KIEMQr/wJOgeqyBOV0ruiMNHSwP4L2vXiJbtzJWQqyVHyPkpavAhruNZ+91XlSzAFP2X5MPxqPBC9fQ==
