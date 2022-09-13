@@ -4034,10 +4034,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-secretjs@0.17.6:
-  version "0.17.6"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.6.tgz#387238c25f11191990345deea9bcf0a0c45f7f9c"
-  integrity sha512-Za0Ko30VcnK/wY3rzUrJAGQarJ4mEnXfsMer43HItNp3OLTEz7fL82BweElj5dyMh7Cfj9dX0/x6g2qM6UmYkQ==
+secretjs@0.17.7:
+  version "0.17.7"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.7.tgz#a1aef5866a35cf673be9ddd717d20729afd056ac"
+  integrity sha512-j39l9+vR2A8067QBqDDejS7LmRLgdkG4uRw2Ar6HMfzDGo26eTh7cIXVlVu/yHBumxtQzKun20epOXwuYHXjQg==
   dependencies:
     "@iov/crypto" "2.1.0"
     "@iov/encoding" "2.1.0"
