@@ -343,3 +343,12 @@ export async function getNativeCoinBalance(): Promise<string> {
   if (!balance) throw new Error('No balance available');
   return balance.amount;
 }
+
+export async function getCoinBalances(): Promise<Coin[]> {
+  if (!client) throw new Error('No client available');
+  const address = getAddress();
+  if (!address) throw new Error('No address available');
+  const account = await client.getAccount(address);
+  if (!account) throw new Error('No account exists on chain');
+  return account.balance.concat();
+}
