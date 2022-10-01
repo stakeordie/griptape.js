@@ -145,7 +145,7 @@ export async function enablePermit(
 
     if (!keplr) throw new Error('No keplr is available');
 
-    const { signature } = await keplr.signAmino(
+    const { signed, signature } = await keplr.signAmino(
       chainId,
       address,
       {
@@ -174,12 +174,14 @@ export async function enablePermit(
       }
     );
 
+    let signedPermit = signed.msgs[0].value;
+
     let permit = {
       params: {
-        permit_name: permitName,
-        allowed_tokens: allowedTokens,
         chain_id: chainId,
-        permissions: permissions,
+        permit_name: signedPermit.permit_name,
+        allowed_tokens: signedPermit.allowed_tokens,
+        permissions: signedPermit.permissions,
       },
       signature: signature,
     };
