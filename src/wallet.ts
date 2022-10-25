@@ -6,7 +6,7 @@ export async function getKeplr(): Promise<Keplr | undefined> {
     return getWindow()?.keplr;
   }
 
-  if (document.readyState === 'complete') {
+  if (getWindow()?.document.readyState === 'complete') {
     return getWindow()?.keplr;
   }
 
@@ -17,10 +17,16 @@ export async function getKeplr(): Promise<Keplr | undefined> {
         (event.target as Document).readyState === 'complete'
       ) {
         resolve(getWindow()?.keplr);
-        document.removeEventListener('readystatechange', documentStateChange);
+        getWindow()?.document.removeEventListener(
+          'readystatechange',
+          documentStateChange
+        );
       }
     };
 
-    document.addEventListener('readystatechange', documentStateChange);
+    getWindow()?.document.addEventListener(
+      'readystatechange',
+      documentStateChange
+    );
   });
 }
