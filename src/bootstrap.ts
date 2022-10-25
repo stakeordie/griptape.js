@@ -123,13 +123,20 @@ export async function gripApp(
       chainId = await getChainId();
     }
     // Set the provider.
+
     getProvider = accountProviderGetter;
 
-    const connected = localStorage.getItem('connected');
+    let connected;
+
+    if (typeof localStorage !== "undefined") {
+       connected = localStorage.getItem('connected');
+
     if (connected == null) {
       emitEvent('account-not-available');
       return;
     }
+  }
+    
 
     provider = await getProvider(chainId);
 
@@ -194,7 +201,10 @@ export async function bootstrap(): Promise<void> {
   accountAvailable = true;
   emitEvent('account-available');
   await initSigningClient();
-  localStorage.setItem('connected', 'connected');
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem('connected', 'connected');
+}
+ 
 }
 
 // Copy of bootstrap without triggering the onAccountAvailable event
@@ -207,11 +217,18 @@ async function reloadSigningClient(): Promise<void> {
 }
 
 export function shutdown() {
-  const connected = localStorage.getItem('connected');
+  let connected;
+  if (typeof localStorage !== "undefined") {
+    connected = localStorage.getItem('connected');
+}
+  
   if (!connected) return;
   accountAvailable = false;
   emitEvent('shutdown');
-  localStorage.removeItem('connected');
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem('connected');
+}
+
 }
 
 // TODO Move this to `contracts.ts`
