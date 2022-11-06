@@ -10,6 +10,7 @@ export interface Context {
   ): Record<string, unknown>;
   entropy?: string;
   permit?: Record<string, unknown>;
+  contractAddress: string;
 }
 
 export interface ContractMessageResponse<T> {

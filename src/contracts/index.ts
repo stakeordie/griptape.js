@@ -84,7 +84,7 @@ async function getContext(contractAddress: string): Promise<Context> {
 
   const permit = permitData?.permit;
   // Set the context.
-  return { address, key, padding, withHeight, entropy, permit } as Context;
+  return { address, key, padding, withHeight, entropy, permit, contractAddress } as Context;
 }
 
 interface TxHandlerResponse {
