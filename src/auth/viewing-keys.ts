@@ -3,8 +3,10 @@ import { getChainId } from '../bootstrap';
 import { BaseContract } from '../contracts/types';
 import { getKeplr } from '../wallet';
 import { getWindow } from '../utils';
-import { KeyForm, Key } from './types';
+import { KeyForm, Key, Account } from './types';
 import { AccountManager } from './account';
+
+const localKey = 'griptape.js';
 
 export class ViewingKeyManager extends AccountManager {
   constructor() {
@@ -31,10 +33,7 @@ export class ViewingKeyManager extends AccountManager {
 
     const newKey = this.createKey(form);
     account.keys.push(newKey);
-    getWindow()?.localStorage.setItem(
-      'griptape.js',
-      JSON.stringify(this.accounts)
-    );
+    getWindow()?.localStorage.setItem(localKey, JSON.stringify(this.accounts));
     emitEvent('viewing-key-created');
     return newKey.value;
   }
@@ -56,10 +55,7 @@ export class ViewingKeyManager extends AccountManager {
     theKey.value = key;
 
     // Update local storage.
-    getWindow()?.localStorage.setItem(
-      'griptape.js',
-      JSON.stringify(this.accounts)
-    );
+    getWindow()?.localStorage.setItem(localKey, JSON.stringify(this.accounts));
   }
 
   public get(idOrAddress: string): string | undefined {
@@ -70,6 +66,34 @@ export class ViewingKeyManager extends AccountManager {
     const key = account?.keys.find(it => this.isEqual(it, idOrAddress));
     if (!key) return;
     return key.value;
+  }
+
+  public remove(idOrAddress: string): void {
+    const key = this.get(idOrAddress);
+    if (!key) {
+      throw new Error(`No id or contract found with ${idOrAddress}`);
+    }
+
+    const storageData = getWindow()?.localStorage.getItem(localKey);
+    if (!storageData) {
+      throw new Error(`No id or contract found with ${idOrAddress}`);
+    }
+
+    const account = this.getAccount();
+    const localData = JSON.parse(storageData as string) as Account[];
+    const index = account?.keys.findIndex(({ value }) => value === key);
+    const localIndex = localData[0].keys.findIndex(
+      ({ value }) => value === key
+    );
+
+    if (index === undefined || localIndex === undefined) {
+      throw new Error(`No id or contract found with ${idOrAddress}`);
+    }
+    //remove vk from account data
+    account?.keys.splice(index as number, 1);
+    //remove vk from local storage
+    localData[0].keys.splice(localIndex as number, 1);
+    getWindow()?.localStorage.setItem(localKey, JSON.stringify(localData));
   }
 
   private createKey(form: KeyForm): Key {
