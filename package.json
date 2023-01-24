@@ -1,6 +1,6 @@
 {
   "name": "@stakeordie/griptape.js",
-  "version": "0.9.17",
+  "version": "0.9.18-RC",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "files": [
@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "decimal.js": "10.2.1",
-    "secretjs": "0.17.7"
+    "secretjs": "0.17.8"
   }
 }
