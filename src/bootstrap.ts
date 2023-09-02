@@ -1,11 +1,16 @@
 import { getKeplr } from './wallet';
-import { Coin, StdFee } from 'secretjs/types/types.js';
+import { SecretUtils, OfflineAminoSigner } from '@keplr-wallet/types';
+// import { Coin, StdFee } from 'secretjs/types/types.js';
 import {
-  CosmWasmClient,
-  SigningCosmWasmClient,
-  ExecuteResult,
-  FeeTable,
+  // CosmWasmClient,
+  SecretNetworkClient,
+  // ExecuteResult,
+  // FeeTable,
   BroadcastMode,
+  MsgExecuteContract,
+  TxResponse,
+  Coin,
+  TxOptions,
 } from 'secretjs';
 import {
   KeplrViewingKeyManager,
@@ -14,19 +19,8 @@ import {
 } from './auth/index';
 import { emitEvent } from './events';
 import { getWindow } from './utils';
-import { getFeeForExecute } from './contracts/utils';
-
-const defaultFee: StdFee = {
-  amount: [{ amount: '500000', denom: 'uscrt' }],
-  gas: '500000',
-};
-
-const systemDefaultFees: FeeTable = {
-  upload: getFeeForExecute(3_000_000) || defaultFee,
-  init: getFeeForExecute(2_000_000) || defaultFee,
-  exec: getFeeForExecute(100_000) || defaultFee,
-  send: getFeeForExecute(90_000) || defaultFee,
-};
+import { StdFee } from 'secretjs/dist/wallet_amino';
+import { ContractInfoWithAddress } from 'secretjs/dist/grpc_gateway/secret/compute/v1beta1/query.pb';
 
 export { BroadcastMode };
 
@@ -46,8 +40,8 @@ export interface Config {
 
 export interface AccountProvider {
   getAddress: () => string;
-  getSigner: () => any;
-  getSeed: () => any;
+  getSigner: () => OfflineAminoSigner;
+  getSeed: () => SecretUtils;
   getName: () => string;
 }
 interface WalletInfo {
@@ -60,8 +54,9 @@ export type AccountProviderGetter = (
 ) => Promise<AccountProvider | undefined>;
 
 let config: Config | undefined;
-let client: CosmWasmClient | undefined;
-let signingClient: SigningCosmWasmClient | undefined;
+let signingClient: SecretNetworkClient | undefined;
+let broadcastMode: BroadcastMode | undefined;
+let client: SecretNetworkClient | undefined;
 let accountAvailable = false;
 let getProvider: AccountProviderGetter | undefined;
 
@@ -128,15 +123,14 @@ export async function gripApp(
 
     let connected;
 
-    if (typeof localStorage !== "undefined") {
-       connected = localStorage.getItem('connected');
+    if (typeof localStorage !== 'undefined') {
+      connected = localStorage.getItem('connected');
 
-    if (connected == null) {
-      emitEvent('account-not-available');
-      return;
+      if (connected == null) {
+        emitEvent('account-not-available');
+        return;
+      }
     }
-  }
-    
 
     provider = await getProvider(chainId);
 
@@ -152,12 +146,15 @@ export async function gripApp(
 
 async function initClient(): Promise<void> {
   if (client) return;
-  if (!config) throw new Error('No configuration was set');
-  client = new CosmWasmClient(config.restUrl);
+  if (!config?.chainId) throw new Error('No configuration was set');
+  client = new SecretNetworkClient({
+    url: config.restUrl,
+    chainId: config.chainId,
+  });
 }
 
 async function initSigningClient(): Promise<void> {
-  if (!config) throw new Error('No configuration was set');
+  if (!config?.chainId) throw new Error('No configuration was set');
   if (!client) throw new Error('No client available');
   if (!provider) throw new Error('No provider available');
 
@@ -168,29 +165,15 @@ async function initSigningClient(): Promise<void> {
   const address = provider.getAddress();
   const signer = provider.getSigner();
   const seed = provider.getSeed();
-  const broadcastMode = config.broadcastMode;
+  broadcastMode = config.broadcastMode;
 
-  let fees: FeeTable = systemDefaultFees;
-
-  if (config.defaultFees) {
-    fees = {
-      upload:
-        getFeeForExecute(config.defaultFees.upload) || systemDefaultFees.upload,
-      init: getFeeForExecute(config.defaultFees.init) || systemDefaultFees.init,
-      exec: getFeeForExecute(config.defaultFees.exec) || systemDefaultFees.exec,
-      send: getFeeForExecute(config.defaultFees.send) || systemDefaultFees.send,
-    };
-  }
-
-  signingClient = new SigningCosmWasmClient(
-    // @ts-ignore
-    restUrl,
-    address,
-    signer,
-    seed,
-    fees,
-    broadcastMode
-  );
+  signingClient = new SecretNetworkClient({
+    url: restUrl,
+    chainId: config.chainId,
+    walletAddress: address,
+    wallet: signer,
+    encryptionUtils: seed,
+  });
 }
 
 export async function bootstrap(): Promise<void> {
@@ -201,10 +184,9 @@ export async function bootstrap(): Promise<void> {
   accountAvailable = true;
   emitEvent('account-available');
   await initSigningClient();
-  if (typeof localStorage !== "undefined") {
+  if (typeof localStorage !== 'undefined') {
     localStorage.setItem('connected', 'connected');
-}
- 
+  }
 }
 
 // Copy of bootstrap without triggering the onAccountAvailable event
@@ -218,28 +200,31 @@ async function reloadSigningClient(): Promise<void> {
 
 export function shutdown() {
   let connected;
-  if (typeof localStorage !== "undefined") {
+  if (typeof localStorage !== 'undefined') {
     connected = localStorage.getItem('connected');
-}
-  
+  }
+
   if (!connected) return;
   accountAvailable = false;
   emitEvent('shutdown');
-  if (typeof localStorage !== "undefined") {
+  if (typeof localStorage !== 'undefined') {
     localStorage.removeItem('connected');
-}
-
+  }
 }
 
 // TODO Move this to `contracts.ts`
 export function queryContract(
   address: string,
   queryMsg: Record<string, unknown>,
-  addedParams?: Record<string, unknown>,
+  addedParams?: undefined,
   codeHash?: string
 ): Promise<Record<string, unknown>> {
   if (!client) throw new Error('No client available');
-  return client.queryContractSmart(address, queryMsg, addedParams, codeHash);
+  return client.query.compute.queryContract({
+    contract_address: address,
+    query: queryMsg,
+    code_hash: codeHash,
+  });
 }
 
 // TODO Move this to `contracts.ts`
@@ -247,18 +232,31 @@ export async function executeContract(
   contractAddress: string,
   handleMsg: Record<string, unknown>,
   memo?: string,
-  transferAmount?: readonly Coin[],
+  transferAmount?: Coin[],
   fee?: StdFee,
   codeHash?: string
-): Promise<ExecuteResult> {
+): Promise<TxResponse> {
   if (!signingClient) throw new Error('No signing client available');
-  return signingClient.execute(
-    contractAddress,
-    handleMsg,
-    memo,
-    transferAmount,
-    fee,
-    codeHash
+  if (!provider) throw new Error('No provider available');
+
+  const gasLimitStr = fee?.amount?.[0]?.amount;
+  const gasLimit = gasLimitStr ? Number(gasLimitStr) : undefined;
+  const opts: TxOptions | undefined =
+    fee || memo || broadcastMode
+      ? { memo, feeGranter: fee?.granter, gasLimit, broadcastMode }
+      : undefined;
+
+  return signingClient.tx.broadcast(
+    [
+      new MsgExecuteContract({
+        sender: provider.getAddress(),
+        contract_address: contractAddress,
+        msg: handleMsg,
+        sent_funds: transferAmount,
+        code_hash: codeHash,
+      }),
+    ],
+    opts
   );
 }
 export let accountChangedCallback: () => void;
@@ -272,7 +270,7 @@ async function getKeplrAccountProviderInternal(
 ): Promise<AccountProvider | undefined> {
   const keplr = await getKeplr();
 
-  if (!keplr || !getWindow()?.getOfflineSigner)
+  if (!keplr || !getWindow()?.getOfflineSignerOnlyAmino)
     throw new Error('Install keplr extension');
 
   try {
@@ -282,7 +280,7 @@ async function getKeplrAccountProviderInternal(
     return;
   }
 
-  const offlineSigner = getWindow()?.getOfflineSigner!(chainId);
+  const offlineSigner = getWindow()?.getOfflineSignerOnlyAmino!(chainId);
   if (!offlineSigner) throw new Error('No offline signer');
   const [{ address }] = await offlineSigner.getAccounts();
   const enigmaUtils = keplr.getEnigmaUtils(chainId);
@@ -312,31 +310,54 @@ export function getKeplrAccountProvider(): AccountProviderGetter {
   };
 }
 
-export function getChainId(): Promise<string> {
+export async function getChainId(): Promise<string> {
   if (!client) throw new Error('No client available');
-  return client.getChainId();
+  // @ts-ignore `chainId` is private
+  return client.chainId;
 }
 
-export function getHeight(): Promise<number> {
+export async function getHeight(): Promise<number> {
   if (!client) throw new Error('No client available');
-  return client.getHeight();
+  const block = await client.query.tendermint.getLatestBlock({});
+  const height = block.block?.last_commit?.height;
+  if (!height) {
+    throw new Error('Could not fetch block info');
+  }
+  return Number(height);
 }
 
-export function instantiate(codeId: number, initMsg: object, label: string) {
+export function instantiate(
+  codeId: number,
+  initMsg: object,
+  label: string,
+  codeHash?: string
+) {
   if (!signingClient) throw new Error('No signing client available');
-  return signingClient.instantiate(codeId, initMsg, label);
+  return signingClient.tx.compute.instantiateContract(
+    {
+      sender: signingClient.address,
+      code_id: codeId,
+      code_hash: codeHash, // optional but way faster
+      init_msg: initMsg,
+      label,
+    },
+    { broadcastMode }
+  );
 }
 
-export function getContracts(codeId: number): Promise<
-  readonly {
-    readonly address: string;
-    readonly codeId: number;
-    readonly creator: string;
-    readonly label: string;
-  }[]
-> {
+export async function getContracts(
+  codeId: number
+): Promise<ContractInfoWithAddress[]> {
   if (!client) throw new Error('No client available');
-  return client?.getContracts(codeId);
+  const { contract_infos } = await client.query.compute.contractsByCodeId({
+    code_id: codeId.toString(),
+  });
+
+  if (!contract_infos) {
+    throw new Error('request failed');
+  }
+
+  return contract_infos;
 }
 
 export function getClient() {
@@ -353,10 +374,9 @@ export async function getNativeCoinBalance(): Promise<string> {
   if (!client) throw new Error('No client available');
   const address = getAddress();
   if (!address) throw new Error('No address available');
-  const account = await client.getAccount(address);
-  if (!account) throw new Error('No account exists on chain');
-  if (account.balance.length == 0) return '0';
-  const balance = account.balance.find(it => it.denom === 'uscrt');
-  if (!balance) throw new Error('No balance available');
+  const res = await client.query.bank.balance({ address, denom: 'uscrt' });
+  if (!res) throw new Error('No account exists on chain');
+  const balance = res.balance;
+  if (!balance?.amount) throw new Error('No balance available');
   return balance.amount;
 }
