@@ -1,4 +1,11 @@
-import { ExecuteResult, BroadcastMode, TxsResponse } from 'secretjs';
+import {
+  BroadcastMode,
+  Coin,
+  TxResponse,
+  TxOptions,
+  Msg,
+  MsgExecuteContract,
+} from 'secretjs';
 import {
   queryContract,
   executeContract,
@@ -28,8 +35,6 @@ import {
   getFeeForExecute,
   sleep,
 } from './utils';
-import { Coin } from 'secretjs/types/types';
-import { Encoding } from '@iov/encoding';
 import { getWindow } from '../utils';
 import { permitManager } from '../bootstrap';
 
@@ -40,20 +45,20 @@ const MESSAGE_TYPE = 'message';
 
 const contractRegistry: any[] = [];
 
-export class ContractTxResponseHandler<T>
+export class ContractTxResponseHandler<T = unknown>
   implements ContractMessageResponse<T>
 {
-  private readonly response: ExecuteResult | TxsResponse;
+  private readonly response: TxResponse;
 
-  private constructor(response: ExecuteResult | TxsResponse) {
+  private constructor(response: TxResponse) {
     this.response = response;
   }
 
-  parse(): any {
-    return JSON.parse(decoder.decode(this.response.data));
+  parse(): T {
+    return JSON.parse(this.response.rawLog);
   }
 
-  getRaw(): ExecuteResult | TxsResponse {
+  getRaw(): TxResponse {
     return this.response;
   }
 
@@ -61,9 +66,7 @@ export class ContractTxResponseHandler<T>
     return typeof this.response === 'undefined';
   }
 
-  static of<T>(
-    response: ExecuteResult | TxsResponse
-  ): ContractMessageResponse<T> {
+  static of<T>(response: TxResponse): ContractMessageResponse<T> {
     return new ContractTxResponseHandler<T>(response);
   }
 }
@@ -84,23 +87,35 @@ async function getContext(contractAddress: string): Promise<Context> {
 
   const permit = permitData?.permit;
   // Set the context.
-  return { address, key, padding, withHeight, entropy, permit, contractAddress } as Context;
+  return {
+    address,
+    key,
+    padding,
+    withHeight,
+    entropy,
+    permit,
+    contractAddress,
+  } as Context;
 }
 
 interface TxHandlerResponse {
   found: boolean;
-  response: TxsResponse | undefined;
+  response: TxResponse | undefined;
 }
 
 async function handleResponse(txHash: string): Promise<TxHandlerResponse> {
   let result = false;
-  let tx;
+  let tx: TxResponse | null;
 
   while (true) {
     try {
-      tx = await getSigningClient().restClient.txById(txHash, true);
+      tx = await getSigningClient().query.getTx(txHash);
 
-      if (!tx.raw_log.startsWith('[')) {
+      if (!tx) {
+        throw new Error();
+      }
+
+      if (!tx.rawLog.startsWith('[')) {
         result = false;
       } else {
         result = true;
@@ -242,9 +257,9 @@ export function createContract<T>(contract: ContractSpecification): T {
   return result;
 }
 
-function subtractErrorFromResponse(response: TxsResponse | undefined): string {
-  if (!response || !response.raw_log) return 'Empty response or unknown error';
-  const raw = response.raw_log;
+function subtractErrorFromResponse(response: TxResponse | undefined): string {
+  if (!response || !response.rawLog) return 'Empty response or unknown error';
+  const raw = response.rawLog;
   // Generic Errors are return as JSON stringified
   // Exam. '{"generic_error": { "msg":"" } }'
   const jsonStart = raw.indexOf('{');
@@ -329,7 +344,23 @@ export async function instantiateContract<T>(
   req: ContractInstantiationRequest
 ): Promise<T> {
   const { id, definition, codeId, label, initMsg } = req;
-  const { contractAddress: at } = await instantiate(codeId, initMsg, label);
+  const decoder = new TextDecoder();
+  const at = (await instantiate(codeId, initMsg, label)).events.reduce<
+    string | undefined
+  >(
+    (_, event) =>
+      event.attributes?.reduce<string | undefined>(
+        (_, attribute) =>
+          decoder.decode(attribute.key) === 'contract_address'
+            ? decoder.decode(attribute.value)
+            : undefined,
+        undefined
+      ),
+    undefined
+  );
+  if (!at) {
+    throw new Error('failed to instantiate contract');
+  }
   const spec: ContractSpecification = {
     id,
     at,
@@ -348,30 +379,40 @@ export async function executeMultiMessage<R>(
   infos: MultiMessageInfo[],
   memo?: string
 ): Promise<ContractMessageResponse<R>> {
-  const messages: MessageEntry[] = [];
+  const messages: Msg[] = [];
   let fees = 0;
 
+  const signingClient = getSigningClient();
+
   for (const info of infos) {
-    const { at: contractAddress } = info.contract;
+    const { at: contractAddress, codeHash } = info.contract;
     const ctx = await getContext(contractAddress);
     const message = info.getMessage(ctx, ...info.args);
     const transferAmount = message.transferAmount
       ? ([message.transferAmount] as Coin[])
       : [];
-    const entry = {
-      contractAddress: contractAddress,
-      handleMsg: message.handleMsg,
-      transferAmount: transferAmount,
-    };
-    messages.push(entry);
+
+    messages.push(
+      new MsgExecuteContract({
+        sender: signingClient.address,
+        contract_address: contractAddress,
+        msg: message.handleMsg,
+        sent_funds: transferAmount,
+        code_hash: codeHash,
+      })
+    );
     fees += message.fees ? message.fees : 0;
   }
 
-  const response = await getSigningClient().multiExecute(
-    messages,
-    memo,
-    getFeeForExecute(fees)
-  );
+  const fee = getFeeForExecute(fees);
+
+  const gasLimitStr = fee?.amount?.[0]?.amount;
+  const gasLimit = gasLimitStr ? Number(gasLimitStr) : undefined;
+  const opts: TxOptions | undefined =
+    fee || memo ? { memo, feeGranter: fee?.granter, gasLimit } : undefined;
+
+  const response = await signingClient.tx.broadcast(messages, opts);
+
   return ContractTxResponseHandler.of(response);
 }
 

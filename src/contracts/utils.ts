@@ -1,4 +1,4 @@
-import { StdFee } from 'secretjs/types/types';
+import { StdFee } from '@keplr-wallet/types';
 
 export function getValue(object: any, key: string): any {
   let value;
